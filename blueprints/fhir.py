@@ -436,3 +436,16 @@ def upload_FHIR(data):
     else:
         res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
     return res
+
+
+def addProject_FHIR(data):
+    print(data)
+    # result = {}
+    # study_rules = FHIR.FhirMappging.query.filter_by(CatId=6, Del=0).all()
+    # for count, s in enumerate(study_rules):
+    #     if count == 0: # 0的時候，可以先把resourceType塞進去
+    #         FHIR_mappingJson(result, "resourceType", s.resource)
+    #     if data.get(s.name):
+    #         FHIR_mappingJson(result, s.fhirpath, data[s.name])
+    # Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)        
+    return data

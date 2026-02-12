@@ -123,7 +123,7 @@ def projectManage():
 def api_addProject():
     data = request.get_json()
 
-    # res = fhir.addDevice_FHIR(data)
+    res = fhir.addProject_FHIR(data)
     # 進土撥鼠的專案
     # data_in = {'ProjectGroup': 'THBC_NHRI', 'Project': 'Device', 'data': [data]}
     # headers_Groundhog = {'WebUsername':'admin@gmail.com', 'WebUserpassword':'aB12345678!'} 
