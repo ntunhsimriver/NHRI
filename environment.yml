@@ -1,0 +1,43 @@
+name: myproject
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - brotlicffi=1.0.9
+  - bzip2=1.0.8
+  - ca-certificates
+  - certifi
+  - cffi=1.17
+  - charset-normalizer=3.3
+  - expat
+  - idna=3.7
+  - libffi
+  - openssl=3.0
+  - requests=2.32
+  - setuptools
+  - sqlite
+  - tk
+  - tzdata
+  - urllib3=2.5
+  - wheel
+  - win_inet_pton
+  - xz
+  - zlib
+  - pip:
+      - blinker==1.9.0
+      - click==8.2.1
+      - colorama==0.4.6
+      - flask==3.1.1
+      - flask-sqlalchemy==3.1.1
+      - greenlet==3.2.3
+      - itsdangerous==2.2.0
+      - jinja2==3.1.6
+      - markupsafe==3.0.2
+      - mysql-connector-python==9.4.0
+      - python-dotenv==1.1.1
+      - sqlalchemy==2.0.41
+      - typing-extensions==4.14.1
+      - werkzeug==3.1.3
+      - psycopg2-binary==2.9.11
+      - fhir-query==0.1.2

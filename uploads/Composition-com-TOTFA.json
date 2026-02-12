@@ -1,0 +1,86 @@
+{
+  "resourceType" : "Composition",
+  "id" : "com-TOTFA",
+  "meta" : {
+    "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/CompositionTOTFA"]
+  },
+  "text" : {
+    "status" : "generated",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>Generated Narrative: Composition com-TOTFA</b></p><a name=\"com-TOTFA\"> </a><a name=\"hccom-TOTFA\"> </a><a name=\"com-TOTFA-en-US\"> </a><p><b>status</b>: Final</p><p><b>type</b>: <span title=\"Codes:{http://loinc.org 100441-5}\">Attending Outpatient Progress note</span></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFA.html\">Encounter: identifier = https://www.ghd.tw/cdm-fhir#1101100011; status = finished; class = 西醫其他專案 (案件分類#09); serviceType = 放射腫瘤科; period = 2023-05-01 00:00:00+0800 --&gt; 2023-08-01 00:00:00+0800</a></p><p><b>date</b>: 2024-06-05 00:00:00+0000</p><p><b>author</b>: <a href=\"Organization-org-TOTFAB.html\">Organization: identifier = example123</a></p><p><b>title</b>: 門診醫療申報檔案 TOTFA</p><p><b>custodian</b>: <a href=\"Organization-org-TOTFAB.html\">Organization: identifier = example123</a></p></div>"
+  },
+  "status" : "final",
+  "type" : {
+    "coding" : [{
+      "system" : "http://loinc.org",
+      "code" : "100441-5",
+      "display" : "Attending Outpatient Progress note"
+    }]
+  },
+  "subject" : {
+    "reference" : "Patient/pat-CDM"
+  },
+  "encounter" : {
+    "reference" : "Encounter/enc-TOTFA"
+  },
+  "date" : "2024-06-05T00:00:00Z",
+  "author" : [{
+    "reference" : "Organization/org-TOTFAB"
+  }],
+  "title" : "門診醫療申報檔案 TOTFA",
+  "custodian" : {
+    "reference" : "Organization/org-TOTFAB"
+  },
+  "section" : [{
+    "code" : {
+      "coding" : [{
+        "system" : "http://loinc.org",
+        "code" : "53242-4"
+      }]
+    },
+    "entry" : [{
+      "reference" : "ChargeItem/cha-CDM"
+    }]
+  },
+  {
+    "code" : {
+      "coding" : [{
+        "system" : "http://loinc.org",
+        "code" : "29554-3"
+      }]
+    },
+    "entry" : [{
+      "reference" : "Procedure/pro-TOTFA"
+    }]
+  },
+  {
+    "code" : {
+      "coding" : [{
+        "system" : "http://loinc.org",
+        "code" : "46018-8"
+      }]
+    },
+    "entry" : [{
+      "reference" : "Condition/con-TOTFA"
+    }]
+  },
+  {
+    "code" : {
+      "coding" : [{
+        "system" : "http://loinc.org",
+        "code" : "46209-3"
+      }]
+    },
+    "entry" : [{
+      "reference" : "ChargeItem/cha-TOTFA-Order"
+    },
+    {
+      "reference" : "MedicationRequest/med-TOTFA-Order"
+    },
+    {
+      "reference" : "Observation/obs-TOTFA-Order"
+    },
+    {
+      "reference" : "Procedure/pro-TOTFA-Order"
+    }]
+  }]
+}

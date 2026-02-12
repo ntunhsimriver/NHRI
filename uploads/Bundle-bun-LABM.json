@@ -1,0 +1,388 @@
+{
+  "resourceType" : "Bundle",
+  "id" : "bun-LABM",
+  "meta" : {
+    "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/BundleLABM"]
+  },
+  "identifier" : {
+    "system" : "https://www.ghd.tw/cdm-fhir/",
+    "value" : "Bundle-LABM"
+  },
+  "type" : "document",
+  "timestamp" : "2024-07-04T00:00:00+08:00",
+  "entry" : [{
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Composition/com-LABM",
+    "resource" : {
+      "resourceType" : "Composition",
+      "id" : "com-LABM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/CompositionLABM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Composition_com-LABM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Composition com-LABM</b></p><a name=\"com-LABM\"> </a><a name=\"hccom-LABM\"> </a><a name=\"com-LABM-en-US\"> </a><p><b>status</b>: Final</p><p><b>type</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/ReportType 1}\">檢體檢驗報告</span></p><p><b>encounter</b>: <a href=\"Encounter-enc-LABM.html\">Encounter: identifier = https://www.ghd.tw/cdm-fhir#1101100011; status = finished; class = 西醫門診手術 (案件分類#03); period = 2023-05-01 00:00:00+0800 --&gt; 2023-08-01 00:00:00+0800</a></p><p><b>date</b>: 2024-06-05 00:00:00+0000</p><p><b>author</b>: <a href=\"Organization-org-LABDM.html\">Organization: identifier = 11:\u00a0example123</a></p><p><b>title</b>: 檢驗檢查資料檔每日格式 LABM</p><p><b>custodian</b>: <a href=\"Organization-org-LABDM.html\">Organization: identifier = 11:\u00a0example123</a></p></div>"
+      },
+      "status" : "final",
+      "type" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/ReportType",
+          "code" : "1",
+          "display" : "檢體檢驗報告"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-LABM"
+      },
+      "date" : "2024-06-05T00:00:00Z",
+      "author" : [{
+        "reference" : "Organization/org-LABDM"
+      }],
+      "title" : "檢驗檢查資料檔每日格式 LABM",
+      "custodian" : {
+        "reference" : "Organization/org-LABDM"
+      },
+      "section" : [{
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "53242-4"
+          }]
+        },
+        "entry" : [{
+          "reference" : "ChargeItem/cha-CDM"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "46209-3"
+          }]
+        },
+        "entry" : [{
+          "reference" : "ChargeItem/cha-LABM-Order"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "53903-1"
+          }]
+        },
+        "entry" : [{
+          "reference" : "Specimen/spe-LABDM"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "11502-2"
+          }]
+        },
+        "entry" : [{
+          "reference" : "DiagnosticReport/diag-LABDM"
+        },
+        {
+          "reference" : "Observation/obs-LABDM"
+        }]
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Organization/org-LABDM",
+    "resource" : {
+      "resourceType" : "Organization",
+      "id" : "org-LABDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/OrganizationLABDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Organization_org-LABDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Organization org-LABDM</b></p><a name=\"org-LABDM\"> </a><a name=\"hcorg-LABDM\"> </a><a name=\"org-LABDM-en-US\"> </a><p><b>identifier</b>: 11/example123</p><p><b>active</b>: true</p></div>"
+      },
+      "identifier" : [{
+        "type" : {
+          "coding" : [{
+            "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/HospitalCategory",
+            "code" : "11"
+          }],
+          "text" : "11"
+        },
+        "value" : "example123"
+      }],
+      "active" : true
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Patient/pat-CDM",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-CDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/PatientCDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Patient_pat-CDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Patient pat-CDM</b></p><a name=\"pat-CDM\"> </a><a name=\"hcpat-CDM\"> </a><a name=\"pat-CDM-en-US\"> </a><p style=\"border: 1px #661aff solid; background-color: #e6e6ff; padding: 10px;\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</p><hr/></div>"
+      },
+      "identifier" : [{
+        "use" : "official",
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NNxxx"
+          }]
+        },
+        "system" : "http://www.moi.gov.tw",
+        "value" : "Z199999829"
+      }],
+      "name" : [{
+        "use" : "official",
+        "text" : "甄○康"
+      }],
+      "gender" : "female",
+      "birthDate" : "1985-01-02"
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Encounter/enc-LABM",
+    "resource" : {
+      "resourceType" : "Encounter",
+      "id" : "enc-LABM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/EncounterLABM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Encounter_enc-LABM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Encounter enc-LABM</b></p><a name=\"enc-LABM\"> </a><a name=\"hcenc-LABM\"> </a><a name=\"enc-LABM-en-US\"> </a><p><b>identifier</b>: <code>https://www.ghd.tw/cdm-fhir</code>/1101100011</p><p><b>status</b>: Finished</p><p><b>class</b>: <a href=\"CodeSystem-CaseType.html#CaseType-03\">案件分類 03</a>: 西醫門診手術</p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>period</b>: 2023-05-01 00:00:00+0800 --&gt; 2023-08-01 00:00:00+0800</p></div>"
+      },
+      "identifier" : [{
+        "system" : "https://www.ghd.tw/cdm-fhir",
+        "value" : "1101100011"
+      }],
+      "status" : "finished",
+      "class" : {
+        "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/CaseType",
+        "code" : "03"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "period" : {
+        "start" : "2023-05-01T00:00:00+08:00",
+        "end" : "2023-08-01T00:00:00+08:00"
+      }
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/ChargeItem/cha-CDM",
+    "resource" : {
+      "resourceType" : "ChargeItem",
+      "id" : "cha-CDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ChargeItemCDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"ChargeItem_cha-CDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: ChargeItem cha-CDM</b></p><a name=\"cha-CDM\"> </a><a name=\"hccha-CDM\"> </a><a name=\"cha-CDM-en-US\"> </a><p><b>status</b>: Billable</p><p><b>code</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/DeclarationCategory 1}\">送核</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>occurrence</b>: 2024-01-25 00:00:00+0800</p><p><b>enteredDate</b>: 2024-01-25 00:00:00+0800</p></div>"
+      },
+      "status" : "billable",
+      "code" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/DeclarationCategory",
+          "code" : "1",
+          "display" : "送核"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "occurrenceDateTime" : "2024-01-25T00:00:00+08:00",
+      "enteredDate" : "2024-01-25T00:00:00+08:00"
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/ChargeItem/cha-LABM-Order",
+    "resource" : {
+      "resourceType" : "ChargeItem",
+      "id" : "cha-LABM-Order",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ChargeItemCMDorder"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"ChargeItem_cha-LABM-Order\"> </a><p class=\"res-header-id\"><b>Generated Narrative: ChargeItem cha-LABM-Order</b></p><a name=\"cha-LABM-Order\"> </a><a name=\"hccha-LABM-Order\"> </a><a name=\"cha-LABM-Order-en-US\"> </a><p><b>identifier</b>: 30</p><p><b>status</b>: Billable</p><p><b>code</b>: <span title=\"Codes:\">0</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>reason</b>: <span title=\"Codes:{http://snomed.info/sct 107008}\">Fetal part of placenta</span></p><p><b>note</b>: 1</p></div>"
+      },
+      "identifier" : [{
+        "value" : "30"
+      }],
+      "status" : "billable",
+      "code" : {
+        "text" : "0"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "reason" : [{
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "107008",
+          "display" : "Fetal part of placenta"
+        }]
+      }],
+      "note" : [{
+        "text" : "1"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Specimen/spe-LABDM",
+    "resource" : {
+      "resourceType" : "Specimen",
+      "id" : "spe-LABDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/SpecimenLABDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Specimen_spe-LABDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Specimen spe-LABDM</b></p><a name=\"spe-LABDM\"> </a><a name=\"hcspe-LABDM\"> </a><a name=\"spe-LABDM-en-US\"> </a><p><b>status</b>: Available</p><p><b>type</b>: <span title=\"Codes:{http://snomed.info/sct 119297000}\">Blood specimen</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><h3>Collections</h3><table class=\"grid\"><tr><td style=\"display: none\">-</td><td><b>Collected[x]</b></td><td><b>Method</b></td></tr><tr><td style=\"display: none\">*</td><td>2024-03-01 00:00:00+0800</td><td><span title=\"Codes:{http://snomed.info/sct 278450005}\">278450005</span></td></tr></table><p><b>note</b>: Nil</p></div>"
+      },
+      "status" : "available",
+      "type" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "119297000",
+          "display" : "Blood specimen"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "collection" : {
+        "collectedDateTime" : "2024-03-01T00:00:00+08:00",
+        "method" : {
+          "coding" : [{
+            "system" : "http://snomed.info/sct",
+            "code" : "278450005",
+            "display" : "Finger-prick sampling"
+          }],
+          "text" : "278450005"
+        }
+      },
+      "note" : [{
+        "text" : "Nil"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Observation/obs-LABDM",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-LABDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ObservationLABDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Observation_obs-LABDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Observation obs-LABDM</b></p><a name=\"obs-LABDM\"> </a><a name=\"hcobs-LABDM\"> </a><a name=\"obs-LABDM-en-US\"> </a><p><b>identifier</b>: 11</p><p><b>status</b>: Final</p><p><b>category</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/observation-category laboratory}\">Laboratory</span></p><p><b>code</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medical-service-payment-tw 09002C}\">血中尿素氮</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>encounter</b>: <a href=\"Encounter-enc-LABM.html\">Encounter: identifier = https://www.ghd.tw/cdm-fhir#1101100011; status = finished; class = 西醫門診手術 (案件分類#03); period = 2023-05-01 00:00:00+0800 --&gt; 2023-08-01 00:00:00+0800</a></p><p><b>effective</b>: 2024-03-01 00:00:00+0800</p><p><b>value</b>: 16.6 mg/dL</p><p><b>interpretation</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation W}\">Chest 1 view PA</span></p><p><b>note</b>: 0</p><p><b>method</b>: <span title=\"Codes:{http://snomed.info/sct 58207001}\">Competitive protein binding assay</span></p><h3>ReferenceRanges</h3><table class=\"grid\"><tr><td style=\"display: none\">-</td><td><b>Low</b></td><td><b>High</b></td></tr><tr><td style=\"display: none\">*</td><td> </td><td>50.1</td></tr><tr><td style=\"display: none\">*</td><td>0.1</td><td> </td></tr></table></div>"
+      },
+      "identifier" : [{
+        "value" : "11"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medical-service-payment-tw",
+          "code" : "09002C"
+        }],
+        "text" : "血中尿素氮"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-LABM"
+      },
+      "effectiveDateTime" : "2024-03-01T00:00:00+08:00",
+      "valueQuantity" : {
+        "value" : 16.6,
+        "unit" : "mg/dL"
+      },
+      "interpretation" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+          "code" : "W"
+        }],
+        "text" : "Chest 1 view PA"
+      }],
+      "note" : [{
+        "text" : "0"
+      }],
+      "method" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "58207001"
+        }]
+      },
+      "referenceRange" : [{
+        "high" : {
+          "value" : 50.1
+        }
+      },
+      {
+        "low" : {
+          "value" : 0.1
+        }
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/DiagnosticReport/diag-LABDM",
+    "resource" : {
+      "resourceType" : "DiagnosticReport",
+      "id" : "diag-LABDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/DiagnosticReportLABDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"DiagnosticReport_diag-LABDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: DiagnosticReport diag-LABDM</b></p><a name=\"diag-LABDM\"> </a><a name=\"hcdiag-LABDM\"> </a><a name=\"diag-LABDM-en-US\"> </a><h2><span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medical-service-payment-tw 09002C}\">血中尿素氮</span> (<span title=\"Codes:{http://terminology.hl7.org/CodeSystem/v2-0074 LAB}\">Laboratory</span>) </h2><table class=\"grid\"><tr><td>Subject</td><td>甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</td></tr></table><p><b>Report Details</b></p><table class=\"grid\"><tr><td><b>Code</b></td><td><b>Value</b></td><td><b>Reference Range</b></td><td><b>Flags</b></td><td><b>Note</b></td><td><b>When For</b></td></tr><tr><td><a href=\"Observation-obs-LABDM.html\"><span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medical-service-payment-tw 09002C}\">血中尿素氮</span></a></td><td>16.6 mg/dL</td><td>&lt;50.1<br/>&gt;0.1</td><td>Final, <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation W}\">Chest 1 view PA</span></td><td>0</td><td>2024-03-01 00:00:00+0800</td></tr></table><p>0</p></div>"
+      },
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0074",
+          "code" : "LAB",
+          "display" : "Laboratory"
+        }],
+        "text" : "Laboratory"
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medical-service-payment-tw",
+          "code" : "09002C",
+          "display" : "血中尿素氮"
+        }],
+        "text" : "血中尿素氮"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "result" : [{
+        "reference" : "Observation/obs-LABDM"
+      }],
+      "conclusion" : "0"
+    }
+  }]
+}

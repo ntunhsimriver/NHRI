@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="material-style layout-fixed">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NHRI - 臨床研究數據平台{% endblock %}</title>
+
+    <!-- Empire 核心 CSS -->
+     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/bootstrap-material.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/shreerang-material.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/uikit.css') }}"> 
+
+    <!-- 你原本的其他樣式（如有衝突可逐步關閉測試） -->
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='Content/css/login.css') }}"> 
+    <!-- Icon Fonts -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/ionicons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/feather.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Content/font/bootstrap-icons.css') }}">
+
+    {% block styles %}
+
+
+    {% endblock %}
+</head>
+
+
+<body class="min-h-screen bg-slate-100 flex items-center justify-center px-4">
+
+  <!-- 卡片 -->
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
+
+    <!-- Logo / Title -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="flex items-center justify-center w-14 h-14 rounded-full bg-blue-600 mb-4">
+        <!-- 心電圖 icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M22 12h-4l-3 9-4-18-3 9H2" />
+        </svg>
+      </div>
+
+      <h1 class="text-xl font-semibold text-slate-800">NHRI 數據平台</h1>
+      <p class="text-sm text-slate-500 mt-1">臨床研究內部系統</p>
+    </div>
+
+    <!-- 登入表單 -->
+    <form id="loginForm" class="space-y-5">
+      <div id="message" class="message"></div>
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">
+          Email
+        </label>
+        <input  id="email" type="email" name="email" required class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="you@nhri.org.tw">
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">
+          密碼
+        </label>
+        <input id="password" type="password" name="password" required class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="********" >
+      </div>
+
+      <!-- Button -->
+      <button
+        type="submit"
+        class="w-full bg-blue-600 text-white rounded-lg py-2.5 font-medium
+               hover:bg-blue-700 transition-colors shadow-sm">
+        登入系統
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <div class="mt-6 text-center text-xs text-slate-400">
+      © NHRI Clinical Research Platform
+    </div>
+
+  </div>
+    
+
+    <!-- JS 資源（順序很重要） -->
+    <script src="{{ url_for('static', filename='assets/css/tailwindcss.css') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/libs/popper/popper.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/bootstrap.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='assets/js/layout-helpers.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/sidenav.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/material-ripple.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='Content/Scripts/login.js') }}"></script>
+
+    <!-- 初始化 Empire layout + 額外保險的伸縮事件 -->
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

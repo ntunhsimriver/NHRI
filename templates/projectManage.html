@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}NHRI - 臨床研究數據平台{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/projectManage.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- <section class="welcome">
+  <h2>歡迎來到健康資料平台</h2>
+  <p>探索病人的健康事件與醫療資訊。</p>
+</section> -->
+
+<section class="space-y-6 fade-in">
+  <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900">計畫管理 (Project Admin)</h2>
+      <p class="text-sm text-slate-500">系統管理員專用：開設新計畫、指定 PI 與管理資料權限</p>
+    </div>
+    <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm shadow-blue-500/30"
+      data-bs-toggle="modal" 
+      data-bs-target="#Modal_addProject" >
+      <i class="bi bi-plus-lg"></i> 開設新計畫
+    </button>
+  </div>
+  <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+        <tr>
+          <th class="px-6 py-3 font-medium">計畫編號</th>
+          <th class="px-6 py-3 font-medium">計畫名稱</th>
+          <th class="px-6 py-3 font-medium">主持人 (PI)</th>
+          <th class="px-6 py-3 font-medium">授權助理</th>
+          <th class="px-6 py-3 font-medium">資料類型</th>
+          <th class="px-6 py-3 font-medium">狀態</th>
+          <th class="px-6 py-3 font-medium text-right">操作</th>
+        </tr>
+      </thead>
+
+      {% for item in data %}
+      <tbody class="divide-y divide-slate-100">
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-4 font-mono font-medium text-blue-600">{{item['study_info'].ProjectId}}</td>
+          <td class="px-6 py-4 font-medium text-slate-900">{{item['study_info'].ProjectName}}
+            <div class="text-xs text-slate-400 mt-1 line-clamp-1 w-64">本研究旨在評估穿戴式裝置在長期監測高血壓患者生理數值之可行性。透過收集受試者連續 6 個月的血壓、心率與活動量數據，探討生活型態介入對血壓控制的影響。</div>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2">
+              <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">D</div>
+              {{item['pi_name']}}
+            </div>
+          </td>
+          <td class="px-6 py-4 text-slate-600">Alice Lin, David Kuo</td>
+          <td class="px-6 py-4">
+            <div class="flex flex-wrap gap-1">
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">FHIR</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Wearable</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Questionnaire</span>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">執行中</span>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <button class="text-blue-600 hover:text-blue-800 font-medium text-xs border border-blue-200 rounded px-2 py-1 hover:bg-blue-50">成員管理</button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- 新增使用者的彈跳視窗 開始 -->
+<div class="modal fade" id="Modal_addProject" tabindex="-1" aria-labelledby="Modal_addProject_Label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <form id="registerForm" class="modal-content border-0 shadow-2xl rounded-xl">
+      
+      <div class="modal-header border-b border-slate-100 p-4">
+        <h3 id="Modal_addProject_title" class="text-lg font-bold text-slate-900">新增計畫</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div id="Modal_addProject_body" class="p-6 space-y-6" style="max-height: 90vh; overflow: hidden;">
+        <div id="message" class="message"></div>
+
+        <label class="block text-sm font-medium text-slate-700" for="new_id">計劃編號</label>
+        <input type="text" id="new_id" class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" required>
+        
+        <label class="block text-sm font-medium text-slate-700" for="new_name">計畫名稱</label>
+        <input type="text" id="new_name" class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" required>
+
+        <!-- 是否有已知的PraId，有才填，沒有就算了 -->
+        <label class="block text-sm font-medium text-slate-700" for="new_PraId">計畫主持人(PI)</label>
+        <input type="text" id="new_PraId" placeholder="Practitioner/Pra-test-id" class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+
+        
+        <label class="block text-sm font-medium text-slate-700 mb-2">收集資料類型</label>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+          <span class="text-sm text-slate-600">FHIR 電子病歷 (臨床/用藥/檢驗)</span>
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+          <span class="text-sm text-slate-600">Wearable 穿戴裝置數據 (手環/手錶)</span>
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+          <span class="text-sm text-slate-600">Questionnaire 電子問卷 (ePRO)</span>
+        </label>
+
+      </div>
+
+      <div class="modal-footer border-t border-slate-100 p-3">
+        <button type="button" class="mr-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" data-bs-dismiss="modal">取消</button>
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">建立計畫</button>
+      </div>
+      
+    </form>
+  </div>
+</div>
+<!-- 新增使用者的彈跳視窗 結束 -->
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='Content/Scripts/projectManage.js') }}">
+</script>
+{% endblock %}

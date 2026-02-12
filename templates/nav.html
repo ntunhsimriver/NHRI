@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}病人事件時間軸{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/nav.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- 在你的 index.html 內容適當位置放按鈕 -->
+<!-- <h3>🧷 後端動作</h3>
+<button id="btn-run" class="btn btn-primary">匯出並產生表格</button>
+<pre id="out" class="mt-3 p-2 border rounded" style="min-height:80px;background:#f8f9fa;"></pre>
+ -->
+
+<div class="custom-padding-bottom-12px">
+  <section class="card">
+    <div class="card-body">
+      <h3>📅 病人事件時間軸</h3>
+      <p>瀏覽病患的醫療紀錄時間分布與重要事件。</p>
+      <a href="{{ url_for('pages.timeline') }}">查看</a>
+  </section>
+</div>
+
+<div class="custom-padding-bottom-12px">
+  <section class="card">
+    <div class="card-body">
+      <h3>📈 相對時間分析</h3>
+      <p>以特定參考日為中心查看事件分布。</p>
+      <a href="{{ url_for('pages.relativetime') }}">查看</a>
+  </section>
+</div>
+
+<div class="custom-padding-bottom-12px">
+  <section class="card">
+    <div class="card-body">
+      <h3>📊 統計報告（建置中）</h3>
+      <p>查看健康趨勢與醫療統計資料。</p>
+      <a href="{{ url_for('pages.fhirdata') }}">查看</a>
+    </div>
+  </section>
+</div>
+<!-- 新增：模板建立/編輯 -->
+
+<div class="custom-padding-bottom-12px">
+  <section class="card">
+    <div class="card-body">
+      <h3>🧩 模板建立與編輯</h3>
+      <p>上傳/建立以欄位清單為核心的模板、版本化管理與編輯。</p>
+      <a href="{{ url_for('pages.tpl_builder') }}">前往模板建立</a>
+    </div>
+  </section>
+</div>
+
+<!-- 新增：欄位複選與多組文字框 -->
+<div class="custom-padding-bottom-12px">
+  <section class="card">
+    <div class="card-body">
+      <h3>🧮 欄位複選與組合</h3>
+      <p>從模板欄位複選，填入多組文字框（可編輯）並存歷史紀錄。</p>
+      <a href="{{ url_for('pages.field_selector') }}">前往欄位選取</a>
+    </div>
+  </section>
+</div>
+
+<div class="custom-padding-bottom-12px">
+  <section class="card">
+    <div class="card-body">
+      <h3>🧷 套用樣板並計算雜湊</h3>
+      <p>上傳 JSON，使用樣板最新的 groups 產生 IDx:"hash-text2-text3" 欄位。</p>
+      <a href="{{ url_for('pages.apply_template_page') }}">前往</a>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ url_for('static', filename='Content/Scripts/nav.js') }}"></script>
+{% endblock %}

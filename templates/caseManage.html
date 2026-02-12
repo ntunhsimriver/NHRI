@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}NHRI - 臨床研究數據平台{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/caseManage.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- <section class="welcome">
+  <h2>歡迎來到健康資料平台</h2>
+  <p>探索病人的健康事件與醫療資訊。</p>
+</section> -->
+{% if data %}
+
+  
+    <div class="space-y-6 fade-in">
+      <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">個案管理清單</h2>
+          <p class="text-sm text-slate-500">管理所有受試者、同意書狀態與設備配發</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30">
+            <i class="bi bi-plus"></i> 新增個案
+          </button>
+          <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            <i class="bi bi-activity" ></i> 批次匯入
+          </button>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="relative flex-1">
+          <i class="bi bi-search absolute left-3 top-2 h-4 w-4 text-slate-400"></i>
+        <input type="text" placeholder="搜尋 Hash ID..." 
+          class="w-full rounded-lg !border !border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+          id="searchInput">
+        </div>
+        <div class="flex gap-2">
+        <select class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 outline-none" id="statusSelect">
+        <option value="all">所有狀態</option>
+        <option value="on-study">On-study</option>
+        <option value="active">Active</option>
+        <option value="withdrawn">Withdrawn</option>
+        </select>
+        </div>
+        </div>
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        
+        <!-- 這個table要換掉 -->
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-3 font-medium">Hash ID</th>
+            <th class="px-6 py-3 font-medium">狀態</th>
+            <th class="px-6 py-3 font-medium">性別/年齡</th>
+            <th class="px-6 py-3 font-medium">配戴設備</th>
+            <th class="px-6 py-3 font-medium">資料完整度</th>
+            <th class="px-6 py-3 font-medium">最近訪視</th>
+            <th class="px-6 py-3 font-medium text-right">操作</th>
+          </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+
+            {% for item in data %}
+            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row" data-status="{{ item.ResearchSubjectStatus}}" onclick="window.location.href='{{ url_for('pages.case_detail', case_id=item.PatInfo.id, ResearchSubjectStatus=item.ResearchSubjectStatus) }}'">
+              <td class="px-6 py-4 font-mono font-medium text-blue-600 group-hover:underline">{{ item.PatInfo.id }}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">{{ item.ResearchSubjectStatus}}</span>
+              </td>
+              <td class="px-6 py-4 text-slate-600">{{ item.PatInfo.gender}} / {{ item.PatInfo.Age}}</td>
+              <td class="px-6 py-4">
+                <span class="inline-block rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600">VivoWatch 5 (SN: 9928)</span>
+                </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <div class="h-1.5 w-20 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="h-full rounded-full bg-blue-500" style="width: 80%;">
+                    </div>
+                  </div>
+                  <span class="text-xs text-slate-400">80%</span>
+                </div>
+              </td>
+                <td class="px-6 py-4 text-slate-600">2024-01-05</td>
+                <td class="px-6 py-4 text-right">
+                <button class="text-slate-400 hover:text-blue-600">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        </div>
+
+
+
+{% elif PatInfo %}
+<main class="flex-1 overflow-auto bg-slate-50 p-8">
+  <div class="space-y-6 fade-in h-full flex flex-col">
+    <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
+      <button class="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-100 transition-colors" onclick="window.location.href='{{ url_for('pages.caseManage') }}'";>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="m15 18-6-6 6-6"></path></svg>
+      </button>
+      <div>
+        <div class="flex items-center gap-3">
+          <h2 class="text-2xl font-bold text-slate-900">{{PatInfo.id}}</h2>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">{{ResearchSubjectStatus}}</span>
+        </div>
+        <p class="text-sm text-slate-500">{{study_id}} | {{PatInfo.gender}}, {{PatInfo.Age}} 歲 | 最後訪視: 2024-01-05</p>
+      </div>
+      <div class="ml-auto flex gap-2">
+        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">編輯個案</button>
+      </div>
+    </div>
+
+
+    <nav>
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm active" id="nav-Overview-tab" data-bs-toggle="tab" data-bs-target="#nav-Overview" type="button" role="tab" aria-controls="nav-Overview" aria-selected="true">
+          <i class="bi bi-columns-gap"></i>總覽 (Overview)
+        </button>
+
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Vitals-tab" data-bs-toggle="tab" data-bs-target="#nav-Vitals" type="button" role="tab" aria-controls="nav-Vitals" aria-selected="true">
+          <i class="bi bi-heart"></i>生理數據 (Vitals)
+        </button>
+
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Clinical-tab" data-bs-toggle="tab" data-bs-target="#nav-Clinical" type="button" role="tab" aria-controls="nav-Clinical" aria-selected="true">
+          <i class="bi bi-activity"></i>臨床病歷 (Clinical)
+        </button>
+
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Scales-tab" data-bs-toggle="tab" data-bs-target="#nav-Scales" type="button" role="tab" aria-controls="nav-Scales" aria-selected="true">
+          <i class="bi bi-clipboard2-data"></i>評估量表 (Scales)
+        </button>
+
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Consents-tab" data-bs-toggle="tab" data-bs-target="#nav-Consents" type="button" role="tab" aria-controls="nav-Consents" aria-selected="true">
+          <i class="bi bi-clipboard2-check"></i>同意書 (Consents)
+        </button>
+      </div>
+    </nav>
+
+    <div class="tab-content" id="nav-tabContent">
+      <div class="tab-pane fade show active" id="nav-Overview" role="tabpanel" aria-labelledby="nav-Overview-tab">
+        <div class="grid gap-6 md:grid-cols-2">
+          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="mb-4 flex items-center justify-between">
+              <h3 class="text-lg font-bold text-slate-900">配戴設備狀態</h3>
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">配對中</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <i class="bi bi-watch" style="font-size: 2rem;"></i>
+              </div>
+              <div>
+                <p class="text-lg font-semibold text-slate-900">VivoWatch 5 (SN: 9928)</p>
+                <p class="text-sm text-slate-500">最後同步: 2024-05-15 14:30</p>
+              </div>
+            </div>
+            <div class="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+              <div>
+                <span class="text-xs text-slate-500">電池電量</span>
+                <p class="font-mono text-lg font-medium text-emerald-600">85%</p>
+              </div>
+              <div>
+                <span class="text-xs text-slate-500">今日步數</span>
+                <p class="font-mono text-lg font-medium text-slate-900">4,520</p>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 class="mb-4 text-lg font-bold text-slate-900">基本資料</h3>
+            <dl class="grid grid-cols-2 gap-x-4 gap-y-6">
+              <div>
+                <dt class="text-xs text-slate-500">出生日期</dt>
+                <dd class="text-sm font-medium text-slate-900">{{PatInfo.birthDate}}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-500">聯絡電話</dt>
+                <dd class="text-sm font-medium text-slate-900">{{PatInfo.phone}}</dd>
+              </div>
+              <div class="col-span-2">
+                <dt class="text-xs text-slate-500">居住地</dt>
+                <dd class="text-sm font-medium text-slate-900">{{PatInfo.address}}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-500">收案日期</dt>
+                <dd class="text-sm font-medium text-slate-900">{{lastUpdated}}</dd>
+              </div></dl></div></div>
+
+
+      </div>
+      
+      <div class="tab-pane fade rounded-xl border border-slate-200 bg-white p-6 shadow-sm" id="nav-Vitals" role="tabpanel" aria-labelledby="nav-Vitals-tab">
+        <h3 class="mb-6 text-lg font-bold text-slate-900" id="myChartText">生理趨勢圖 (近14天)</h3>
+        <canvas id="myChart-Vitals" width="100%" height="50%"></canvas>
+
+      </div>
+      
+      <div class="tab-pane fade rounded-xl border border-slate-200 bg-white p-6 shadow-sm" id="nav-Clinical" role="tabpanel" aria-labelledby="nav-Clinical-tab">
+        <h3 class="mb-6 text-lg font-bold text-slate-900">臨床歷程時間軸 (Clinical Timeline)</h3>
+        
+        <div class="relative pl-4">
+          <div class="timeline-line absolute bottom-0 left-0 top-2 w-px bg-slate-200 ml-4"></div>
+          <div class="space-y-8">
+
+            <!-- 迴圈開始 -->
+            {% for item in getAllInfoResult %}
+            <div class="relative flex gap-6">
+              <div class="relative z-10 flex h-8 w-8 flex-none items-center justify-center rounded-full border-2 border-white shadow-sm type-{{item.Type}}">
+                {{item.Type}}
+              </div>
+              <div class="flex-1 rounded-lg border border-slate-100 bg-slate-50 p-4 transition-all hover:border-blue-200 hover:bg-white hover:shadow-sm">
+                <div class="mb-2 flex items-center justify-between">
+                  <span class="text-sm font-semibold text-slate-900">{{item.Date}}</span><span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-slate-100 text-slate-800">{{item.Status}}</span>
+                </div>
+                <h4 class="text-base font-bold text-slate-800">{{item.Name}}</h4>
+                <p class="mt-1 text-sm text-slate-600">{{item.Value}}</p>
+                <div class="mt-3 flex items-center gap-2 text-xs text-slate-400">
+                  <i class="bi bi-activity"></i><span>{{item.Org}}</span>
+                </div>
+              </div>
+            </div>
+            <!-- 迴圈結束 -->
+            {% endfor %}
+          </div>
+        </div>
+        
+      </div>
+      
+      <div class="tab-pane fade" id="nav-Scales" role="tabpanel" aria-labelledby="nav-Scales-tab">評估量表 (Scales)</div>
+      
+      <div class="tab-pane fade" id="nav-Consents" role="tabpanel" aria-labelledby="nav-Consents-tab">
+        <div class="space-y-4">
+          <div class="flex justify-between">
+            <h3 class="text-lg font-bold text-slate-900">已簽署文件</h3>
+            <button class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
+              <i class="bi bi-upload"></i> 
+              上傳新文件
+            </button>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            
+            <!-- 迴圈開始 -->
+
+            {% if getConsent %}
+              {% for item in getConsent %}
+              <div class="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+                <div class="mb-3 flex items-start justify-between">
+                  <div class="rounded-lg bg-red-50 p-2 text-red-500 d-flex align-items-center justify-content-center" style="width: 3rem; height: 3rem; flex-shrink: 0;">
+                    <i class="bi bi-file-earmark-medical" style="font-size: 1.5rem;-webkit-text-stroke: 0.2px;"></i>
+                  </div>
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">
+                  {{item.status}}</span>
+                </div>
+                <h4 class="font-medium text-slate-900">{{item.title}}</h4>
+                <p class="mb-4 text-xs text-slate-500">{{item.url}}</p>
+                <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
+                  <span>簽署日: {{item.dateTime}}</span>
+                  <button class="flex items-center gap-1 font-medium text-blue-600 hover:underline" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#Modal_Consent" 
+                          data-bs-title="{{item.title}}"
+                          data-bs-url="{{item.url}}"> <i class="bi bi-eye"></i> 檢視內容
+                  </button>
+                </div>
+              </div>
+              {% endfor %}
+            {% endif %}
+            <!-- 迴圈結束 -->
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </main>
+
+
+
+  <!-- 這邊放問卷裡面的視窗 -->
+  <div class="modal fade" id="Modal_Consent" tabindex="-1" aria-labelledby="Modal_Consent_Label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-2xl rounded-xl">
+      
+      <div class="modal-header border-b border-slate-100 p-4">
+        <h3 id="Modal_Consent_title" class="text-lg font-bold text-slate-900"></h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div id="Modal_Consent_body" class="modal-body overflow-y-auto p-6 text-sm text-slate-600 leading-relaxed whitespace-pre-line" style="height: 80vh; overflow: hidden;">
+        <iframe id="Consent_PDF_Viewer" src="" width="100%" height="100%" frameborder="0"></iframe>
+      </div>
+
+      <div class="modal-footer border-t border-slate-100 p-3">
+        <button type="button" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors" data-bs-dismiss="modal">關閉</button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+{% else %}
+
+
+    <div class="space-y-6 fade-in">
+      <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h2 class="text-3xl font-bold text-slate-900">尚無個案，請新增個案</h2>
+        </div>
+        <div class="flex gap-2">
+          <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30">
+            <i class="bi bi-plus"></i> 新增個案
+          </button>
+          <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            <i class="bi bi-activity" ></i> 批次匯入
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  {% if getObs14daysResult %}
+
+  // 傳後端來的數值到js的檔案
+  const SERVER_DATA = {
+      sbp: {{ getObs14daysResult[0] | tojson  }},
+      dbp: {{ getObs14daysResult[1] | tojson  }},
+      hr: {{ getObs14daysResult[2] | tojson  }},
+      labels: {{ getObs14daysResult[3] | tojson }}
+  };
+
+  {% endif %}
+</script>
+<script src="{{ url_for('static', filename='Content/Scripts/caseManage.js') }}"></script>
+{% endblock %}

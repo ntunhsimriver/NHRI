@@ -1,0 +1,560 @@
+{
+  "resourceType" : "Bundle",
+  "id" : "bun-TOTFB",
+  "meta" : {
+    "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/BundleTOTFB"]
+  },
+  "identifier" : {
+    "system" : "https://www.ghd.tw/cdm-fhir/",
+    "value" : "Bundle-TOTFB"
+  },
+  "type" : "document",
+  "timestamp" : "2024-07-04T00:00:00+08:00",
+  "entry" : [{
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Composition/com-TOTFB",
+    "resource" : {
+      "resourceType" : "Composition",
+      "id" : "com-TOTFB",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/CompositionTOTFB"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Composition_com-TOTFB\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Composition com-TOTFB</b></p><a name=\"com-TOTFB\"> </a><a name=\"hccom-TOTFB\"> </a><a name=\"com-TOTFB-en-US\"> </a><p><b>status</b>: Final</p><p><b>type</b>: <span title=\"Codes:{http://loinc.org 101005-7}\">Hospitalist Discharge summary</span></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFB.html\">Encounter: identifier = http://healthcare.example.org/identifiers/enocunter#1101100011; status = finished; class = 西醫一般案件 (案件分類#01); type = DRG40002; serviceType = 消化內科; period = 2022-08-01 17:00:14+0800 --&gt; 2022-08-01 18:00:14+0800</a></p><p><b>date</b>: 2024-06-05 00:00:00+0000</p><p><b>author</b>: <a href=\"Organization-org-TOTFAB.html\">Organization: identifier = example123</a></p><p><b>title</b>: 住院醫療申報檔案 TOTFB</p><p><b>custodian</b>: <a href=\"Organization-org-TOTFAB.html\">Organization: identifier = example123</a></p></div>"
+      },
+      "status" : "final",
+      "type" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "101005-7",
+          "display" : "Hospitalist Discharge summary"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-TOTFB"
+      },
+      "date" : "2024-06-05T00:00:00Z",
+      "author" : [{
+        "reference" : "Organization/org-TOTFAB"
+      }],
+      "title" : "住院醫療申報檔案 TOTFB",
+      "custodian" : {
+        "reference" : "Organization/org-TOTFAB"
+      },
+      "section" : [{
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "53242-4"
+          }]
+        },
+        "entry" : [{
+          "reference" : "ChargeItem/cha-CDM"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "103213-5"
+          }]
+        },
+        "entry" : [{
+          "reference" : "Observation/obs-TOTFB"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "46018-8"
+          }]
+        },
+        "entry" : [{
+          "reference" : "Condition/con-TOTFB"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "29554-3"
+          }]
+        },
+        "entry" : [{
+          "reference" : "Procedure/pro-TOTFB"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "46209-3"
+          }]
+        },
+        "entry" : [{
+          "reference" : "ChargeItem/cha-TOTFB-Order"
+        },
+        {
+          "reference" : "MedicationRequest/med-TOTFB-Order"
+        },
+        {
+          "reference" : "Observation/obs-TOTFB-Order"
+        },
+        {
+          "reference" : "Procedure/pro-TOTFB-Order"
+        }]
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Organization/org-TOTFAB",
+    "resource" : {
+      "resourceType" : "Organization",
+      "id" : "org-TOTFAB",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/OrganizationTOTFAB"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Organization_org-TOTFAB\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Organization org-TOTFAB</b></p><a name=\"org-TOTFAB\"> </a><a name=\"hcorg-TOTFAB\"> </a><a name=\"org-TOTFAB-en-US\"> </a><p><b>identifier</b>: example123</p><p><b>active</b>: true</p></div>"
+      },
+      "identifier" : [{
+        "value" : "example123"
+      }],
+      "active" : true
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Patient/pat-CDM",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-CDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/PatientCDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Patient_pat-CDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Patient pat-CDM</b></p><a name=\"pat-CDM\"> </a><a name=\"hcpat-CDM\"> </a><a name=\"pat-CDM-en-US\"> </a><p style=\"border: 1px #661aff solid; background-color: #e6e6ff; padding: 10px;\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</p><hr/></div>"
+      },
+      "identifier" : [{
+        "use" : "official",
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NNxxx"
+          }]
+        },
+        "system" : "http://www.moi.gov.tw",
+        "value" : "Z199999829"
+      }],
+      "name" : [{
+        "use" : "official",
+        "text" : "甄○康"
+      }],
+      "gender" : "female",
+      "birthDate" : "1985-01-02"
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Encounter/enc-TOTFB",
+    "resource" : {
+      "resourceType" : "Encounter",
+      "id" : "enc-TOTFB",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/EncounterTOTFB"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Encounter_enc-TOTFB\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Encounter enc-TOTFB</b></p><a name=\"enc-TOTFB\"> </a><a name=\"hcenc-TOTFB\"> </a><a name=\"enc-TOTFB-en-US\"> </a><p><b>identifier</b>: <code>http://healthcare.example.org/identifiers/enocunter</code>/1101100011</p><p><b>status</b>: Finished</p><p><b>class</b>: <a href=\"CodeSystem-CaseType.html#CaseType-01\">案件分類 01</a>: 西醫一般案件</p><p><b>type</b>: <span title=\"Codes:{https://www.nhi.gov.tw/ch/cp-6423-28784-2851-1.html? DRG40002}\">DRG40002</span></p><p><b>serviceType</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/FuncType AA}\">AA</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>period</b>: 2022-08-01 17:00:14+0800 --&gt; 2022-08-01 18:00:14+0800</p><h3>Hospitalizations</h3><table class=\"grid\"><tr><td style=\"display: none\">-</td><td><b>DischargeDisposition</b></td></tr><tr><td style=\"display: none\">*</td><td><span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/TranCode 3}\">改門診治療</span></td></tr></table></div>"
+      },
+      "identifier" : [{
+        "system" : "http://healthcare.example.org/identifiers/enocunter",
+        "value" : "1101100011"
+      }],
+      "status" : "finished",
+      "class" : {
+        "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/CaseType",
+        "code" : "01"
+      },
+      "type" : [{
+        "coding" : [{
+          "system" : "https://www.nhi.gov.tw/ch/cp-6423-28784-2851-1.html?",
+          "code" : "DRG40002"
+        }]
+      }],
+      "serviceType" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/FuncType",
+          "code" : "AA",
+          "display" : "消化內科"
+        }],
+        "text" : "AA"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "period" : {
+        "start" : "2022-08-01T17:00:14+08:00",
+        "end" : "2022-08-01T18:00:14+08:00"
+      },
+      "hospitalization" : {
+        "dischargeDisposition" : {
+          "coding" : [{
+            "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/TranCode",
+            "code" : "3"
+          }]
+        }
+      }
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/ChargeItem/cha-CDM",
+    "resource" : {
+      "resourceType" : "ChargeItem",
+      "id" : "cha-CDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ChargeItemCDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"ChargeItem_cha-CDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: ChargeItem cha-CDM</b></p><a name=\"cha-CDM\"> </a><a name=\"hccha-CDM\"> </a><a name=\"cha-CDM-en-US\"> </a><p><b>status</b>: Billable</p><p><b>code</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/DeclarationCategory 1}\">送核</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>occurrence</b>: 2024-01-25 00:00:00+0800</p><p><b>enteredDate</b>: 2024-01-25 00:00:00+0800</p></div>"
+      },
+      "status" : "billable",
+      "code" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/DeclarationCategory",
+          "code" : "1",
+          "display" : "送核"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "occurrenceDateTime" : "2024-01-25T00:00:00+08:00",
+      "enteredDate" : "2024-01-25T00:00:00+08:00"
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Procedure/pro-TOTFB",
+    "resource" : {
+      "resourceType" : "Procedure",
+      "id" : "pro-TOTFB",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ProcedureTOTFAB"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Procedure_pro-TOTFB\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Procedure pro-TOTFB</b></p><a name=\"pro-TOTFB\"> </a><a name=\"hcpro-TOTFB\"> </a><a name=\"pro-TOTFB-en-US\"> </a><p><b>status</b>: Completed</p><p><b>code</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw 0016070}\">0016070</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFB.html\">Encounter: identifier = http://healthcare.example.org/identifiers/enocunter#1101100011; status = finished; class = 西醫一般案件 (案件分類#01); type = DRG40002; serviceType = 消化內科; period = 2022-08-01 17:00:14+0800 --&gt; 2022-08-01 18:00:14+0800</a></p><p><b>note</b>: 主手術(處置)代碼</p></div>"
+      },
+      "status" : "completed",
+      "code" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw",
+          "code" : "0016070"
+        }],
+        "text" : "0016070"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-TOTFB"
+      },
+      "note" : [{
+        "text" : "主手術(處置)代碼"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Condition/con-TOTFB",
+    "resource" : {
+      "resourceType" : "Condition",
+      "id" : "con-TOTFB",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ConditionTOTFAB"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Condition_con-TOTFB\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Condition con-TOTFB</b></p><a name=\"con-TOTFB\"> </a><a name=\"hccon-TOTFB\"> </a><a name=\"con-TOTFB-en-US\"> </a><p><b>clinicalStatus</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/condition-clinical remission}\">Remission</span></p><p><b>verificationStatus</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/condition-ver-status confirmed}\">Confirmed</span></p><p><b>category</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/condition-category encounter-diagnosis}\">Encounter Diagnosis</span></p><p><b>code</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-cm-2023-tw A01.0}\">A01.0</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFB.html\">Encounter: identifier = http://healthcare.example.org/identifiers/enocunter#1101100011; status = finished; class = 西醫一般案件 (案件分類#01); type = DRG40002; serviceType = 消化內科; period = 2022-08-01 17:00:14+0800 --&gt; 2022-08-01 18:00:14+0800</a></p><p><b>note</b>: 主診斷代碼</p></div>"
+      },
+      "clinicalStatus" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/condition-clinical",
+          "code" : "remission"
+        }]
+      },
+      "verificationStatus" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code" : "confirmed"
+        }]
+      },
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code" : "encounter-diagnosis"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-cm-2023-tw",
+          "code" : "A01.0"
+        }],
+        "text" : "A01.0"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-TOTFB"
+      },
+      "note" : [{
+        "text" : "主診斷代碼"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Observation/obs-TOTFB",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-TOTFB",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ObservationTOTFB"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Observation_obs-TOTFB\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Observation obs-TOTFB</b></p><a name=\"obs-TOTFB\"> </a><a name=\"hcobs-TOTFB\"> </a><a name=\"obs-TOTFB-en-US\"> </a><p><b>status</b>: Final</p><p><b>code</b>: <span title=\"Codes:{http://loinc.org 103213-5}\">Duration in bed</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFB.html\">Encounter: identifier = http://healthcare.example.org/identifiers/enocunter#1101100011; status = finished; class = 西醫一般案件 (案件分類#01); type = DRG40002; serviceType = 消化內科; period = 2022-08-01 17:00:14+0800 --&gt; 2022-08-01 18:00:14+0800</a></p><p><b>value</b>: 3 days<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM  coded = 'd')</span></p><p><b>note</b>: 慢性病床天數</p></div>"
+      },
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "103213-5"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-TOTFB"
+      },
+      "valueQuantity" : {
+        "value" : 3,
+        "unit" : "days",
+        "system" : "http://unitsofmeasure.org",
+        "code" : "d"
+      },
+      "note" : [{
+        "text" : "慢性病床天數"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/ChargeItem/cha-TOTFB-Order",
+    "resource" : {
+      "resourceType" : "ChargeItem",
+      "id" : "cha-TOTFB-Order",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ChargeItemCMDorder"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"ChargeItem_cha-TOTFB-Order\"> </a><p class=\"res-header-id\"><b>Generated Narrative: ChargeItem cha-TOTFB-Order</b></p><a name=\"cha-TOTFB-Order\"> </a><a name=\"hccha-TOTFB-Order\"> </a><a name=\"cha-TOTFB-Order-en-US\"> </a><p><b>identifier</b>: 30</p><p><b>status</b>: Billable</p><p><b>code</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType 2}\">診療明細</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>occurrence</b>: 2024-01-21 00:00:00+0800 --&gt; 2024-01-25 00:00:00+0800</p><p><b>reason</b>: <span title=\"Codes:{http://snomed.info/sct 107008}\">Fetal part of placenta</span></p><p><b>note</b>: 1</p></div>"
+      },
+      "identifier" : [{
+        "value" : "30"
+      }],
+      "status" : "billable",
+      "code" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType",
+          "code" : "2",
+          "display" : "診療明細"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "occurrencePeriod" : {
+        "start" : "2024-01-21T00:00:00+08:00",
+        "end" : "2024-01-25T00:00:00+08:00"
+      },
+      "reason" : [{
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "107008",
+          "display" : "Fetal part of placenta"
+        }]
+      }],
+      "note" : [{
+        "text" : "1"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/MedicationRequest/med-TOTFB-Order",
+    "resource" : {
+      "resourceType" : "MedicationRequest",
+      "id" : "med-TOTFB-Order",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/MedicationRequestCDMorder"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"MedicationRequest_med-TOTFB-Order\"> </a><p class=\"res-header-id\"><b>Generated Narrative: MedicationRequest med-TOTFB-Order</b></p><a name=\"med-TOTFB-Order\"> </a><a name=\"hcmed-TOTFB-Order\"> </a><a name=\"med-TOTFB-Order-en-US\"> </a><p><b>identifier</b>: 08</p><p><b>status</b>: Active</p><p><b>intent</b>: Order</p><p><b>category</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/medicationrequest-category discharge}\">Discharge</span></p><p><b>medication</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-fda-tw 衛署藥輸字第025485號}\">阿立批挫</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFB.html\">Encounter: identifier = http://healthcare.example.org/identifiers/enocunter#1101100011; status = finished; class = 西醫一般案件 (案件分類#01); type = DRG40002; serviceType = 消化內科; period = 2022-08-01 17:00:14+0800 --&gt; 2022-08-01 18:00:14+0800</a></p><blockquote><p><b>dosageInstruction</b></p><p><b>timing</b>: Code </p><p><b>site</b>: <span title=\"Codes:{http://snomed.info/sct 107008}\">Fetal part of placenta</span></p><p><b>route</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-path-tw PO}\">口服</span></p><h3>DoseAndRates</h3><table class=\"grid\"><tr><td style=\"display: none\">-</td><td><b>Dose[x]</b></td></tr><tr><td style=\"display: none\">*</td><td>0.5</td></tr></table></blockquote><h3>DispenseRequests</h3><table class=\"grid\"><tr><td style=\"display: none\">-</td><td><b>ValidityPeriod</b></td><td><b>Quantity</b></td></tr><tr><td style=\"display: none\">*</td><td>2024-03-01 00:00:00+0800 --&gt; 2024-05-01 00:00:00+0800</td><td>30</td></tr></table></div>"
+      },
+      "identifier" : [{
+        "value" : "08"
+      }],
+      "status" : "active",
+      "intent" : "order",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+          "code" : "discharge"
+        }]
+      }],
+      "medicationCodeableConcept" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-fda-tw",
+          "code" : "衛署藥輸字第025485號",
+          "display" : "阿立批挫"
+        }],
+        "text" : "阿立批挫"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-TOTFB"
+      },
+      "dosageInstruction" : [{
+        "timing" : {
+          "code" : {
+            "coding" : [{
+              "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-frequency-nhi-tw",
+              "code" : "PC"
+            }],
+            "text" : "PC"
+          }
+        },
+        "site" : {
+          "coding" : [{
+            "system" : "http://snomed.info/sct",
+            "code" : "107008"
+          }]
+        },
+        "route" : {
+          "coding" : [{
+            "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-path-tw",
+            "code" : "PO"
+          }]
+        },
+        "doseAndRate" : [{
+          "doseQuantity" : {
+            "value" : 0.5
+          }
+        }]
+      }],
+      "dispenseRequest" : {
+        "validityPeriod" : {
+          "start" : "2024-03-01T00:00:00+08:00",
+          "end" : "2024-05-01T00:00:00+08:00"
+        },
+        "quantity" : {
+          "value" : 30
+        }
+      }
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Observation/obs-TOTFB-Order",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-TOTFB-Order",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ObservationCDMorder"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Observation_obs-TOTFB-Order\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Observation obs-TOTFB-Order</b></p><a name=\"obs-TOTFB-Order\"> </a><a name=\"hcobs-TOTFB-Order\"> </a><a name=\"obs-TOTFB-Order-en-US\"> </a><p><b>identifier</b>: 30</p><p><b>status</b>: Final</p><p><b>category</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType 2}\">診療明細</span></p><p><b>code</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw 0016070}\">0016070</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>effective</b>: 2024-03-01 00:00:00+0800 --&gt; 2024-05-01 00:00:00+0800</p><p><b>value</b>: 15.1 mg/dL</p><p><b>note</b>: 0</p></div>"
+      },
+      "identifier" : [{
+        "value" : "30"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType",
+          "code" : "2"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw",
+          "code" : "0016070"
+        }],
+        "text" : "0016070"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "effectivePeriod" : {
+        "start" : "2024-03-01T00:00:00+08:00",
+        "end" : "2024-05-01T00:00:00+08:00"
+      },
+      "valueQuantity" : {
+        "value" : 15.1,
+        "unit" : "mg/dL"
+      },
+      "note" : [{
+        "text" : "0"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Procedure/pro-TOTFB-Order",
+    "resource" : {
+      "resourceType" : "Procedure",
+      "id" : "pro-TOTFB-Order",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ProcedureCDMorder"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Procedure_pro-TOTFB-Order\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Procedure pro-TOTFB-Order</b></p><a name=\"pro-TOTFB-Order\"> </a><a name=\"hcpro-TOTFB-Order\"> </a><a name=\"pro-TOTFB-Order-en-US\"> </a><p><b>identifier</b>: 30</p><p><b>status</b>: Completed</p><p><b>category</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType 2}\">診療明細</span></p><p><b>code</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw 0016070}\">0016070</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>performed</b>: 2024-03-01 00:00:00+0800 --&gt; 2024-05-01 00:00:00+0800</p><p><b>note</b>: 0</p></div>"
+      },
+      "identifier" : [{
+        "value" : "30"
+      }],
+      "status" : "completed",
+      "category" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType",
+          "code" : "2"
+        }]
+      },
+      "code" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw",
+          "code" : "0016070"
+        }],
+        "text" : "0016070"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "performedPeriod" : {
+        "start" : "2024-03-01T00:00:00+08:00",
+        "end" : "2024-05-01T00:00:00+08:00"
+      },
+      "note" : [{
+        "text" : "0"
+      }]
+    }
+  }]
+}

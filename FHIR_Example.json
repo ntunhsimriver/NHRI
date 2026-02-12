@@ -1,0 +1,607 @@
+[
+    {
+        "resourceType": "ResearchStudy",
+        "id": "IRB-2026-001",
+        "title": "高血壓長期追蹤計畫",
+        "status": "active",
+        "principalInvestigator":
+        {
+            "reference": "Practitioner/pra-admin001"
+        }
+    },
+    {
+        "resourceType": "ResearchStudy",
+        "id": "IRB-2026-002",
+        "title": "高血壓長期追蹤計畫",
+        "status": "withdrawn",
+        "principalInvestigator":
+        {
+            "reference": "Practitioner/pra-admin001"
+        }
+    },
+    {
+        "resourceType": "ResearchSubject",
+        "id": "IRB-2026-001-ResearchSubject-001",
+        "status": "on-study",
+        "study":
+        {
+            "reference": "ResearchStudy/IRB-2026-001"
+        },
+        "individual":
+        {
+            "reference": "Patient/AF4C2EB21830688C3B3DAC785185EFB97C870DB9"
+        },
+        "assignedArm": "受測者",
+        "consent":
+        {
+            "reference": "Consent/37635"
+        }
+    },
+    {
+        "resourceType": "ResearchSubject",
+        "id": "RB-2026-001-ResearchSubject-002",
+        "status": "withdrawn",
+        "study":
+        {
+            "reference": "ResearchStudy/IRB-2026-001"
+        },
+        "individual":
+        {
+            "reference": "Patient/A99003699ED87C8E048213DF8058D1D9DF0ED8C1"
+        },
+        "assignedArm": "受測者"
+    },
+    {
+        "resourceType": "Practitioner",
+        "id": "pra-pi-id",
+        "meta":
+        {
+            "profile":
+            [
+                "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Practitioner-twcore"
+            ]
+        },
+        "active": true,
+        "name":
+        [
+            {
+                "use": "official",
+                "text": "Dr. Chang",
+                "family": "Chang"
+            }
+        ],
+        "telecom":
+        [
+            {
+                "system": "email",
+                "value": " chang@nhri.org.tw"
+            }
+        ],
+        "gender": "male",
+        "birthDate": "1980-11-11"
+    },
+    {
+        "resourceType": "Practitioner",
+        "id": "pra-admin001",
+        "meta":
+        {
+            "profile":
+            [
+                "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Practitioner-twcore"
+            ]
+        },
+        "active": true,
+        "name":
+        [
+            {
+                "use": "official",
+                "text": "Dr. Chang",
+                "family": "Chang"
+            }
+        ],
+        "telecom":
+        [
+            {
+                "system": "email",
+                "value": " chang@nhri.org.tw"
+            }
+        ],
+        "gender": "male",
+        "birthDate": "1980-11-11"
+    },
+    {
+        "resourceType": "Observation",
+        "status": "final",
+        "category":
+        [
+            {
+                "coding":
+                [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                        "code": "vital-signs",
+                        "display": "Vital Signs"
+                    }
+                ]
+            }
+        ],
+        "code":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://loinc.org",
+                    "code": "8480-6",
+                    "display": "Systolic blood pressure"
+                }
+            ],
+            "text": "收縮壓"
+        },
+        "subject":
+        {
+            "reference": "Patient/A99003699ED87C8E048213DF8058D1D9DF0ED8C1"
+        },
+        "effectiveDateTime": "2023-10-27T10:30:00+08:00",
+        "valueQuantity":
+        {
+            "value": 120,
+            "unit": "mmHg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mm[Hg]"
+        }
+    },
+    {
+        "resourceType": "Procedure",
+        "status": "completed",
+        "code":
+        {
+            "coding":
+            [
+                {
+                    "system": "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw",
+                    "code": "0016070",
+                    "display": "開放性腦室至鼻咽繞道術，使用自體組織替代物"
+                }
+            ],
+            "text": "開放性腦室至鼻咽繞道術，使用自體組織替代物"
+        },
+        "subject":
+        {
+            "reference": "Patient/Pat-test"
+        },
+        "performedDateTime": "2023-11-10T14:00:00Z",
+        "performer":
+        [
+            {
+                "actor":
+                {
+                    "reference": "Practitioner/pra-pi-id"
+                },
+                "onBehalfOf":
+                {
+                    "reference": "Organization/356A192B7913B04C54574D18C28D46E6395428AB"
+                }
+            }
+        ]
+    },
+    {
+        "resourceType": "Patient",
+        "id": "Pat-test",
+        "identifier":
+        [
+            {
+                "value": "A123456789"
+            },
+            {
+                "system": "https://build.fhir.org/ig/HL7/fhir-mCODE-ig/",
+                "value": "Cancer Patient"
+            }
+        ],
+        "name":
+        [
+            {
+                "use": "official",
+                "text": "陳加玲",
+                "family": "Chen",
+                "given":
+                [
+                    "Chia Lin"
+                ]
+            }
+        ],
+        "telecom":
+        [
+            {
+                "system": "phone",
+                "value": "0911327999",
+                "use": "mobile",
+                "period":
+                {
+                    "start": "2022-07-31",
+                    "end": "2024-07-31"
+                }
+            }
+        ],
+        "address":
+        [
+            {
+                "text": "臺北市大同區大有里19鄰承德路三段52巷6弄210號2樓B室"
+            }
+        ],
+        "gender": "female",
+        "birthDate": "1974-04-04"
+    },
+    {
+        "resourceType": "Condition",
+        "clinicalStatus":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                    "code": "active"
+                }
+            ]
+        },
+        "code":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://hl7.org/fhir/sid/icd-10",
+                    "code": "I10",
+                    "display": "Essential (primary) hypertension"
+                }
+            ],
+            "text": "原發性高血壓"
+        },
+        "subject":
+        {
+            "reference": "Patient/Pat-test"
+        },
+        "recordedDate": "2024-01-10"
+    },
+    {
+        "resourceType": "Condition",
+        "clinicalStatus":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                    "code": "active"
+                }
+            ]
+        },
+        "code":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://hl7.org/fhir/sid/icd-10",
+                    "code": "E11.9",
+                    "display": "Type 2 diabetes mellitus without complications"
+                }
+            ],
+            "text": "第二型糖尿病"
+        },
+        "subject":
+        {
+            "reference": "Patient/Pat-test"
+        },
+        "recordedDate": "2025-01-10"
+    },
+    {
+        "resourceType": "Condition",
+        "clinicalStatus":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                    "code": "active"
+                }
+            ]
+        },
+        "code":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://hl7.org/fhir/sid/icd-10",
+                    "code": "E78.5",
+                    "display": "Hyperlipidemia, unspecified"
+                }
+            ],
+            "text": "高血脂症"
+        },
+        "subject":
+        {
+            "reference": "Patient/Pat-test"
+        },
+        "recordedDate": "2026-01-10"
+    },
+    {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "860974",
+                    "display": "Metformin hydrochloride 500 MG Oral Tablet"
+                }
+            ],
+            "text": "美托明 (Metformin) 500mg"
+        },
+        "subject":
+        {
+            "reference": "Patient/Pat-test"
+        },
+        "authoredOn": "2026-01-26",
+        "dosageInstruction":
+        [
+            {
+                "text": "每日兩次，隨餐服用",
+                "timing":
+                {
+                    "repeat":
+                    {
+                        "frequency": 2,
+                        "period": 1,
+                        "periodUnit": "d"
+                    }
+                },
+                "doseAndRate":
+                [
+                    {
+                        "doseQuantity":
+                        {
+                            "value": 1,
+                            "unit": "tablet",
+                            "system": "http://unitsofmeasure.org",
+                            "code": "{tablet}"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationReference":
+        {
+            "reference": "Medication/med-amlodipine-5mg"
+        },
+        "subject":
+        {
+            "reference": "Patient/Pat-test"
+        },
+        "authoredOn": "2025-01-26",
+        "dosageInstruction":
+        [
+            {
+                "text": "每日兩次，隨餐服用",
+                "timing":
+                {
+                    "repeat":
+                    {
+                        "frequency": 2,
+                        "period": 1,
+                        "periodUnit": "d"
+                    }
+                },
+                "doseAndRate":
+                [
+                    {
+                        "doseQuantity":
+                        {
+                            "value": 1,
+                            "unit": "tablet",
+                            "system": "http://unitsofmeasure.org",
+                            "code": "{tablet}"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "resourceType": "Medication",
+        "id": "med-amlodipine-5mg",
+        "meta":
+        {
+            "profile":
+            [
+                "http://hl7.org/fhir/StructureDefinition/Medication"
+            ]
+        },
+        "code":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "308136",
+                    "display": "Amlodipine 5 MG Oral Tablet"
+                }
+            ],
+            "text": "脈優 (Amlodipine) 5mg"
+        },
+        "form":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": "385055001",
+                    "display": "Oral tablet"
+                }
+            ]
+        },
+        "amount":
+        {
+            "numerator":
+            {
+                "value": 5,
+                "unit": "mg",
+                "system": "http://unitsofmeasure.org",
+                "code": "mg"
+            },
+            "denominator":
+            {
+                "value": 1,
+                "unit": "Tablet",
+                "system": "http://unitsofmeasure.org",
+                "code": "{Tablet}"
+            }
+        }
+    },
+    {
+        "resourceType": "Observation",
+        "status": "final",
+        "category":
+        [
+            {
+                "coding":
+                [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                        "code": "laboratory",
+                        "display": "Laboratory"
+                    }
+                ]
+            }
+        ],
+        "code":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://loinc.org",
+                    "code": "4548-4",
+                    "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+                }
+            ],
+            "text": "糖化血色素 (HbA1c)"
+        },
+        "subject":
+        {
+            "reference": "Patient/Pat-test"
+        },
+        "effectiveDateTime": "2026-01-26T14:00:00+08:00",
+        "valueQuantity":
+        {
+            "value": 7.2,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+        },
+        "referenceRange":
+        [
+            {
+                "high":
+                {
+                    "value": 6.0,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                },
+                "type":
+                {
+                    "text": "Normal Range"
+                }
+            }
+        ],
+        "interpretation":
+        [
+            {
+                "coding":
+                [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                        "code": "H",
+                        "display": "High"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "resourceType": "Consent",
+        "status": "active",
+        "scope":
+        {
+            "coding":
+            [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+                    "code": "research"
+                }
+            ]
+        },
+        "category":
+        [
+            {
+                "coding":
+                [
+                    {
+                        "system": "http://loinc.org",
+                        "code": "59284-0",
+                        "display": "Consent Document"
+                    }
+                ]
+            }
+        ],
+        "patient":
+        {
+            "reference": "Patient/Pat-test"
+        },
+        "dateTime": "2026-01-27T10:00:00+08:00",
+        "sourceAttachment":
+        {
+            "contentType": "application/pdf",
+            "url": "/consent/patient_001_v1.pdf",
+            "title": "主同意書"
+        }
+    },
+    {
+        "resourceType": "Group",
+        "id": "Group-Admin",
+        "type": "person",
+        "actual": true,
+        "name": "研究團隊_測試",
+        "managingEntity":
+        {
+            "reference": "Practitioner/pra-admin001"
+        },
+        "characteristic":
+        [
+            {
+                "code":
+                {
+                    "text": "研究團隊"
+                },
+                "valueReference":
+                {
+                    "reference": "ResearchStudy/IRB-2026-001"
+                },
+                "exclude": false
+            }
+        ],
+        "member":
+        [
+            {
+                "entity":
+                {
+                    "reference": "Practitioner/pra-pi-id"
+                }
+            }
+        ]
+    }
+]

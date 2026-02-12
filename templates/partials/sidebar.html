@@ -1,0 +1,70 @@
+{% block styles %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/sidebar.css') }}">
+
+{% endblock %}
+
+<!-- Sidebar 側邊欄 - 使用 Empire 樣式整合 -->
+<div id="layout-sidenav" class="layout-sidenav sidenav sidenav-vertical text-white">
+  <!-- 標誌區塊 -->
+  <div class="app-brand demo">
+    <a href="{{ url_for('pages.index_page') }}" class="app-brand-link flex items-center">
+      <i id="bi-activity-inSideBar" class="bi bi-activity"></i>
+      <span class="app-brand-text demo sidenav-text font-weight-normal ml-2">NHRI 數據平台</span>
+    </a>
+  </div>
+
+  <div class="sidenav-divider mt-0"></div>
+
+  <!-- 導覽選單 -->
+  <ul class="sidenav-inner py-1">
+
+    <li class="sidenav-item {% if request.path == url_for('pages.index_page') %}active{% endif %}">
+      <a href="{{ url_for('pages.index_page') }}" class="sidenav-link">
+        <i class="sidenav-icon feather icon-grid"></i>
+        <div>儀錶板</div>
+      </a>
+    </li>
+
+    <li class="sidenav-item {% if request.path == url_for('pages.caseManage') %}active{% endif %}">
+      <a href="{{ url_for('pages.caseManage') }}" class="sidenav-link">
+        <i class="sidenav-icon feather icon-users"></i>
+        <div>個案管理</div>
+      </a>
+    </li>
+
+    <li class="sidenav-item {% if request.path == url_for('pages.dataImport') %}active{% endif %}">
+      <a href="{{ url_for('pages.dataImport') }}" class="sidenav-link">
+        <i class="sidenav-icon bi bi-database"></i>
+        <div>數據匯入</div>
+      </a>
+    </li>
+
+    <li class="sidenav-item {% if request.path == url_for('pages.deviceManage') %}active{% endif %}">
+      <a href="{{ url_for('pages.deviceManage') }}" class="sidenav-link">
+        <i class="sidenav-icon feather icon-watch"></i>
+        <div>設備管理</div>
+      </a>
+    </li>
+
+    <li class="sidenav-item {% if request.path == url_for('pages.projectManage') %}active{% endif %}">
+      <a href="{{ url_for('pages.projectManage') }}" class="sidenav-link">
+        <i class="sidenav-icon feather icon-briefcase"></i>
+        <div>計畫管理</div>
+      </a>
+    </li>
+
+    <li class="sidenav-item {% if request.path == url_for('auth.settings') %}active{% endif %}">
+      <a href="{{ url_for('auth.settings') }}" class="sidenav-link">
+        <i class="sidenav-icon feather icon-settings"></i>
+        <div>系統設定</div>
+      </a>
+    </li>
+
+  </ul>
+</div>
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='assets/css/tailwindcss.css') }}"></script>
+<script src="{{ url_for('static', filename='Content/Scripts/sidebar.js') }}"></script>
+{% endblock %}

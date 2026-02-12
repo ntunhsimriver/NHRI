@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="material-style layout-fixed">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NHRI - 臨床研究數據平台{% endblock %}</title>
+
+    <!-- Empire 核心 CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/tailwindcss.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/bootstrap-material.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/shreerang-material.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/uikit.css') }}"> 
+
+    <!-- 你原本的其他樣式（如有衝突可逐步關閉測試） -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='Content/css/base.css') }}"> 
+    <!-- Icon Fonts -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/ionicons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/feather.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Content/font/bootstrap-icons.css') }}">
+    {% block styles %}
+
+
+    {% endblock %}
+</head>
+
+<body>
+    <!-- Pre-loader -->
+    <div class="page-loader">
+        <div class="bg-primary"></div>
+    </div>
+
+    <!-- [ Layout wrapper ] Start -->
+    <div class="layout-wrapper layout-2">
+        <div class="layout-inner">
+
+            <!-- [ Sidebar ] Start -->
+            {% include 'partials/sidebar.html' %}
+            <!-- [ Sidebar ] End -->
+
+            <!-- [ Layout container ] Start -->
+            <div class="layout-container">
+
+                <!-- [ Navbar ] Start -->
+                <nav class="layout-navbar navbar navbar-expand-lg align-items-lg-center bg-white container-p-x custom-height"
+                    id="layout-navbar">
+                    <a href="{{ url_for('pages.index_page') }}" class="navbar-brand app-brand demo d-lg-none py-0 mr-4">
+                        <!-- <span class="app-brand-logo demo">
+                            <img src="{{ url_for('static', filename='assets/img/logo-dark.png') }}" alt="Logo" class="img-fluid">
+                        </span> -->
+                        <span class="app-brand-text demo font-weight-normal ml-2">NHRI - 臨床研究數據平台</span>
+                    </a>
+
+
+                    <div class="flex h-16 items-center justify-between border-slate-200 z-10">
+                        <h1 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                            <span class="text-slate-400 font-normal">Project:</span>{{study_id}}
+                            <span class="text-sm font-normal text-slate-500 ml-2">({{study_name}})</span>
+                        </h1>
+                    </div>
+                    <div class="flex items-center gap-4 ml-auto">
+                        <a href="{{ url_for('pages.selectproject') }}" class="text-sm text-blue-600 hover:underline mr-2">
+                        切換計畫</a>
+                        <button class="relative rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                            <i class="bi bi-bell"></i>
+                            <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+                        </button>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <span class="text-sm font-medium text-slate-600">研究中心 A</span>
+                    </div>
+
+                </nav>
+                <!-- [ Navbar ] End -->
+
+                <!-- [ 主要內容區塊 ] Start -->
+                <div class="layout-content">
+                    <div class="container-fluid flex-grow-1 container-p-y">
+
+                        {% block header %}{% endblock %}
+                        {% block content %}{% endblock %}
+
+                    </div>
+
+                    <!-- Footer -->
+                    <nav class="layout-footer footer bg-white">
+                        <div
+                            class="container-fluid d-flex flex-wrap justify-content-between text-center container-p-x pb-3">
+                            <div class="pt-3">
+                                <span class="footer-text font-weight-semibold">&copy; {{ current_year }}</span>
+                            </div>
+                            <div>
+                                <a href="#" class="footer-link pt-3">關於我們</a>
+                                <a href="#" class="footer-link pt-3 ml-4">幫助</a>
+                                <a href="#" class="footer-link pt-3 ml-4">聯絡</a>
+                                <a href="#" class="footer-link pt-3 ml-4">條款</a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+                <!-- [ 主要內容區塊 ] End -->
+
+            </div>
+            <!-- [ Layout container ] End -->
+
+        </div>
+
+        <!-- 手機遮罩：點擊也會收合側欄 -->
+        <div class="layout-overlay layout-sidenav-toggle"></div>
+    </div>
+    <!-- [ Layout wrapper ] End -->
+
+    <!-- JS 資源（順序很重要） -->
+    <script src="{{ url_for('static', filename='assets/js/chart.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/jquery-4.0.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/libs/popper/popper.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/bootstrap.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='assets/js/layout-helpers.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/sidenav.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/material-ripple.js') }}"></script>
+
+
+    <!-- 初始化 Empire layout + 額外保險的伸縮事件 -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.layoutHelpers) {
+                window.layoutHelpers.init();
+            }
+
+            // 額外保險：任何 .layout-sidenav-toggle 被點擊時，切換側欄收合/展開
+            document.querySelectorAll('.layout-sidenav-toggle').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    if (window.layoutHelpers && typeof window.layoutHelpers.toggleCollapsed === 'function') {
+                        window.layoutHelpers.toggleCollapsed();
+                    }
+                });
+            });
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+{
+  "resourceType" : "ChargeItem",
+  "id" : "cha-LABM-Order",
+  "meta" : {
+    "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ChargeItemCMDorder"]
+  },
+  "text" : {
+    "status" : "generated",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>Generated Narrative: ChargeItem cha-LABM-Order</b></p><a name=\"cha-LABM-Order\"> </a><a name=\"hccha-LABM-Order\"> </a><a name=\"cha-LABM-Order-en-US\"> </a><p><b>identifier</b>: 30</p><p><b>status</b>: Billable</p><p><b>code</b>: <span title=\"Codes:\">0</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>reason</b>: <span title=\"Codes:{http://snomed.info/sct 107008}\">Fetal part of placenta</span></p><p><b>note</b>: 1</p></div>"
+  },
+  "identifier" : [{
+    "value" : "30"
+  }],
+  "status" : "billable",
+  "code" : {
+    "text" : "0"
+  },
+  "subject" : {
+    "reference" : "Patient/pat-CDM"
+  },
+  "reason" : [{
+    "coding" : [{
+      "system" : "http://snomed.info/sct",
+      "code" : "107008",
+      "display" : "Fetal part of placenta"
+    }]
+  }],
+  "note" : [{
+    "text" : "1"
+  }]
+}

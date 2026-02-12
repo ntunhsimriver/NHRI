@@ -1,0 +1,34 @@
+/* 系統管理員：紫色系 */
+.type-SUPER_ADMIN {
+    background-color: #f3e8ff; /* 淺紫底 */
+    color: #7e22ce;           /* 深紫字 */
+}
+
+/* PI (計畫主持人)：藍色系 */
+.type-PI {
+    background-color: #dbeafe; /* 淺藍底 */
+    color: #1d4ed8;           /* 深藍字 */
+}
+
+/* PI 助理 (研究助理)：藍色系 */
+.type-ASSISTANT {
+    /*background-color: #d1fae5; /* 圖片中的淺綠背景 (Mint) */
+    /*color: #065f46;           /* 對比鮮明的深綠文字 */
+    /*先把PI也改成藍色的*/
+    background-color: #dbeafe; /* 淺藍底 */
+    color: #1d4ed8;           /* 深藍字 */
+}
+
+.error-message {
+    color: #ef4444; /* Tailwind 的 red-500 */
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.success-message {
+    color: #10b981; /* Tailwind 的 emerald-500 */
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}

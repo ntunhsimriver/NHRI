@@ -1,0 +1,36 @@
+/* 先把 Bootstrap 的 active border 清掉 */
+.nav-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+}
+
+/* 再指定你要的藍色 */
+.nav-tabs .nav-link.active {
+  color: #2563eb;
+}
+
+button:focus {
+  outline: none;
+}
+
+.timeline-line::before {
+  content: "";            /* 必須有這行，偽元素才會出現 */
+  position: absolute;
+  left: 15px;             /* 往左偏移一點，包住灰色細線 */
+  top: 0;
+  bottom: 0;
+  width: 2px;             /* 這就是你想要的「第二條粗線」的寬度 */
+  background-color: #e2e8f0; /* 橘色 (可以根據 resource 動態給顏色) */
+  z-index: 0;
+}
+
+
+/* 分類顏色定義 */
+/* Lb: Laboratory (綠色) */
+.type-Lb { background-color: rgb(236, 252, 203); color: rgb(132, 204, 22); }
+
+/* Dx: Diagnosis (紅色) */
+.type-Dx { background-color: rgb(254, 226, 226); color: rgb(239, 68, 68); }
+
+/* Rx: Medication (藍色) */
+.type-Rx { background-color: rgb(224, 242, 254); color: rgb(14, 165, 233); }

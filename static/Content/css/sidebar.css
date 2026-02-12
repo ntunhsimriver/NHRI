@@ -1,0 +1,42 @@
+.sidenav-item.has-sub > .sidenav-menu {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .25s ease;
+}
+.sidenav-item.has-sub.open > .sidenav-menu {
+  max-height: 600px; /* 依實際高度調整 */
+}
+
+.sidenav-item > .sidenav-link {
+  margin: 0 1rem;
+}
+
+.sidenav-item.active > .sidenav-link {
+  background-color: #2563eb;
+  color: #fff;
+  border-radius: 8px;
+}
+
+.sidenav-item.active .sidenav-icon {
+  color: #fff;
+}
+
+
+a {
+  color: #ffffff;
+}
+
+.layout-sidenav {
+  background-color: rgb(15 23 42); /* slate-900 */
+  border-right: 1px solid #1e293b; /* slate-800 */
+
+}
+
+.app-brand-text {
+  font-size: 1.25rem; /* 約 20px */
+}
+
+#bi-activity-inSideBar{
+  color: #6CB6FF;
+  font-size: 2rem;
+}

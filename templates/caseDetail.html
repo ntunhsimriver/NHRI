@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}NHRI - 臨床研究數據平台{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/caseManage.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- <section class="welcome">
+  <h2>歡迎來到健康資料平台</h2>
+  <p>探索病人的健康事件與醫療資訊。</p>
+</section> -->
+
+<section>
+  
+    <div class="space-y-6 fade-in">
+      <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">個案管理清單</h2>
+          <p class="text-sm text-slate-500">管理所有受試者、同意書狀態與設備配發</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30">
+            <i class="bi bi-plus"></i> 新增個案
+          </button>
+          <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            <i class="bi bi-activity" ></i> 批次匯入
+          </button>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="relative flex-1">
+          <i class="bi bi-search absolute left-3 top-2 h-4 w-4 text-slate-400"></i>
+        <input type="text" placeholder="搜尋 Hash ID..." class="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+        <div class="flex gap-2">
+        <select class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 outline-none">
+        <option>所有狀態</option>
+        <option>Active</option>
+        <option>Withdrawn</option>
+        </select>
+        </div>
+        </div>
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        
+        <!-- 這個table要換掉 -->
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-3 font-medium">Hash ID</th>
+            <th class="px-6 py-3 font-medium">狀態</th>
+            <th class="px-6 py-3 font-medium">性別/年齡</th>
+            <th class="px-6 py-3 font-medium">配戴設備</th>
+            <th class="px-6 py-3 font-medium">資料完整度</th>
+            <th class="px-6 py-3 font-medium">最近訪視</th>
+            <th class="px-6 py-3 font-medium text-right">操作</th>
+          </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+
+            {% for item in data %}
+            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" onclick="goPatientDetail('{{ item.id }}')">
+              <td class="px-6 py-4 font-mono font-medium text-blue-600 group-hover:underline">{{ item.id }}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">ACTIVE</span>
+              </td>
+              <td class="px-6 py-4 text-slate-600">{{ item.gender}} / {{ item.Age}}</td>
+              <td class="px-6 py-4">
+                <span class="inline-block rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600">VivoWatch 5 (SN: 9928)</span>
+                </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <div class="h-1.5 w-20 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="h-full rounded-full bg-blue-500" style="width: 80%;">
+                    </div>
+                  </div>
+                  <span class="text-xs text-slate-400">80%</span>
+                </div>
+              </td>
+                <td class="px-6 py-4 text-slate-600">2024-01-05</td>
+                <td class="px-6 py-4 text-right">
+                <button class="text-slate-400 hover:text-blue-600">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        </div>
+
+
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='Scripts/d3js-7.9.0.js') }}">
+</script>
+<script>
+  
+</script>
+<script src="{{ url_for('static', filename='Content/Scripts/caseManage.js') }}">
+</script>
+{% endblock %}

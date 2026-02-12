@@ -1,0 +1,13 @@
+.error-message {
+    color: #ef4444; /* Tailwind 的 red-500 */
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.success-message {
+    color: #10b981; /* Tailwind 的 emerald-500 */
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
