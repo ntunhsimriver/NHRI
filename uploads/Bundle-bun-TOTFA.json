@@ -1,0 +1,507 @@
+{
+  "resourceType" : "Bundle",
+  "id" : "bun-TOTFA",
+  "meta" : {
+    "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/BundleTOTFA"]
+  },
+  "identifier" : {
+    "system" : "https://www.ghd.tw/cdm-fhir/",
+    "value" : "Bundle-TOTFA"
+  },
+  "type" : "document",
+  "timestamp" : "2024-07-04T00:00:00+08:00",
+  "entry" : [{
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Composition/com-TOTFA",
+    "resource" : {
+      "resourceType" : "Composition",
+      "id" : "com-TOTFA",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/CompositionTOTFA"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Composition_com-TOTFA\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Composition com-TOTFA</b></p><a name=\"com-TOTFA\"> </a><a name=\"hccom-TOTFA\"> </a><a name=\"com-TOTFA-en-US\"> </a><p><b>status</b>: Final</p><p><b>type</b>: <span title=\"Codes:{http://loinc.org 100441-5}\">Attending Outpatient Progress note</span></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFA.html\">Encounter: identifier = https://www.ghd.tw/cdm-fhir#1101100011; status = finished; class = 西醫其他專案 (案件分類#09); serviceType = 放射腫瘤科; period = 2023-05-01 00:00:00+0800 --&gt; 2023-08-01 00:00:00+0800</a></p><p><b>date</b>: 2024-06-05 00:00:00+0000</p><p><b>author</b>: <a href=\"Organization-org-TOTFAB.html\">Organization: identifier = example123</a></p><p><b>title</b>: 門診醫療申報檔案 TOTFA</p><p><b>custodian</b>: <a href=\"Organization-org-TOTFAB.html\">Organization: identifier = example123</a></p></div>"
+      },
+      "status" : "final",
+      "type" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "100441-5",
+          "display" : "Attending Outpatient Progress note"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-TOTFA"
+      },
+      "date" : "2024-06-05T00:00:00Z",
+      "author" : [{
+        "reference" : "Organization/org-TOTFAB"
+      }],
+      "title" : "門診醫療申報檔案 TOTFA",
+      "custodian" : {
+        "reference" : "Organization/org-TOTFAB"
+      },
+      "section" : [{
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "53242-4"
+          }]
+        },
+        "entry" : [{
+          "reference" : "ChargeItem/cha-CDM"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "29554-3"
+          }]
+        },
+        "entry" : [{
+          "reference" : "Procedure/pro-TOTFA"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "46018-8"
+          }]
+        },
+        "entry" : [{
+          "reference" : "Condition/con-TOTFA"
+        }]
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "46209-3"
+          }]
+        },
+        "entry" : [{
+          "reference" : "ChargeItem/cha-TOTFA-Order"
+        },
+        {
+          "reference" : "MedicationRequest/med-TOTFA-Order"
+        },
+        {
+          "reference" : "Observation/obs-TOTFA-Order"
+        },
+        {
+          "reference" : "Procedure/pro-TOTFA-Order"
+        }]
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Organization/org-TOTFAB",
+    "resource" : {
+      "resourceType" : "Organization",
+      "id" : "org-TOTFAB",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/OrganizationTOTFAB"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Organization_org-TOTFAB\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Organization org-TOTFAB</b></p><a name=\"org-TOTFAB\"> </a><a name=\"hcorg-TOTFAB\"> </a><a name=\"org-TOTFAB-en-US\"> </a><p><b>identifier</b>: example123</p><p><b>active</b>: true</p></div>"
+      },
+      "identifier" : [{
+        "value" : "example123"
+      }],
+      "active" : true
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Patient/pat-CDM",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-CDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/PatientCDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Patient_pat-CDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Patient pat-CDM</b></p><a name=\"pat-CDM\"> </a><a name=\"hcpat-CDM\"> </a><a name=\"pat-CDM-en-US\"> </a><p style=\"border: 1px #661aff solid; background-color: #e6e6ff; padding: 10px;\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</p><hr/></div>"
+      },
+      "identifier" : [{
+        "use" : "official",
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NNxxx"
+          }]
+        },
+        "system" : "http://www.moi.gov.tw",
+        "value" : "Z199999829"
+      }],
+      "name" : [{
+        "use" : "official",
+        "text" : "甄○康"
+      }],
+      "gender" : "female",
+      "birthDate" : "1985-01-02"
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Encounter/enc-TOTFA",
+    "resource" : {
+      "resourceType" : "Encounter",
+      "id" : "enc-TOTFA",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/EncounterTOTFA"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Encounter_enc-TOTFA\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Encounter enc-TOTFA</b></p><a name=\"enc-TOTFA\"> </a><a name=\"hcenc-TOTFA\"> </a><a name=\"enc-TOTFA-en-US\"> </a><p><b>identifier</b>: <code>https://www.ghd.tw/cdm-fhir</code>/1101100011</p><p><b>status</b>: Finished</p><p><b>class</b>: <a href=\"CodeSystem-CaseType.html#CaseType-09\">案件分類 09</a>: 西醫其他專案</p><p><b>serviceType</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/FuncType FB}\">FB</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>period</b>: 2023-05-01 00:00:00+0800 --&gt; 2023-08-01 00:00:00+0800</p></div>"
+      },
+      "identifier" : [{
+        "system" : "https://www.ghd.tw/cdm-fhir",
+        "value" : "1101100011"
+      }],
+      "status" : "finished",
+      "class" : {
+        "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/CaseType",
+        "code" : "09"
+      },
+      "serviceType" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/FuncType",
+          "code" : "FB",
+          "display" : "放射腫瘤科"
+        }],
+        "text" : "FB"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "period" : {
+        "start" : "2023-05-01T00:00:00+08:00",
+        "end" : "2023-08-01T00:00:00+08:00"
+      }
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/ChargeItem/cha-CDM",
+    "resource" : {
+      "resourceType" : "ChargeItem",
+      "id" : "cha-CDM",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ChargeItemCDM"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"ChargeItem_cha-CDM\"> </a><p class=\"res-header-id\"><b>Generated Narrative: ChargeItem cha-CDM</b></p><a name=\"cha-CDM\"> </a><a name=\"hccha-CDM\"> </a><a name=\"cha-CDM-en-US\"> </a><p><b>status</b>: Billable</p><p><b>code</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/DeclarationCategory 1}\">送核</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>occurrence</b>: 2024-01-25 00:00:00+0800</p><p><b>enteredDate</b>: 2024-01-25 00:00:00+0800</p></div>"
+      },
+      "status" : "billable",
+      "code" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/DeclarationCategory",
+          "code" : "1",
+          "display" : "送核"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "occurrenceDateTime" : "2024-01-25T00:00:00+08:00",
+      "enteredDate" : "2024-01-25T00:00:00+08:00"
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Procedure/pro-TOTFA",
+    "resource" : {
+      "resourceType" : "Procedure",
+      "id" : "pro-TOTFA",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ProcedureTOTFAB"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Procedure_pro-TOTFA\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Procedure pro-TOTFA</b></p><a name=\"pro-TOTFA\"> </a><a name=\"hcpro-TOTFA\"> </a><a name=\"pro-TOTFA-en-US\"> </a><p><b>status</b>: Completed</p><p><b>code</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw 0016070}\">0016070</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFA.html\">Encounter: identifier = https://www.ghd.tw/cdm-fhir#1101100011; status = finished; class = 西醫其他專案 (案件分類#09); serviceType = 放射腫瘤科; period = 2023-05-01 00:00:00+0800 --&gt; 2023-08-01 00:00:00+0800</a></p><p><b>note</b>: 特定治療項目代號(一)</p></div>"
+      },
+      "status" : "completed",
+      "code" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw",
+          "code" : "0016070"
+        }],
+        "text" : "0016070"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-TOTFA"
+      },
+      "note" : [{
+        "text" : "特定治療項目代號(一)"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Condition/con-TOTFA",
+    "resource" : {
+      "resourceType" : "Condition",
+      "id" : "con-TOTFA",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ConditionTOTFAB"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Condition_con-TOTFA\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Condition con-TOTFA</b></p><a name=\"con-TOTFA\"> </a><a name=\"hccon-TOTFA\"> </a><a name=\"con-TOTFA-en-US\"> </a><p><b>clinicalStatus</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/condition-clinical remission}\">Remission</span></p><p><b>verificationStatus</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/condition-ver-status confirmed}\">Confirmed</span></p><p><b>category</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/condition-category encounter-diagnosis}\">Encounter Diagnosis</span></p><p><b>code</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-cm-2023-tw A00}\">A00</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFA.html\">Encounter: identifier = https://www.ghd.tw/cdm-fhir#1101100011; status = finished; class = 西醫其他專案 (案件分類#09); serviceType = 放射腫瘤科; period = 2023-05-01 00:00:00+0800 --&gt; 2023-08-01 00:00:00+0800</a></p><p><b>note</b>: 主診斷代碼</p></div>"
+      },
+      "clinicalStatus" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/condition-clinical",
+          "code" : "remission"
+        }]
+      },
+      "verificationStatus" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code" : "confirmed"
+        }]
+      },
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code" : "encounter-diagnosis"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-cm-2023-tw",
+          "code" : "A00"
+        }],
+        "text" : "A00"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-TOTFA"
+      },
+      "note" : [{
+        "text" : "主診斷代碼"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/ChargeItem/cha-TOTFA-Order",
+    "resource" : {
+      "resourceType" : "ChargeItem",
+      "id" : "cha-TOTFA-Order",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ChargeItemCMDorder"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"ChargeItem_cha-TOTFA-Order\"> </a><p class=\"res-header-id\"><b>Generated Narrative: ChargeItem cha-TOTFA-Order</b></p><a name=\"cha-TOTFA-Order\"> </a><a name=\"hccha-TOTFA-Order\"> </a><a name=\"cha-TOTFA-Order-en-US\"> </a><p><b>identifier</b>: 30</p><p><b>status</b>: Billable</p><p><b>code</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType 2}\">診療明細</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>occurrence</b>: 2024-01-21 00:00:00+0800 --&gt; 2024-01-25 00:00:00+0800</p><p><b>bodysite</b>: <span title=\"Codes:{http://snomed.info/sct 107008}\">Fetal part of placenta</span></p><p><b>note</b>: 1</p></div>"
+      },
+      "identifier" : [{
+        "value" : "30"
+      }],
+      "status" : "billable",
+      "code" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType",
+          "code" : "2",
+          "display" : "診療明細"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "occurrencePeriod" : {
+        "start" : "2024-01-21T00:00:00+08:00",
+        "end" : "2024-01-25T00:00:00+08:00"
+      },
+      "bodysite" : [{
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "107008",
+          "display" : "Fetal part of placenta"
+        }]
+      }],
+      "note" : [{
+        "text" : "1"
+      }]
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/MedicationRequest/med-TOTFA-Order",
+    "resource" : {
+      "resourceType" : "MedicationRequest",
+      "id" : "med-TOTFA-Order",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/MedicationRequestCDMorder"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"MedicationRequest_med-TOTFA-Order\"> </a><p class=\"res-header-id\"><b>Generated Narrative: MedicationRequest med-TOTFA-Order</b></p><a name=\"med-TOTFA-Order\"> </a><a name=\"hcmed-TOTFA-Order\"> </a><a name=\"med-TOTFA-Order-en-US\"> </a><p><b>identifier</b>: 08</p><p><b>status</b>: Active</p><p><b>intent</b>: Order</p><p><b>category</b>: <span title=\"Codes:{http://terminology.hl7.org/CodeSystem/medicationrequest-category discharge}\">Discharge</span></p><p><b>medication</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-fda-tw 衛署藥輸字第025485號}\">阿立批挫</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>encounter</b>: <a href=\"Encounter-enc-TOTFA.html\">Encounter: identifier = https://www.ghd.tw/cdm-fhir#1101100011; status = finished; class = 西醫其他專案 (案件分類#09); serviceType = 放射腫瘤科; period = 2023-05-01 00:00:00+0800 --&gt; 2023-08-01 00:00:00+0800</a></p><p><b>note</b>: 1</p><blockquote><p><b>dosageInstruction</b></p><p><b>timing</b>: Code </p><p><b>site</b>: <span title=\"Codes:{http://snomed.info/sct 107008}\">Fetal part of placenta</span></p><p><b>route</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-path-tw PO}\">口服</span></p><h3>DoseAndRates</h3><table class=\"grid\"><tr><td style=\"display: none\">-</td><td><b>Dose[x]</b></td></tr><tr><td style=\"display: none\">*</td><td>0.5</td></tr></table></blockquote><blockquote><p><b>dispenseRequest</b></p><p><b>validityPeriod</b>: 2024-03-01 00:00:00+0800 --&gt; 2024-05-01 00:00:00+0800</p><p><b>quantity</b>: 30</p><h3>ExpectedSupplyDurations</h3><table class=\"grid\"><tr><td style=\"display: none\">-</td><td><b>Value</b></td></tr><tr><td style=\"display: none\">*</td><td>30</td></tr></table></blockquote></div>"
+      },
+      "identifier" : [{
+        "value" : "08"
+      }],
+      "status" : "active",
+      "intent" : "order",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+          "code" : "discharge"
+        }]
+      }],
+      "medicationCodeableConcept" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-fda-tw",
+          "code" : "衛署藥輸字第025485號",
+          "display" : "阿立批挫"
+        }],
+        "text" : "阿立批挫"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-TOTFA"
+      },
+      "note" : [{
+        "text" : "1"
+      }],
+      "dosageInstruction" : [{
+        "timing" : {
+          "code" : {
+            "coding" : [{
+              "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-frequency-nhi-tw",
+              "code" : "PC"
+            }],
+            "text" : "PC"
+          }
+        },
+        "site" : {
+          "coding" : [{
+            "system" : "http://snomed.info/sct",
+            "code" : "107008"
+          }]
+        },
+        "route" : {
+          "coding" : [{
+            "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/medication-path-tw",
+            "code" : "PO"
+          }]
+        },
+        "doseAndRate" : [{
+          "doseQuantity" : {
+            "value" : 0.5
+          }
+        }]
+      }],
+      "dispenseRequest" : {
+        "validityPeriod" : {
+          "start" : "2024-03-01T00:00:00+08:00",
+          "end" : "2024-05-01T00:00:00+08:00"
+        },
+        "quantity" : {
+          "value" : 30
+        },
+        "expectedSupplyDuration" : {
+          "value" : 30
+        }
+      }
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Observation/obs-TOTFA-Order",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-TOTFA-Order",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ObservationCDMorder"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Observation_obs-TOTFA-Order\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Observation obs-TOTFA-Order</b></p><a name=\"obs-TOTFA-Order\"> </a><a name=\"hcobs-TOTFA-Order\"> </a><a name=\"obs-TOTFA-Order-en-US\"> </a><p><b>identifier</b>: 30</p><p><b>status</b>: Final</p><p><b>category</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType 2}\">診療明細</span></p><p><b>code</b>: <span title=\"Codes:{https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw 0016070}\">0016070</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>effective</b>: 2024-03-01 00:00:00+0800 --&gt; 2024-05-01 00:00:00+0800</p><p><b>value</b>: 15.1 mg/dL</p><p><b>note</b>: 0</p><p><b>bodySite</b>: <span title=\"Codes:{http://snomed.info/sct 107008}\">Fetal part of placenta</span></p></div>"
+      },
+      "identifier" : [{
+        "value" : "30"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType",
+          "code" : "2"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/icd-10-pcs-2023-tw",
+          "code" : "0016070"
+        }],
+        "text" : "0016070"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "effectivePeriod" : {
+        "start" : "2024-03-01T00:00:00+08:00",
+        "end" : "2024-05-01T00:00:00+08:00"
+      },
+      "valueQuantity" : {
+        "value" : 15.1,
+        "unit" : "mg/dL"
+      },
+      "note" : [{
+        "text" : "0"
+      }],
+      "bodySite" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "107008"
+        }]
+      }
+    }
+  },
+  {
+    "fullUrl" : "https://www.ghd.tw/cdm-fhir/Procedure/pro-TOTFA-Order",
+    "resource" : {
+      "resourceType" : "Procedure",
+      "id" : "pro-TOTFA-Order",
+      "meta" : {
+        "profile" : ["https://www.ghd.tw/cdm-fhir/StructureDefinition/ProcedureCDMorder"]
+      },
+      "text" : {
+        "status" : "generated",
+        "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"Procedure_pro-TOTFA-Order\"> </a><p class=\"res-header-id\"><b>Generated Narrative: Procedure pro-TOTFA-Order</b></p><a name=\"pro-TOTFA-Order\"> </a><a name=\"hcpro-TOTFA-Order\"> </a><a name=\"pro-TOTFA-Order-en-US\"> </a><p><b>identifier</b>: 30</p><p><b>status</b>: Completed</p><p><b>category</b>: <span title=\"Codes:{https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType 2}\">診療明細</span></p><p><b>code</b>: <span title=\"Codes:\">無資料</span></p><p><b>subject</b>: <a href=\"Patient-pat-CDM.html\">甄○康(official) Female, DoB: 1985-01-02 ( National Person Identifier where the xxx is the ISO table 3166 3-character (alphabetic) country code\u00a0(use:\u00a0official,\u00a0))</a></p><p><b>performed</b>: 2024-03-01 00:00:00+0800 --&gt; 2024-05-01 00:00:00+0800</p><p><b>note</b>: 0</p></div>"
+      },
+      "identifier" : [{
+        "value" : "30"
+      }],
+      "status" : "completed",
+      "category" : {
+        "coding" : [{
+          "system" : "https://www.ghd.tw/cdm-fhir/CodeSystem/OrderType",
+          "code" : "2"
+        }]
+      },
+      "code" : {
+        "text" : "無資料"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-CDM"
+      },
+      "performedPeriod" : {
+        "start" : "2024-03-01T00:00:00+08:00",
+        "end" : "2024-05-01T00:00:00+08:00"
+      },
+      "note" : [{
+        "text" : "0"
+      }]
+    }
+  }]
+}
