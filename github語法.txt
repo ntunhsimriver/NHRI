@@ -1,9 +1,0 @@
-# Github
-
-https://github.com/ntunhsimriver/NHRI.git
-
-### 在另一台電腦「第一次下載」 (Clone)
-git clone https://github.com/ntunhsimriver/NHRI.git
-
-### 在原本的電腦「獲取最新版本」 (Pull)
-git pull origin main

@@ -119,6 +119,21 @@ def projectManage():
     data = fhir.get_Project(session['fhir_practitioner_id'])    
     return render_template('projectManage.html', data=data, script_path=url_for('static', filename='Content/Scripts/projectManage.js'))
 
+@bp.route('/api/addProject', methods=['POST'])
+def api_addProject():
+    data = request.get_json()
+
+    # res = fhir.addDevice_FHIR(data)
+    # 進土撥鼠的專案
+    # data_in = {'ProjectGroup': 'THBC_NHRI', 'Project': 'Device', 'data': [data]}
+    # headers_Groundhog = {'WebUsername':'admin@gmail.com', 'WebUserpassword':'aB12345678!'} 
+    # response = requests.post(cfg.Trans_FHIR, headers=headers_Groundhog, json=data_in, verify=False)
+    # json_fhir = json.loads(str(response.text))
+    # response_FHIR = requests.post(cfg.FHIR_SERVER_URL, json=json_fhir, verify=False)
+    if data:
+        return jsonify({'success': True, 'message': '已新增成功'})
+    else:
+        return jsonify({'success': False, 'message': '新增失敗'})
 
 # @bp.route('/crossData')
 # def crossData_page():
