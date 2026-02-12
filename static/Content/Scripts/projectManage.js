@@ -28,7 +28,7 @@ var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModaladdProject);
 
 
 // 當 Modal 關閉時自動重置表單
-document.getElementById('Modal_addUser').addEventListener('hidden.bs.modal', function () {
+document.getElementById('Modal_addProject').addEventListener('hidden.bs.modal', function () {
     form.reset();
     msg.textContent = '';
     msg.className = 'message';
@@ -42,35 +42,40 @@ const msg = document.getElementById('message');
 form.addEventListener('submit', async function (e) {
     e.preventDefault();
     
-    const full_name = document.getElementById('newUser_name').value;
-    const email = document.getElementById('newUser_email').value;
-    const organization = document.getElementById('newUser_org').value;
-    const fhir_practitioner_id = document.getElementById('newUser_PraId').value;
-    const role = document.getElementById('newUser_role').value;
+    const id = document.getElementById('new_id').value;
+    const name = document.getElementById('new_name').value;
+    const PraId = document.getElementById('new_PraId').value;
+    const checkboxes = document.querySelectorAll('input[name="new_dataType"]:checked');
+    // const role = document.getElementById('newUser_role').value;
 
-    // 清除前一次樣式
-    msg.classList.remove('error-message', 'success-message');
-    if (!full_name || !email) {
-        msg.textContent = '請填寫帳號與密碼！';
-        msg.classList.add('error-message');
-        return;
-    }
+	const selectedValues = Array.from(checkboxes).map(cb => cb.value);
 
-    const response = await fetch('/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name, email, organization, role, fhir_practitioner_id })
-    });
+	// 3. 現在你可以看到具體的結果了
+	alert("選中的值有: " + selectedValues.join(", "));
 
-    const result = await response.json();
-    if (result.success) {
-        msg.textContent = result.message;
-        msg.classList.add('success-message');
-        setTimeout(() => {
-            location.reload();
-        }, 500);
-    } else {
-        msg.textContent = result.message;
-        msg.classList.add('error-message');
-    }
+    // // 清除前一次樣式
+    // msg.classList.remove('error-message', 'success-message');
+    // if (!full_name || !email) {
+    //     msg.textContent = '請填寫帳號與密碼！';
+    //     msg.classList.add('error-message');
+    //     return;
+    // }
+
+    // const response = await fetch('/register', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ full_name, email, organization, role, fhir_practitioner_id })
+    // });
+
+    // const result = await response.json();
+    // if (result.success) {
+    //     msg.textContent = result.message;
+    //     msg.classList.add('success-message');
+    //     setTimeout(() => {
+    //         location.reload();
+    //     }, 500);
+    // } else {
+    //     msg.textContent = result.message;
+    //     msg.classList.add('error-message');
+    // }
 });
