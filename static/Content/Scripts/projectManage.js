@@ -42,40 +42,33 @@ const msg = document.getElementById('message');
 form.addEventListener('submit', async function (e) {
     e.preventDefault();
     
-    const id = document.getElementById('new_id').value;
-    const name = document.getElementById('new_name').value;
-    const PraId = document.getElementById('new_PraId').value;
+    const ProjectId = document.getElementById('new_id').value;
+    const ProjectName = document.getElementById('new_name').value;
+    const ProjectStatus = document.getElementById('new_status').value;
     const checkboxes = document.querySelectorAll('input[name="new_dataType"]:checked');
     // const role = document.getElementById('newUser_role').value;
 
-	const selectedValues = Array.from(checkboxes).map(cb => cb.value);
+	const dataType = Array.from(checkboxes).map(cb => cb.value).join(',');
 
-	// 3. 現在你可以看到具體的結果了
-	alert("選中的值有: " + selectedValues.join(", "));
 
-    // // 清除前一次樣式
-    // msg.classList.remove('error-message', 'success-message');
-    // if (!full_name || !email) {
-    //     msg.textContent = '請填寫帳號與密碼！';
-    //     msg.classList.add('error-message');
-    //     return;
-    // }
+    // 清除前一次樣式
+    msg.classList.remove('error-message', 'success-message');
 
-    // const response = await fetch('/register', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ full_name, email, organization, role, fhir_practitioner_id })
-    // });
+    const response = await fetch('/api/addProject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ProjectId, ProjectName, ProjectStatus, dataType })
+    });
 
-    // const result = await response.json();
-    // if (result.success) {
-    //     msg.textContent = result.message;
-    //     msg.classList.add('success-message');
-    //     setTimeout(() => {
-    //         location.reload();
-    //     }, 500);
-    // } else {
-    //     msg.textContent = result.message;
-    //     msg.classList.add('error-message');
-    // }
+    const result = await response.json();
+    if (result.success) {
+        msg.textContent = result.message;
+        msg.classList.add('success-message');
+        setTimeout(() => {
+            location.reload();
+        }, 500);
+    } else {
+        msg.textContent = result.message;
+        msg.classList.add('error-message');
+    }
 });

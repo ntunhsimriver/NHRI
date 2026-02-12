@@ -101,11 +101,11 @@ function handleUpload() {
                 // 解析 Flask 回傳的 JSON
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
-                    console.log("上傳成功:", response.filename);
+                    console.log("上傳成功:", response.message);
                     // 順利上傳後，執行切換到步驟 3 的函式
                     goToStep3(); 
                 } else {
-                    alert("伺服器錯誤: " + response.error);
+                    alert("伺服器錯誤: " + response.message);
                 }
             } else {
                 alert("連線失敗，狀態碼: " + xhr.status);

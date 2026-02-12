@@ -92,9 +92,16 @@
         <label class="block text-sm font-medium text-slate-700" for="new_name">計畫名稱</label>
         <input type="text" id="new_name" class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" required>
 
-        <!-- 是否有已知的PraId，有才填，沒有就算了 -->
-        <label class="block text-sm font-medium text-slate-700" for="new_PraId">計畫主持人(PI)</label>
-        <input type="text" id="new_PraId" placeholder="Practitioner/Pra-test-id" class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+        <label class="block text-sm font-medium text-slate-700" for="new_status">角色權限</label>
+        <select id="new_status" class="mt-1 block w-full rounded-md !border !border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" required>
+          <option value="active">active</option>
+          <option value="draft">draft</option>
+          <option value="retired">retired</option>
+        </select>
+
+        <!-- 現暫時改成，誰登入的pi就是誰 -->
+        <!-- <label class="block text-sm font-medium text-slate-700" for="new_PraId">計畫主持人(PI)</label>
+        <input type="text" id="new_PraId" placeholder="Practitioner/Pra-test-id" class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"> -->
 
         
         <label class="block text-sm font-medium text-slate-700 mb-2">收集資料類型</label>

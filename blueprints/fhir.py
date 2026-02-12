@@ -9,6 +9,7 @@ import json
 import re
 from datetime import datetime, date, timedelta
 import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
+from models.project import Project
 from jsonpath_ng import jsonpath, parse
 from pydantic import create_model
 from collections import Counter
@@ -438,14 +439,41 @@ def upload_FHIR(data):
     return res
 
 
-def addProject_FHIR(data):
-    print(data)
-    # result = {}
-    # study_rules = FHIR.FhirMappging.query.filter_by(CatId=6, Del=0).all()
-    # for count, s in enumerate(study_rules):
-    #     if count == 0: # 0的時候，可以先把resourceType塞進去
-    #         FHIR_mappingJson(result, "resourceType", s.resource)
-    #     if data.get(s.name):
-    #         FHIR_mappingJson(result, s.fhirpath, data[s.name])
-    # Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)        
-    return data
+def addProject_FHIR(data, pra_id):
+
+    ProjectId = data.get('ProjectId')
+    # 1. 先查看看有沒有重複的編號
+    existing_project = Project.query.filter_by(irb_number=ProjectId).first()
+    
+    if existing_project:
+        # 這裡你可以選擇回傳錯誤，或是更新它
+        return {"success": False, "message": f"IRB編號 {ProjectId} 已存在"}
+
+    result = {}
+    data['PI'] = pra_id # FHIR也要補一下PI的id
+    study_rules = FHIR.FhirMappging.query.filter_by(CatId=2, Del=0).all()
+    for count, s in enumerate(study_rules):
+        if count == 0: # 0的時候，可以先把resourceType塞進去
+            FHIR_mappingJson(result, "resourceType", s.resource)
+        if data.get(s.name):
+            FHIR_mappingJson(result, s.fhirpath, data[s.name])
+
+    print(result)
+
+    ProjectName = data.get('ProjectName')
+    ProjectStatus = data.get('ProjectStatus')
+    PI = pra_id
+    dataType = data.get('dataType')
+    fhir_study_id = 'ResearchStudy/' + ProjectId
+
+
+    new_projecy = Project(irb_number = ProjectId, name = ProjectName, pi_id = pra_id, fhir_study_id = fhir_study_id, status = ProjectStatus, dataType = dataType)
+    db.session.add(new_projecy)
+    db.session.commit()
+
+    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)    
+    print(Response)
+    if Response.ok:
+        return {'success': True, 'message': '已新增成功'}
+    else:
+        return {"success": False, "message": result.text}

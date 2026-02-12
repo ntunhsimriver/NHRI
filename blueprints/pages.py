@@ -123,17 +123,15 @@ def projectManage():
 def api_addProject():
     data = request.get_json()
 
-    res = fhir.addProject_FHIR(data)
+
+    res = fhir.addProject_FHIR(data, session['fhir_practitioner_id'])
     # 進土撥鼠的專案
     # data_in = {'ProjectGroup': 'THBC_NHRI', 'Project': 'Device', 'data': [data]}
     # headers_Groundhog = {'WebUsername':'admin@gmail.com', 'WebUserpassword':'aB12345678!'} 
     # response = requests.post(cfg.Trans_FHIR, headers=headers_Groundhog, json=data_in, verify=False)
     # json_fhir = json.loads(str(response.text))
     # response_FHIR = requests.post(cfg.FHIR_SERVER_URL, json=json_fhir, verify=False)
-    if data:
-        return jsonify({'success': True, 'message': '已新增成功'})
-    else:
-        return jsonify({'success': False, 'message': '新增失敗'})
+    return jsonify(res)
 
 # @bp.route('/crossData')
 # def crossData_page():
@@ -161,7 +159,7 @@ def api_uploadFHIR():
         result = fhir.upload_FHIR(data) # 直接把檔案轉成 Python 字典
         
         if result.ok:
-            return jsonify({"success": True, "filename": file.filename})
+            return jsonify({"success": True, "message": file.filename})
         else:
-            return jsonify({"success": False, "error": result.text})
-    return jsonify({"success": False, "error": "沒收到檔案"})
+            return jsonify({"success": False, "message": result.text})
+    return jsonify({"success": False, "message": "沒收到檔案"})
