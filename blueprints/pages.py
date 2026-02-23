@@ -4,6 +4,8 @@ from config import BaseConfig as cfg  # 讀 config
 import requests
 import json
 import os
+import sys
+import traceback
 
 bp = Blueprint("pages", __name__)
 
@@ -25,9 +27,20 @@ def selectproject():
 
     session.pop('study_id', None)
     session.pop('study_name', None)
-    data = fhir.get_Project(session['fhir_practitioner_id'])
-    return render_template('selectproject.html', data=data, script_path=url_for('static', filename='Content/Scripts/selectproject.js'))
-
+    try:
+        data = fhir.get_Project(session['fhir_practitioner_id'])
+        return render_template('selectproject.html', data=data, script_path=url_for('static', filename='Content/Scripts/selectproject.js'))
+    except Exception as e:
+        # 取得詳細的錯誤追蹤（Traceback）
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        detailed_error = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        
+        # 將錯誤印在終端機方便排錯
+        print("".join(detailed_error))
+        
+        # 將錯誤訊息傳給前端模板
+        # 在開發階段，建議直接顯示 e，正式上線再改回模糊訊息
+        return render_template('error_page.html', message=f"錯誤原因：{str(e)}"), 503
 @bp.route('/index')
 def index_page():
     if 'username' not in session:
@@ -114,8 +127,8 @@ def api_addDevice():
 def projectManage():
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
-    elif 'study_id' not in session:
-        return redirect(url_for('pages.selectproject'))
+    # elif 'study_id' not in session:
+    #     return redirect(url_for('pages.selectproject'))
     data = fhir.get_Project(session['fhir_practitioner_id'])    
     return render_template('projectManage.html', data=data, script_path=url_for('static', filename='Content/Scripts/projectManage.js'))
 
@@ -143,6 +156,7 @@ def api_addProject():
 @bp.route('/api/uploadFHIR', methods=['POST'])
 def api_uploadFHIR():
     file = request.files.get('file')
+    print(file)
     if file:
         # 1. 定義上傳路徑
         upload_dir = "./uploads"

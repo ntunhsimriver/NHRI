@@ -431,11 +431,13 @@ def upload_FHIR(data):
 
     getFHIR = FHIRData_Handle(data, 1, 0)
     getFirstInfo = getFHIR[0] # 取第一個就可以知道最外層的，要先確認他到底是什麼Resource
-
+    print(getFHIR)
     if getFirstInfo.type == "transaction":
         res = post_FHIR_api(data, "") # transaction可以直接上傳
     else:
-        res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
+        for fhir in getFHIR:
+            print(fhir.BundleResouce)
+        # res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
     return res
 
 
@@ -466,14 +468,14 @@ def addProject_FHIR(data, pra_id):
     dataType = data.get('dataType')
     fhir_study_id = 'ResearchStudy/' + ProjectId
 
-
-    new_projecy = Project(irb_number = ProjectId, name = ProjectName, pi_id = pra_id, fhir_study_id = fhir_study_id, status = ProjectStatus, dataType = dataType)
-    db.session.add(new_projecy)
-    db.session.commit()
-
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)    
-    print(Response)
+    print(Response.text)
     if Response.ok:
+        # 確定進fhir server再進資料庫
+        new_projecy = Project(irb_number = ProjectId, name = ProjectName, pi_id = pra_id, fhir_study_id = fhir_study_id, status = ProjectStatus, dataType = dataType)
+        db.session.add(new_projecy)
+        db.session.commit()
         return {'success': True, 'message': '已新增成功'}
     else:
+        print(result)
         return {"success": False, "message": result.text}
