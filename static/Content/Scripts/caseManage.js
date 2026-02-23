@@ -76,7 +76,6 @@ form.addEventListener('submit', async function (e) {
 });
 
 
-
 document.addEventListener('DOMContentLoaded', function() {
     const statusSelect = document.getElementById('statusSelect');
     const caseRows = document.querySelectorAll('.case-row');

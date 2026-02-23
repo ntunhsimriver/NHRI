@@ -87,42 +87,43 @@ function handleUpload() {
     // 2. 建立 FormData 物件（這是 AJAX 傳檔案的關鍵）
     const formData = new FormData();
     formData.append('file', file); // 'file' 要對應 Flask 裡的 request.files['file']
+    formData.append('fileType', fileType);  // 把fileType也一起傳到後端
 
     // 3. 建立傳統的 AJAX 請求 (XMLHttpRequest)
     const xhr = new XMLHttpRequest();
 
-    if (fileType === 'FHIR'){
-        // 設定請求目標
-        xhr.open('POST', '/api/uploadFHIR', true);
 
-        // 監聽回傳結果
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                // 解析 Flask 回傳的 JSON
-                const response = JSON.parse(xhr.responseText);
-                if (response.success) {
-                    console.log("上傳成功:", response.message);
-                    // 順利上傳後，執行切換到步驟 3 的函式
-                    goToStep3(); 
-                } else {
-                    alert("伺服器錯誤: " + response.message);
-                }
+    // 設定請求目標
+    xhr.open('POST', '/api/uploadFHIR', true);
+
+    // 監聽回傳結果
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // 解析 Flask 回傳的 JSON
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                console.log("上傳成功:", response.message);
+                // 順利上傳後，執行切換到步驟 3 的函式
+                goToStep3(); 
             } else {
-                alert("連線失敗，狀態碼: " + xhr.status);
+                alert("伺服器錯誤: " + response.message);
             }
-        };
+        } else {
+            alert("連線失敗，狀態碼: " + xhr.status);
+        }
+    };
 
-        // (選填) 如果你以後想做進度條，就是在這監聽
-        xhr.upload.onprogress = function (e) {
-            if (e.lengthComputable) {
-                const percent = (e.loaded / e.total) * 100;
-                console.log("目前進度: " + Math.round(percent) + "%");
-            }
-        };
+    // (選填) 如果你以後想做進度條，就是在這監聽
+    xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+            const percent = (e.loaded / e.total) * 100;
+            console.log("目前進度: " + Math.round(percent) + "%");
+        }
+    };
 
-        // 4. 正式發送資料
-        xhr.send(formData);
-    }
+    // 4. 正式發送資料
+    xhr.send(formData);
+    
     
 }
 

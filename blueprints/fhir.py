@@ -169,25 +169,22 @@ def FHIR_listMapping(data, CatId): # 放要進去的值的json, 從資料庫裡�
             FHIR_mappingJson(result, s.fhirpath, data[s.name])
     return result
 
-def get_AllPatient(study_id): # 還不是新邏輯
+def get_AllPatient(study_id): 
     getResult = [] # 準備存處理好的Patient資料
-    print(FHIRSearch_Handle(10, [study_id]))
-    Response = read_FHIR_api("/ResearchSubject" + "?study=ResearchStudy/" + study_id)
-    
-    Bundle_entry = FHIR.FHIR_Bundle(Response)
 
-    for b in Bundle_entry.entries:
-        ResearchSubject_Info = FHIR.FHIR_ResearchSubject(b['resource'])
-        print(b['resource'])
+    study = FHIRData_Handle(FHIRSearch_Handle(10, [study_id]), 5, 1)
+    for s in study:
+        PatInfo = FHIRData_Handle(read_FHIR_api(s.pat_id), 9, 0)
 
-        Response = read_FHIR_api(ResearchSubject_Info.pat_id)
+        DeviceInfo = FHIRData_Handle(FHIRSearch_Handle(42, [s.pat_id]), 6, 1)
 
-        PatInfo = FHIR.FHIR_Patient(Response)
+        print(DeviceInfo)
         getResult.append({
-                "PatInfo": PatInfo,  # 這裡存的是整個study的資料，他是物件
-                "ResearchSubjectStatus": ResearchSubject_Info.status,    # 這裡存的是PI名字，他是字串
+                "PatInfo": PatInfo[0],  # 這裡存的是整個study的資料，他是物件
+                "DeviceInfo": DeviceInfo,  # 這裡存這個患者戴的設備
+                "ResearchSubjectStatus": s.status,    # 這裡存的是PI名字，他是字串
             })
-        print(PatInfo)
+
 
     return getResult
 

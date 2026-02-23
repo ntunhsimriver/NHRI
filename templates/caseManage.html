@@ -32,7 +32,7 @@
             data-bs-toggle="modal" 
             data-bs-for="connect" 
             data-bs-target="#Modal_addPatient">
-            
+
             <i class="bi bi-link-45deg"></i> 關聯個案
           </button>
 
@@ -65,7 +65,7 @@
           <tr>
             <th class="px-6 py-3 font-medium">Hash ID</th>
             <th class="px-6 py-3 font-medium">狀態</th>
-            <th class="px-6 py-3 font-medium">性別/年齡</th>
+            <th class="px-6 py-3 font-medium">性別</th>
             <th class="px-6 py-3 font-medium">配戴設備</th>
             <th class="px-6 py-3 font-medium">資料完整度</th>
             <th class="px-6 py-3 font-medium">最近訪視</th>
@@ -80,9 +80,13 @@
               <td class="px-6 py-4">
                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">{{ item.ResearchSubjectStatus}}</span>
               </td>
-              <td class="px-6 py-4 text-slate-600">{{ item.PatInfo.gender}} / {{ item.PatInfo.Age}}</td>
+              <td class="px-6 py-4 text-slate-600">{{ item.PatInfo.gender}}</td>
               <td class="px-6 py-4">
-                <span class="inline-block rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600">VivoWatch 5 (SN: 9928)</span>
+                <span class="inline-block rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600">
+                {% if item.DeviceInfo %}{{item.DeviceInfo[0].model}} (ID: {{item.DeviceInfo[0].id}})
+                {% else %} 尚未配戴設備
+                {% endif %}
+              </span>
                 </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">

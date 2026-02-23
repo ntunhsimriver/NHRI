@@ -168,24 +168,34 @@ def api_addProject():
 @bp.route('/api/uploadFHIR', methods=['POST'])
 def api_uploadFHIR():
     file = request.files.get('file')
+    file_type = request.form.get('fileType')  # 👈 這樣拿
+
+    print(file_type)
     print(file)
     if file:
         # 1. 定義上傳路徑
-        upload_dir = "./uploads"
+        upload_dir = "./uploads/" + file_type
         # 2. 檢查資料夾是否存在，不存在就建立 (核心修復)
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
             print(f"建立資料夾: {upload_dir}")
+
         # 3. 執行存檔
         save_path = os.path.join(upload_dir, file.filename)
         file.save(save_path)
         # 指針歸0
         file.seek(0)
-        data = json.load(file)
-        result = fhir.upload_FHIR(data) # 直接把檔案轉成 Python 字典
-        
-        if result.ok:
+
+        if file_type == 'FHIR':
+            data = json.load(file)
+            result = fhir.upload_FHIR(data) # 直接把檔案轉成 Python 字典
+            
+            if result.ok:
+                return jsonify({"success": True, "message": file.filename})
+            else:
+                return jsonify({"success": False, "message": result.text})
+        elif file_type == 'Excel':
             return jsonify({"success": True, "message": file.filename})
-        else:
-            return jsonify({"success": False, "message": result.text})
     return jsonify({"success": False, "message": "沒收到檔案"})
+
+
