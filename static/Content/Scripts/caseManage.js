@@ -1,3 +1,82 @@
+// 新增個案及關連個案
+const modalAddPatient = document.getElementById('Modal_addPatient');
+const msg = document.getElementById('message');
+modalAddPatient.addEventListener('show.bs.modal', async function (event) {
+
+    const button = event.relatedTarget;
+    // 取得 data-bs-for 的值
+    const mode = button.getAttribute('data-bs-for');
+
+
+
+    document.getElementById('hidden_addPatient').value = mode;
+
+    const title = document.getElementById('Modal_addPatient_title');
+    const submitBtn = modalAddPatient.querySelector('button[type="submit"]');
+
+    const fields_Gender_birth = document.getElementById('addPatient_Gender_birth');
+
+    if (mode === 'new') {
+    title.innerText = '新增個案';
+    submitBtn.innerText = '確認新增';
+    submitBtn.className = 'rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700';
+    fields_Gender_birth.classList.remove('hidden');
+
+    } else if (mode === 'connect') {
+    title.innerText = '關聯已存在個案(Patient)';
+    submitBtn.innerText = '立即關聯';
+    fields_Gender_birth.classList.add('hidden');
+
+    }
+
+});
+
+// 當 Modal 關閉時自動重置表單
+modalAddPatient.addEventListener('hidden.bs.modal', function () {
+    form.reset();
+    msg.textContent = '';
+    msg.className = 'message';
+});
+
+
+// 先宣告
+const form = document.getElementById('registerForm');
+
+form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    
+    const pat_id = document.getElementById('addPatId').value;
+    const gender = document.getElementById('addGender').value;
+    const birthDate = document.getElementById('addBirth').value;
+    const start = document.getElementById('addPeriodStart').value;
+    const type = document.getElementById('hidden_addPatient').value; // 存這個json到底是新增還是關聯
+
+    // const role = document.getElementById('newUser_role').value;
+
+    // 清除前一次樣式
+    msg.classList.remove('error-message', 'success-message');
+
+    const response = await fetch('/api/addPatient', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pat_id, gender, birthDate, start, type })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+        msg.textContent = result.message;
+        msg.classList.add('success-message');
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    } else {
+        msg.textContent = result.message;
+        msg.classList.add('error-message');
+    }
+});
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const statusSelect = document.getElementById('statusSelect');
     const caseRows = document.querySelectorAll('.case-row');

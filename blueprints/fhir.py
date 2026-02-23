@@ -159,6 +159,15 @@ def FHIR_mappingJson(data, path, value):
                 if key not in current:
                     current[key] = [] if next_part_is_index else {}
                 current = current[key]
+def FHIR_listMapping(data, CatId): # 放要進去的值的json, 從資料庫裡面取出來的json
+    result = {}
+    study_rules = FHIR.FhirMappging.query.filter_by(CatId=CatId, Del=0).all()
+    for count, s in enumerate(study_rules):
+        if count == 0: # 0的時候，可以先把resourceType塞進去
+            FHIR_mappingJson(result, "resourceType", s.resource)
+        if data.get(s.name):
+            FHIR_mappingJson(result, s.fhirpath, data[s.name])
+    return result
 
 def get_AllPatient(study_id): # 還不是新邏輯
     getResult = [] # 準備存處理好的Patient資料
@@ -416,13 +425,7 @@ def set_nested_value(dic, path, value):
     # ... (簡化版邏輯)
 
 def addDevice_FHIR(data):
-    result = {}
-    study_rules = FHIR.FhirMappging.query.filter_by(CatId=6, Del=0).all()
-    for count, s in enumerate(study_rules):
-        if count == 0: # 0的時候，可以先把resourceType塞進去
-            FHIR_mappingJson(result, "resourceType", s.resource)
-        if data.get(s.name):
-            FHIR_mappingJson(result, s.fhirpath, data[s.name])
+    result = FHIR_listMapping(data, 6)
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)        
     return Response
 
@@ -435,9 +438,9 @@ def upload_FHIR(data):
     if getFirstInfo.type == "transaction":
         res = post_FHIR_api(data, "") # transaction可以直接上傳
     else:
-        for fhir in getFHIR:
-            print(fhir.BundleResouce)
-        # res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
+        # for fhir in getFHIR:
+        #     print(fhir.BundleResouce)
+        res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
     return res
 
 
@@ -451,14 +454,8 @@ def addProject_FHIR(data, pra_id):
         # 這裡你可以選擇回傳錯誤，或是更新它
         return {"success": False, "message": f"IRB編號 {ProjectId} 已存在"}
 
-    result = {}
     data['PI'] = pra_id # FHIR也要補一下PI的id
-    study_rules = FHIR.FhirMappging.query.filter_by(CatId=2, Del=0).all()
-    for count, s in enumerate(study_rules):
-        if count == 0: # 0的時候，可以先把resourceType塞進去
-            FHIR_mappingJson(result, "resourceType", s.resource)
-        if data.get(s.name):
-            FHIR_mappingJson(result, s.fhirpath, data[s.name])
+    result = FHIR_listMapping(data, 2)
 
     print(result)
 
@@ -479,3 +476,32 @@ def addProject_FHIR(data, pra_id):
     else:
         print(result)
         return {"success": False, "message": result.text}
+
+
+
+def addPatient_FHIR(data, study_id):
+    type = data.get('type')
+
+    inputResSub = {
+        'pat_id': "Patient/" + data.get('pat_id'),
+        'start': data.get('start'),
+        'id': study_id + '-' + data.get('pat_id'),
+        'status': 'on-study',
+        'studyId': "ResearchStudy/" + study_id
+    }
+
+    inputPat = {
+        'id': data.get('pat_id'),
+        'birthDate': data.get('birthDate'),
+        'gender': data.get('gender'),
+    }
+    ResearchSubject_rules = FHIR.FhirMappging.query.filter_by(CatId=5, Del=0).all()
+
+    if type == 'new': # 如果是新增 就要補一個patient進去fhir server
+        result = FHIR_listMapping(inputPat, 9)
+        Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result) 
+
+    result = FHIR_listMapping(inputResSub, 5)
+    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
+
+    return Response

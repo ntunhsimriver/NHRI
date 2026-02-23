@@ -85,6 +85,18 @@ def case_detail(case_id, ResearchSubjectStatus):
     print(getObs14daysResult)
     return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllInfoResult=getAllInfoResult, PatInfo=PatInfo, lastUpdated=lastUpdated, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
 
+@bp.route('/api/addPatient', methods=['POST'])
+def api_addPatient():
+    data = request.get_json()
+
+    res = fhir.addPatient_FHIR(data, session['study_id'])
+    print(res)
+    if res.ok:
+        return jsonify({'success': True, 'message': '已新增成功'})
+    else:
+        return jsonify({'success': False, 'message': '新增失敗'})
+
+
 @bp.route('/dataImport')
 def dataImport():
     if 'username' not in session:
