@@ -188,28 +188,25 @@ def get_AllPatient(study_id):
 
     return getResult
 
-def get_Patient(PatID, study_id): # 同意書可以一起讀? # 還不是新邏輯
-    Response = read_FHIR_api("Patient/" + PatID)
-    PatInfo = FHIR.FHIR_Patient(Response)
+def get_Patient(PatID, study_id): # 同意書可以一起讀
+    Response = read_FHIR_api("Patient/" + PatID) # 先抓Patient資料
+    PatInfo = FHIRData_Handle(Response, 9, 0)[0] # 拿去處理
 
-    # 為了要抓這個人在這個專案底下的更新日期(只能把她當收案日期)，去抓他最早一筆紀錄的最後更新日期，且只抓一筆???
-    Response = read_FHIR_api("ResearchSubject?individual=Patient/" + PatID + "&study=ResearchStudy/" + study_id + "&_sort=_lastUpdated")
-    Bundle_entry = FHIR.FHIR_Bundle(Response)
-    lastUpdated = FHIR.FHIR_ResearchSubject(Bundle_entry.entries[0]['resource']).lastUpdated
-    lastUpdated = lastUpdated[:10]
+    # 為了以防他很多筆資料，就抓他最新的一筆(且同一個案件的同一個人底下，只抓最新的一筆) 其他不理她
+    getSubject = FHIRData_Handle(FHIRSearch_Handle(43, [PatID,study_id]), 5, 1)[0]
 
-    getConsent = []
-    Bundle_entry = FHIR.FHIR_Bundle(Response)
-    for b in Bundle_entry.entries:
-        Info = FHIR.FHIR_ResearchSubject(b['resource'])
-        # Response = read_FHIR_api(Info.consent)
-        ConsentId = Info.consent
-        if ConsentId:
-            getConsent.append(FHIR.FHIR_Consent(read_FHIR_api(ConsentId)))
-        print(ConsentId)
-    return PatInfo, lastUpdated, getConsent
+    FirstDate = getSubject.start
+    FirstDate = FirstDate[:10]
 
+    getConsent = FHIRData_Handle(FHIRSearch_Handle(49, [getSubject.id]), 10, 1) # 抓同意書內容
 
+    return PatInfo, FirstDate, getConsent
+
+def get_IndexProject(study_id):
+    getSubjectCount = FHIRData_Handle(FHIRSearch_Handle(9, [ study_id]), 1, 1)[0].SummaryCount
+
+    print("getSubjectCount"+str(getSubjectCount))
+    return getSubjectCount
 
 def get_Project(pi_id):
     getResult = [] # 準備存處理好的資料
@@ -328,7 +325,7 @@ def getAllInfo(PatID): # 還不是新邏輯
 
 
 
-def getObs14days(PatID): # 還不是新邏輯
+def getObs14days(PatID): 
     print(datetime.now())
     # 1. 自動計算日期
     # 今天日期 (例如: 2026-01-26)
@@ -435,8 +432,6 @@ def upload_FHIR(data):
     if getFirstInfo.type == "transaction":
         res = post_FHIR_api(data, "") # transaction可以直接上傳
     else:
-        # for fhir in getFHIR:
-        #     print(fhir.BundleResouce)
         res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
     return res
 
