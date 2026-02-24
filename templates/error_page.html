@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="material-style layout-fixed">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NHRI - 臨床研究數據平台{% endblock %}</title>
+
+    <!-- Empire 核心 CSS -->
+     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/bootstrap-material.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/shreerang-material.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/uikit.css') }}"> 
+
+    <!-- 你原本的其他樣式（如有衝突可逐步關閉測試） -->
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='Content/css/selectproject.css') }}"> 
+    <!-- Icon Fonts -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/ionicons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/feather.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Content/font/bootstrap-icons.css') }}">
+
+    {% block styles %}
+
+
+    {% endblock %}
+</head>
+
+<body>
+
+    <!-- Pre-loader -->
+    <div class="page-loader">
+        <div class="bg-primary"></div>
+    </div>
+
+    <section>
+
+    <h1>無法連線至伺服器</h1>
+    <p>很抱歉，系統暫時無法處理您的請求。{{ message }}</p>
+    
+    <div class="debug-info">
+        <strong>錯誤詳情：</strong><br>
+        {{ error_message or "Connection Refused (WinError 10061)" }}
+    </div>
+    </section>
+    
+
+    <!-- JS 資源（順序很重要） -->
+    <script src="{{ url_for('static', filename='assets/css/tailwindcss.css') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/jquery-4.0.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/libs/popper/popper.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/bootstrap.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='assets/js/layout-helpers.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/sidenav.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/material-ripple.js') }}"></script>
+
+
+    <!-- 初始化 Empire layout + 額外保險的伸縮事件 -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.layoutHelpers) {
+                window.layoutHelpers.init();
+            }
+
+            // 額外保險：任何 .layout-sidenav-toggle 被點擊時，切換側欄收合/展開
+            document.querySelectorAll('.layout-sidenav-toggle').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    if (window.layoutHelpers && typeof window.layoutHelpers.toggleCollapsed === 'function') {
+                        window.layoutHelpers.toggleCollapsed();
+                    }
+                });
+            });
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
