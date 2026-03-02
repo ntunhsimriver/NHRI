@@ -88,14 +88,23 @@ def case_detail(case_id, ResearchSubjectStatus):
     PatInfo = getPatInfo[0]
     FirstDate = getPatInfo[1] # 最後更新日期(當作收案日)
     getConsent = getPatInfo[2] # 抓同意書內容
+    getDeviceInfo = getPatInfo[3] # 抓所有設備的資訊
+    print(getDeviceInfo)
     # 直接去抓他全部的值
     getAllInfoResult = fhir.getAllInfo(case_id)
     # 這個是畫 生理數據 (Vitals) 的折線圖用的
-    getObs14daysResult = fhir.getObs14days(case_id)
+    getObs14daysResult = fhir.getObs14days(case_id, "")
 
 
     print(getObs14daysResult)
-    return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllInfoResult=getAllInfoResult, PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
+    return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllInfoResult=getAllInfoResult, PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
+
+@bp.route("/deviceDetail/<pat_id>/<device_id>")
+def deviceDetail(pat_id, device_id):
+
+    getObs14daysResult = fhir.getObs14days("", device_id)
+    return render_template("deviceDetail.html", getObs14daysResult=getObs14daysResult, script_path=url_for('static', filename='Content/Scripts/deviceDetail.js'))
+
 
 @bp.route('/api/addPatient', methods=['POST'])
 def api_addPatient():
@@ -184,11 +193,15 @@ def api_addProject():
 def api_uploadFHIR():
     file = request.files.get('file')
     file_type = request.form.get('fileType')  # 這樣拿
+    pat_id = request.form.get('pat_id')  # 這樣拿
+    study_id = session['study_id']
 
     print(file_type)
     print(file)
     if file:
         # 1. 定義上傳路徑
+        subfilename = file.filename.split('.')[1]
+        new_filename = study_id + '-' + pat_id + '.' + subfilename
         upload_dir = "./static/data/" + file_type
         # 2. 檢查資料夾是否存在，不存在就建立 (核心修復)
         if not os.path.exists(upload_dir):
@@ -196,11 +209,12 @@ def api_uploadFHIR():
             print(f"建立資料夾: {upload_dir}")
 
         # 3. 執行存檔
-        save_path = os.path.join(upload_dir, file.filename)
+        save_path = os.path.join(upload_dir, new_filename)
         file.save(save_path)
         # 指針歸0
         file.seek(0)
 
+        print(file_type)
         if file_type == 'FHIR':
             data = json.load(file)
             result = fhir.upload_FHIR(data) # 直接把檔案轉成 Python 字典
@@ -212,7 +226,12 @@ def api_uploadFHIR():
         elif file_type == 'Excel':
             return jsonify({"success": True, "message": file.filename})
         elif file_type == 'Consent':
-            return jsonify({"success": True, "message": "已收到同意書: "+file.filename})
+            
+            result = fhir.upload_Consent(study_id, pat_id, new_filename) # 直接把檔案轉成 Python 字典
+            if result.ok:
+                return jsonify({"success": True, "message": "已收到同意書: " + file.filename})
+            else:
+                return jsonify({"success": False, "message": result.text})
     return jsonify({"success": False, "message": "沒收到檔案"})
 
 

@@ -124,7 +124,7 @@
           <h2 class="text-2xl font-bold text-slate-900">{{PatInfo.id}}</h2>
           <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">{{ResearchSubjectStatus}}</span>
         </div>
-        <p class="text-sm text-slate-500">{{study_id}} | {{PatInfo.gender}}, {{PatInfo.Age}} 歲 | 最後訪視: 2024-01-05</p>
+        <p class="text-sm text-slate-500">{{study_id}} | {{PatInfo.gender}} | 最後訪視: 2024-01-05</p>
       </div>
       <div class="ml-auto flex gap-2">
         <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">編輯個案</button>
@@ -139,7 +139,7 @@
         </button>
 
         <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Vitals-tab" data-bs-toggle="tab" data-bs-target="#nav-Vitals" type="button" role="tab" aria-controls="nav-Vitals" aria-selected="true">
-          <i class="bi bi-heart"></i>生理數據 (Vitals)
+          <i class="bi bi-heart"></i>檢驗檢查 (Laboratory)
         </button>
 
         <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Clinical-tab" data-bs-toggle="tab" data-bs-target="#nav-Clinical" type="button" role="tab" aria-controls="nav-Clinical" aria-selected="true">
@@ -158,32 +158,8 @@
 
     <div class="tab-content" id="nav-tabContent">
       <div class="tab-pane fade show active" id="nav-Overview" role="tabpanel" aria-labelledby="nav-Overview-tab">
-        <div class="grid gap-6 md:grid-cols-2">
-          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="mb-4 flex items-center justify-between">
-              <h3 class="text-lg font-bold text-slate-900">配戴設備狀態</h3>
-              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">配對中</span>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                <i class="bi bi-watch" style="font-size: 2rem;"></i>
-              </div>
-              <div>
-                <p class="text-lg font-semibold text-slate-900">VivoWatch 5 (SN: 9928)</p>
-                <p class="text-sm text-slate-500">最後同步: 2024-05-15 14:30</p>
-              </div>
-            </div>
-            <div class="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
-              <div>
-                <span class="text-xs text-slate-500">電池電量</span>
-                <p class="font-mono text-lg font-medium text-emerald-600">85%</p>
-              </div>
-              <div>
-                <span class="text-xs text-slate-500">今日步數</span>
-                <p class="font-mono text-lg font-medium text-slate-900">4,520</p>
-              </div>
-            </div>
-          </div>
+        <div class="grid gap-6 md:grid-cols-1">
+
           <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <h3 class="mb-4 text-lg font-bold text-slate-900">基本資料</h3>
             <dl class="grid grid-cols-2 gap-x-4 gap-y-6">
@@ -195,14 +171,49 @@
                 <dt class="text-xs text-slate-500">聯絡電話</dt>
                 <dd class="text-sm font-medium text-slate-900">{{PatInfo.phone}}</dd>
               </div>
-              <div class="col-span-2">
+              <div>
+                <dt class="text-xs text-slate-500">婚姻狀況</dt>
+                <dd class="text-sm font-medium text-slate-900">{{PatInfo.maritalStatusCode}} ({{PatInfo.maritalStatusDisplay}})</dd>
+              </div>
+              <div>
                 <dt class="text-xs text-slate-500">居住地</dt>
                 <dd class="text-sm font-medium text-slate-900">{{PatInfo.address}}</dd>
               </div>
               <div>
                 <dt class="text-xs text-slate-500">收案日期</dt>
                 <dd class="text-sm font-medium text-slate-900">{{FirstDate}}</dd>
-              </div></dl></div></div>
+              </div>
+            </dl>
+          </div>
+
+          {% for item in getDeviceInfo %}
+          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:bg-slate-100 transition-colors cursor-pointer" onclick="window.location.href='{{ url_for('pages.deviceDetail', pat_id=PatInfo.id, device_id=item.id) }}'">
+            <div class="mb-4 flex items-center justify-between">
+              <h3 class="text-lg font-bold text-slate-900">配戴設備狀態</h3>
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">{{item.status}}</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <i class="bi bi-watch" style="font-size: 2rem;"></i>
+              </div>
+              <div>
+                <p class="text-lg font-semibold text-slate-900">{{item.model}} (ID: {{item.id}})</p>
+                <!-- <p class="text-sm text-slate-500">最後同步: 2024-05-15 14:30</p> -->
+              </div>
+            </div>
+<!--             <div class="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+              <div>
+                <span class="text-xs text-slate-500">電池電量</span>
+                <p class="font-mono text-lg font-medium text-emerald-600">85%</p>
+              </div>
+              <div>
+                <span class="text-xs text-slate-500">今日步數</span>
+                <p class="font-mono text-lg font-medium text-slate-900">4,520</p>
+              </div>
+            </div> -->
+          </div>
+          {% endfor %}
+        </div>
 
 
       </div>
@@ -252,7 +263,7 @@
             <h3 class="text-lg font-bold text-slate-900">已簽署文件</h3>
 
             <!-- 隱藏的上傳口 -->
-            <input type="file" id="fileInput" style="display: none;" accept="image/*, .pdf" onchange="handleFileSelect(event)">
+            <input type="file" id="fileInput" style="display: none;" accept=".pdf, image/*" onchange="handleFileSelect(event)">
             <button  type="button"
               onclick="document.getElementById('fileInput').click()"
               class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50">

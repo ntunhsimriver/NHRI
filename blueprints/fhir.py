@@ -33,7 +33,7 @@ def put_FHIR_api(id, FHIR): # 回傳完整
 
     return res
 
-def post_FHIR_api(FHIR, resource): # 回傳完整
+def post_FHIR_api(resource, FHIR): # 回傳完整
     URL = cfg.FHIR_SERVER_URL # 搜尋條件
     res = requests.post(URL+resource, json=FHIR, verify=False)
 
@@ -195,12 +195,14 @@ def get_Patient(PatID, study_id): # 同意書可以一起讀
     # 為了以防他很多筆資料，就抓他最新的一筆(且同一個案件的同一個人底下，只抓最新的一筆) 其他不理她
     getSubject = FHIRData_Handle(FHIRSearch_Handle(43, [PatID,study_id]), 5, 1)[0]
 
+    DeviceInfo = FHIRData_Handle(FHIRSearch_Handle(42, [PatID]), 6, 1) # 不知道後續會不會帶很多設備
+
     FirstDate = getSubject.start
     FirstDate = FirstDate[:10]
 
     getConsent = FHIRData_Handle(FHIRSearch_Handle(49, [getSubject.id]), 10, 1) # 抓同意書內容
 
-    return PatInfo, FirstDate, getConsent
+    return PatInfo, FirstDate, getConsent, DeviceInfo
 
 def get_IndexProject(study_id):
     getSubjectCount = FHIRData_Handle(FHIRSearch_Handle(9, [ study_id]), 1, 1)[0].SummaryCount
@@ -343,7 +345,7 @@ def getAllInfo(PatID): # 還不是新邏輯
 
 
 
-def getObs14days(PatID): 
+def getObs14days(PatID, DeviceID): 
     print(datetime.now())
     # 1. 自動計算日期
     # 今天日期 (例如: 2026-01-26)
@@ -362,13 +364,13 @@ def getObs14days(PatID):
 
     # 2. 組合 API URL (使用 ge 前綴代表 "大於等於") # 因為14天又有兩個資料，怕到時候資料會很多，先取1000筆，到時候再說
     target_codes = "85354-9,8480-6,8462-4,8867-4"
-    # api_url = f"/Observation?subject=Patient/{PatID}&code={target_codes}&date=ge{fourteen_days_ago}&_sort=date&_count=1000"
-    # Response = read_FHIR_api(api_url)
-    # Bundle_entry = FHIR.FHIR_Bundle(Response)
 
     # 這邊先抓出所有內容
-    rows = FHIRData_Handle(FHIRSearch_Handle(16, [PatID, target_codes, fourteen_days_ago, '1000']), 1, 1)
-
+    if PatID:
+        rows = FHIRData_Handle(FHIRSearch_Handle(16, [PatID, target_codes, fourteen_days_ago, '1000']), 1, 1)
+    elif DeviceID:
+        rows = FHIRData_Handle(FHIRSearch_Handle(55, [DeviceID, target_codes, fourteen_days_ago, '1000']), 1, 1)
+        
     sorted_dates = [ (today - timedelta(days=13-i)).date().isoformat() for i in range(14) ]
     storage = {d: {'SBP': [], 'DBP': [], 'HR': []} for d in sorted_dates}
     code_map = {'8480-6': 'SBP', '8462-4': 'DBP', '8867-4': 'HR'}
@@ -523,3 +525,24 @@ def getProjectManagePatient(study_id):
 
 
     return 
+
+def upload_Consent(study_id, pat_id, filename):
+
+    # 這邊因為Consent我綁的是ResearchSubject，所以要先去抓一下他的id
+    getSubject = FHIRData_Handle(FHIRSearch_Handle(43, [pat_id,study_id]), 5, 1)[0] 
+
+    data = {
+        "status": "",
+        "pat_id": "Patient/" + pat_id,
+        "subjectId": "ResearchSubject/" + getSubject.id,
+        "url": "/consent/" + filename,
+        "dateTime": datetime.now().strftime('%Y-%m-%d'),
+    }
+    result = FHIR_listMapping(data, 10)
+
+    print(result)
+
+    res = post_FHIR_api('Consent', result)
+    # Consent_rules = FHIR.FhirMappging.query.filter_by(CatId=5, Del=0).all()
+
+    return res

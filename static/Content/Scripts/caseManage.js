@@ -280,6 +280,7 @@ ModalConsent.addEventListener('hidden.bs.modal', function () {
 // 同意書上傳的按鈕
 function handleFileSelect(event) {
     const file = event.target.files[0]; // 取得第一個檔案
+    const pat_id = document.querySelector('h2').innerText.trim(); // 抓pat id
     if (file) {
         console.log("選取的檔案名稱:", file.name);
         console.log("檔案大小:", (file.size / 1024).toFixed(2), "KB");
@@ -289,7 +290,8 @@ function handleFileSelect(event) {
 
         const formData = new FormData();
         formData.append('file', file); // 'file' 要對應 Flask 裡的 request.files['file']
-        formData.append('fileType', 'consent');  // 把fileType也一起傳到後端
+        formData.append('fileType', 'Consent');  // 把fileType也一起傳到後端
+        formData.append('pat_id', pat_id);  // 把pat_id也一起傳到後端
 
         // 3. 建立傳統的 AJAX 請求 (XMLHttpRequest)
         const xhr = new XMLHttpRequest();
@@ -304,9 +306,8 @@ function handleFileSelect(event) {
                 // 解析 Flask 回傳的 JSON
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
-                    console.log("上傳成功:", response.message);
+                    alert("上傳成功:", response.message);
                     // 順利上傳後，執行切換到步驟 3 的函式
-                    goToStep3(); 
                 } else {
                     alert("伺服器錯誤: " + response.message);
                 }
