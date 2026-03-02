@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}NHRI - 臨床研究數據平台{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/caseManage.css') }}">
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 overflow-auto bg-slate-50 p-8">
+  <div class="space-y-6 fade-in h-full flex flex-col">
+    <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
+      <button class="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-100 transition-colors" onclick="window.location.href='{{ url_for('pages.caseManage') }}'";>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="m15 18-6-6 6-6"></path></svg>
+      </button>
+      <div>
+        <div class="flex items-center gap-3">
+          <h2 class="text-2xl font-bold text-slate-900">{{PatInfo.id}}</h2>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">{{ResearchSubjectStatus}}</span>
+        </div>
+        <p class="text-sm text-slate-500">{{study_id}} | {{PatInfo.gender}} | 最後訪視: 2024-01-05</p>
+      </div>
+    </div>
+
+    
+    </div>
+  </main>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  {% if getObs14daysResult %}
+
+  // 傳後端來的數值到js的檔案
+  const SERVER_DATA = {
+      sbp: {{ getObs14daysResult[0] | tojson  }},
+      dbp: {{ getObs14daysResult[1] | tojson  }},
+      hr: {{ getObs14daysResult[2] | tojson  }},
+      labels: {{ getObs14daysResult[3] | tojson }}
+  };
+
+  {% endif %}
+</script>
+<script src="{{ url_for('static', filename='Content/Scripts/caseManage.js') }}"></script>
+{% endblock %}
