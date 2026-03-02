@@ -49,13 +49,16 @@ def index_page():
         return redirect(url_for('pages.selectproject'))
     print(session['study_id'])
 
-    getProjectInfo = fhir.get_IndexProject(session['study_id'])
+    getProjectInfo_All = fhir.get_IndexProject(session['study_id'])
+    getProjectInfo = getProjectInfo_All[0]
+    getMonthProjectInfo = getProjectInfo_All[1]
 
     getDevice = fhir.getDevice()
     data = getDevice[0] # 所有device的內容
     TotalDev = getDevice[1] # 總設備術
     CountDev = getDevice[2] # 個別設備數
-    return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, script_path=url_for('static', filename='Content/Scripts/index.js'))
+
+    return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, script_path=url_for('static', filename='Content/Scripts/index.js'))
 
 @bp.route('/set_study_session/<study_id>/<study_name>') # 這個是為了先把study ID寄進去session裡面，這樣後續要抓資料比較好抓，不用再透過PI
 def set_study_session(study_id, study_name):
@@ -151,6 +154,9 @@ def projectManage():
     # elif 'study_id' not in session:
     #     return redirect(url_for('pages.selectproject'))
     data = fhir.get_Project(session['fhir_practitioner_id'])    
+
+    PatInfo = fhir.getProjectManagePatient(session['study_id'])
+
     return render_template('projectManage.html', data=data, script_path=url_for('static', filename='Content/Scripts/projectManage.js'))
 
 @bp.route('/api/addProject', methods=['POST'])
@@ -205,6 +211,8 @@ def api_uploadFHIR():
                 return jsonify({"success": False, "message": result.text})
         elif file_type == 'Excel':
             return jsonify({"success": True, "message": file.filename})
+        elif file_type == 'Consent':
+            return jsonify({"success": True, "message": "已收到同意書: "+file.filename})
     return jsonify({"success": False, "message": "沒收到檔案"})
 
 

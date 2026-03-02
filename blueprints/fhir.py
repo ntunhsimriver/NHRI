@@ -13,6 +13,7 @@ from models.project import Project
 from jsonpath_ng import jsonpath, parse
 from pydantic import create_model
 from collections import Counter
+from dateutil.relativedelta import relativedelta
 
 def register_fhir(app):
     fhir = FHIRClient()  # 從環境變數讀設定
@@ -177,9 +178,8 @@ def get_AllPatient(study_id):
         PatInfo = FHIRData_Handle(read_FHIR_api(s.pat_id), 9, 0)
 
         DeviceInfo = FHIRData_Handle(FHIRSearch_Handle(42, [s.pat_id]), 6, 1)
-
-        print(DeviceInfo)
         getResult.append({
+                "startDate": s.start,
                 "PatInfo": PatInfo[0],  # 這裡存的是整個study的資料，他是物件
                 "DeviceInfo": DeviceInfo,  # 這裡存這個患者戴的設備
                 "ResearchSubjectStatus": s.status,    # 這裡存的是PI名字，他是字串
@@ -206,7 +206,25 @@ def get_IndexProject(study_id):
     getSubjectCount = FHIRData_Handle(FHIRSearch_Handle(9, [ study_id]), 1, 1)[0].SummaryCount
 
     print("getSubjectCount"+str(getSubjectCount))
-    return getSubjectCount
+
+    # 開始抓這個月開始的前六個月，每個月的收案人數
+    current_month_start = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    months = []
+    months_data = []
+
+
+    for i in range(5, -1, -1):
+        # 計算該月的開始與結束日期
+        # start_date: 該月 1 號 (ge)
+        # end_date: 下個月 1 號 (lt)
+        start_date = (current_month_start - relativedelta(months=i)).strftime('%Y-%m-%d')
+        end_date = (current_month_start - relativedelta(months=i-1)).strftime('%Y-%m-%d')
+
+        months.append(start_date[:7])
+        months_data.append(FHIRData_Handle(FHIRSearch_Handle(50, [study_id, start_date, end_date]), 1, 1)[0].SummaryCount) # 這邊直接建查fhir時候要的格式
+    print(months_data)
+    return getSubjectCount, [months, months_data]
 
 def get_Project(pi_id):
     getResult = [] # 準備存處理好的資料
@@ -497,3 +515,11 @@ def addPatient_FHIR(data, study_id):
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
 
     return Response
+
+
+def getProjectManagePatient(study_id):
+
+    print(study_id)
+
+
+    return 

@@ -276,3 +276,55 @@ ModalConsent.addEventListener('hidden.bs.modal', function () {
 });
 
 
+
+// 同意書上傳的按鈕
+function handleFileSelect(event) {
+    const file = event.target.files[0]; // 取得第一個檔案
+    if (file) {
+        console.log("選取的檔案名稱:", file.name);
+        console.log("檔案大小:", (file.size / 1024).toFixed(2), "KB");
+        
+        // 這裡可以加入上傳到伺服器的邏輯 (例如使用 Fetch API)
+        alert("你已選取檔案：" + file.name);
+
+        const formData = new FormData();
+        formData.append('file', file); // 'file' 要對應 Flask 裡的 request.files['file']
+        formData.append('fileType', 'consent');  // 把fileType也一起傳到後端
+
+        // 3. 建立傳統的 AJAX 請求 (XMLHttpRequest)
+        const xhr = new XMLHttpRequest();
+
+
+        // 設定請求目標
+        xhr.open('POST', '/api/uploadFHIR', true);
+
+        // 監聽回傳結果
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // 解析 Flask 回傳的 JSON
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    console.log("上傳成功:", response.message);
+                    // 順利上傳後，執行切換到步驟 3 的函式
+                    goToStep3(); 
+                } else {
+                    alert("伺服器錯誤: " + response.message);
+                }
+            } else {
+                alert("連線失敗，狀態碼: " + xhr.status);
+            }
+        };
+
+        // (選填) 如果你以後想做進度條，就是在這監聽
+        xhr.upload.onprogress = function (e) {
+            if (e.lengthComputable) {
+                const percent = (e.loaded / e.total) * 100;
+                console.log("目前進度: " + Math.round(percent) + "%");
+            }
+        };
+
+        // 4. 正式發送資料
+        xhr.send(formData);
+        
+    }
+}
