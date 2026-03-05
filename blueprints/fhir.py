@@ -546,3 +546,11 @@ def upload_Consent(study_id, pat_id, filename):
     # Consent_rules = FHIR.FhirMappging.query.filter_by(CatId=5, Del=0).all()
 
     return res
+
+
+def get_DevicePatient(pat_id, study_id):
+
+    Response = read_FHIR_api("Patient/" + pat_id) # 先抓Patient資料
+    PatInfo = FHIRData_Handle(Response, 9, 0)[0] # 拿去處理
+    
+    return PatInfo

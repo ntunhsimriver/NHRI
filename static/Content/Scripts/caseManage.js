@@ -227,8 +227,8 @@ document.querySelectorAll('#nav-tab button').forEach(btn => {
         const tab = new bootstrap.Tab(btn);
         tab.show();
 
-        // 只要點到「生理數據」就觸發繪圖
-        if (btn.innerText.includes("生理數據")) {
+        // 只要點到「檢驗檢查」就觸發繪圖
+        if (btn.innerText.includes("檢驗檢查")) {
             // 使用 requestAnimationFrame 確保在 DOM 更新後才畫圖
             window.requestAnimationFrame(() => {
                 // --- 這裡就是你的外掛檢查邏輯 ---

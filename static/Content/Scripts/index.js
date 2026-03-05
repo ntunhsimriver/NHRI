@@ -1,6 +1,7 @@
 let myChart = null;
 
-
+const maxValue = Math.max(...SERVER_DATA.months_data);
+const minValue = Math.min(...SERVER_DATA.months_data);
 
 // 將原本的繪圖邏輯封裝成函式
 function drawChart() {
@@ -32,6 +33,7 @@ function drawChart() {
         data: data,
         options: {
         responsive: true,
+        maintainAspectRatio: false,
         interaction: {
           mode: 'nearest',   // 吸附最近的點
           axis: 'x',         // 只看 X 軸距離（Day）
@@ -65,8 +67,8 @@ function drawChart() {
               display: true,
               text: 'Value'
             },
-            suggestedMin: 50,
-            suggestedMax: 200
+            suggestedMin: 0,
+            suggestedMax: maxValue + 20
           }
         }
       }

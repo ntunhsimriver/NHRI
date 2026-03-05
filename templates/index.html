@@ -50,7 +50,7 @@
         </div>
         <div class="mt-4 flex items-baseline gap-2">
           <span class="text-3xl font-bold text-slate-900">{{CountDev['foundPat']}}/{{TotalDev}}</span>
-          <span class="text-xs font-medium text-emerald-600">使用率 {{CountDev['foundPat']/TotalDev*100}}%</span>
+          <span class="text-xs font-medium text-emerald-600">使用率 {{(CountDev['foundPat']/TotalDev*100) | round | int}}%</span>
         </div>
       </div>
 
