@@ -1,0 +1,13 @@
+.collapse:not(.show) {
+  display: none !important;
+}
+
+.collapsing {
+  height: 0;
+  overflow: hidden;
+  transition: height .35s ease;
+}
+
+.collapse.show {
+  display: block !important;
+}

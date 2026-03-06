@@ -3,7 +3,7 @@
 {% block title %}NHRI - 臨床研究數據平台{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/caseManage.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/deviceDetail.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -16,31 +16,39 @@
       <div>
         <div class="flex items-center gap-3">
           <h2 class="text-2xl font-bold text-slate-900">{{PatInfo.id}}</h2>
-          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800"></span>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">{{device_id}}</span>
         </div>
         <p class="text-sm text-slate-500">{{study_id}} | {{PatInfo.gender}} | 最後訪視: 2024-01-05</p>
       </div>
     </div>
 
     
+    <input type="hidden" id="hidden_device_id" value="{{ device_id }}">
+
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between cursor-pointer tw-collapse-toggle" id="vitalsToggle"
+             data-target="#collapseVitals" role="button">
+            <h3 class="text-lg font-bold text-slate-900" id="myChartText">
+                生理趨勢圖 (近14天)
+            </h3>
+            <span id="data-status" class="text-sm text-blue-500">數據載入中...</span>
+        </div>
+
+        <div class="tw-collapse hidden mt-4" id="collapseVitals">
+            <div id="chart-loading-spinner" class="text-center py-10">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-slate-500">正在從伺服器抓取量測紀錄...</p>
+            </div>
+            <div style="height: 300px; width: 100%;">
+                <canvas id="myChart-Vitals"></canvas>
+            </div>
+        </div>
     </div>
+
   </main>
 
 {% endblock %}
 
 {% block scripts %}
-<script>
-  {% if getObs14daysResult %}
-
-  // 傳後端來的數值到js的檔案
-  const SERVER_DATA = {
-      sbp: {{ getObs14daysResult[0] | tojson  }},
-      dbp: {{ getObs14daysResult[1] | tojson  }},
-      hr: {{ getObs14daysResult[2] | tojson  }},
-      labels: {{ getObs14daysResult[3] | tojson }}
-  };
-
-  {% endif %}
-</script>
-<script src="{{ url_for('static', filename='Content/Scripts/caseManage.js') }}"></script>
+<script src="{{ url_for('static', filename='Content/Scripts/deviceDetail.js') }}"></script>
 {% endblock %}

@@ -111,10 +111,10 @@
 
     <!-- JS 資源（順序很重要） -->
     <script src="{{ url_for('static', filename='assets/js/chart.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='assets/js/jquery-4.0.0.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='assets/libs/popper/popper.js') }}"></script>
-    <script src="{{ url_for('static', filename='assets/js/bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/bootstrap.bundle.min.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='assets/js/jquery-4.0.0.min.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='assets/libs/popper/popper.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='assets/js/bootstrap.js') }}"></script> -->
 
     <script src="{{ url_for('static', filename='assets/js/layout-helpers.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/js/sidenav.js') }}"></script>
@@ -122,6 +122,7 @@
 
 
     <!-- 初始化 Empire layout + 額外保險的伸縮事件 -->
+    <script src="{{ url_for('static', filename='Content/Scripts/base.js') }}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             if (window.layoutHelpers) {
@@ -137,7 +138,19 @@
                 });
             });
         });
+
+        document.addEventListener("click", function(e) {
+          const btn = e.target.closest(".tw-collapse-toggle");
+          if (!btn) return;
+
+
+          const target = document.querySelector(btn.dataset.target);
+          if (!target) return;
+
+          target.classList.toggle("hidden");
+        });
     </script>
+
 
     {% block scripts %}{% endblock %}
 </body>

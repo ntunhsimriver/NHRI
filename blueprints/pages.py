@@ -105,8 +105,15 @@ def deviceDetail(pat_id, device_id):
 
     PatInfo = fhir.get_DevicePatient(pat_id, session['study_id']) # 同意書可以這邊一起讀取?
 
+    # getObs14daysResult = fhir.getObs14days("", device_id)
+    return render_template("deviceDetail.html", PatInfo=PatInfo, device_id=device_id, script_path=url_for('static', filename='Content/Scripts/deviceDetail.js'))
+
+@bp.route("/api/deviceDetailObs14days/<device_id>")
+def api_deviceDetail(device_id):
+    print(device_id)
     getObs14daysResult = fhir.getObs14days("", device_id)
-    return render_template("deviceDetail.html", getObs14daysResult=getObs14daysResult, PatInfo=PatInfo, script_path=url_for('static', filename='Content/Scripts/deviceDetail.js'))
+
+    return jsonify(getObs14daysResult) # 使用 jsonify 確保格式正確
 
 
 @bp.route('/api/addPatient', methods=['POST'])
