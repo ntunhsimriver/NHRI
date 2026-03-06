@@ -554,3 +554,17 @@ def get_DevicePatient(pat_id, study_id):
     PatInfo = FHIRData_Handle(Response, 9, 0)[0] # 拿去處理
     
     return PatInfo
+
+
+def getAllEncounter(pat_id):
+
+    EncBundle = FHIRData_Handle("Encounter?_sort=-date&patient=Patient/" + pat_id, 1, 1)
+    # 抓每一個Encounter
+    result = []
+    for e in EncBundle:
+        # 把他從model轉json
+        enc_data = FHIRData_Handle(e.BundleResouce, 11, 0)
+        print(enc_data)
+        result.extend(e.model_dump() for e in enc_data)
+    # PatInfo = FHIRData_Handle(Response, 11, 0)[0] # 拿去處理
+    return result
