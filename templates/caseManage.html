@@ -116,7 +116,7 @@
 <main class="flex-1 overflow-auto bg-slate-50 p-8">
   <div class="space-y-6 fade-in h-full flex flex-col">
     <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
-      <button class="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-100 transition-colors" onclick="window.location.href='{{ url_for('pages.caseManage') }}'";>
+      <button class="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-100 transition-colors" onclick="history.back()";>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="m15 18-6-6 6-6"></path></svg>
       </button>
       <div>
@@ -218,11 +218,70 @@
 
       </div>
       
-      <div class="tab-pane fade rounded-xl border border-slate-200 bg-white p-6 shadow-sm" id="nav-Vitals" role="tabpanel" aria-labelledby="nav-Vitals-tab">
-        <h3 class="mb-6 text-lg font-bold text-slate-900" id="myChartText">生理趨勢圖 (近14天)</h3>
-        <canvas id="myChart-Vitals" width="100%" height="50%"></canvas>
+      <div class="tab-pane fade " id="nav-Vitals" role="tabpanel" aria-labelledby="nav-Vitals-tab">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" id="nav-Vitals" role="tabpanel" aria-labelledby="nav-Vitals-tab">
+          <h3 class="mb-6 text-lg font-bold text-slate-900" id="myChartText">生理趨勢圖 (近14天)</h3>
+          <canvas id="myChart-Vitals" width="100%" height="50%"></canvas>
+        </div>
 
+        <!-- DiagnosticReport Timeline start -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
+          <h3
+            class="mb-6 text-lg font-bold text-slate-900 tw-collapse-toggle"
+            data-target="#DiagnosticReportList"
+            role="button"
+          >
+            診斷報告時間軸 (DiagnosticReport Timeline)
+          </h3>
+
+          <div class="relative hidden pl-4 tw-collapse" id="DiagnosticReportList">
+            <div class="timeline-line absolute bottom-0 left-0 top-2 ml-4 w-px bg-slate-200"></div>
+
+            <div class="space-y-8">
+              {% for item in getAllDiaRep %}
+              <div class="relative flex gap-6">
+                <!-- timeline dot -->
+                <div class="relative z-10 flex h-8 w-8 flex-none items-center justify-center rounded-full border-2 border-white text-xs shadow-sm type-{{item['type'][:3]}}">
+                  {{item['type'][:3]}}
+                </div>
+
+                <!-- card -->
+                <div class="flex-1 rounded-lg border border-slate-100 bg-slate-50 p-4 transition-all hover:border-blue-200 hover:bg-white hover:shadow-sm">
+                  
+                  <!-- clickable summary -->
+                  <div>
+                    <div class="mb-2 flex items-center justify-between gap-4">
+                      <h4 class="text-base font-bold text-slate-800">
+                        檢查項目: {{ item['code'] }}
+                      </h4>
+
+                      <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">
+                        {{ item['status'] }}
+                      </span>
+                    </div>
+
+                    <p class="mt-1 text-sm text-slate-600">
+                      <strong>診斷報告日期</strong>: {{ item['date'] }}
+                    </p>
+
+                    <p class="mt-1 text-sm text-slate-600 whitespace-pre-line">
+                        <strong>臨床結論:</strong> <br>
+                        {{ item['conclusion']  | safe }}
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+              {% else %}
+                <p class="text-sm text-slate-500">暫無資料</p>
+
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <!-- DiagnosticReport Timeline end -->
       </div>
+        
       
       <div class="tab-pane fade" id="nav-Clinical" role="tabpanel" aria-labelledby="nav-Clinical-tab">
 
@@ -267,6 +326,8 @@
                 </div>            
               </div>
 
+              {% else %}
+                <p class="text-sm text-slate-500">暫無資料</p>
 
               <!-- 迴圈結束 -->
               {% endfor %}
@@ -282,7 +343,7 @@
             data-target="#TreatmentList"
             role="button"
           >
-            治療紀錄時間軸 (Procedure Timeline)
+            治療紀錄時間軸 (Treatment Timeline)
           </h3>
 
           <div class="relative hidden pl-4 tw-collapse" id="TreatmentList">
@@ -300,39 +361,37 @@
                 <div class="flex-1 rounded-lg border border-slate-100 bg-slate-50 p-4 transition-all hover:border-blue-200 hover:bg-white hover:shadow-sm">
                   
                   <!-- clickable summary -->
-                  <!-- <div
-                    class="tw-collapse-toggle tw-treatment-one cursor-pointer"
-                    data-target="#treatment-detail-{{ item['id'] }}"
-                    data-treatment-id="{{ item['id'] }}"
-                    role="button"
-                  > --> 
                   <div>
                     <div class="mb-2 flex items-center justify-between gap-4">
                       <h4 class="text-base font-bold text-slate-800">
                         治療項目: {{ item['code'] }}
                       </h4>
-
-<!--                       <h4 class="text-base font-bold text-slate-800">
-                        category: {{ item['category'] }}
-                      </h4> -->
-
                       <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">
                         {{ item['status'] }}
                       </span>
                     </div>
-
                     <p class="mt-1 text-sm text-slate-600">
-                      治療原因: {{ item['reasonCode'] }}
+                      治療日期: {{ item['date'] }}
                     </p>
-
                     <p class="mt-1 text-sm text-slate-600 whitespace-pre-line">
-                      治療結果: <br> {{ item['outcome'] }}
+                      {% if item['type'] == 'Procedure' %}
+                        <span class="font-medium">治療結果:</span>
+                        {{ item['outcome'] }}
+                      {% else %}
+                        <span class="font-medium">劑量備註:</span>
+                        {{ item['dosage'] }}
+                      {% endif %}
                     </p>
                   </div>
 
                 </div>
               </div>
+
+              {% else %}
+                <p class="text-sm text-slate-500">暫無資料</p>
+
               {% endfor %}
+              
             </div>
           </div>
         </div>

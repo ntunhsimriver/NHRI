@@ -26,11 +26,11 @@ button:focus {
 
 
 /* 分類顏色定義 */
-/* Lb: Laboratory (紅色) */
-.type-Obs { background-color: rgb(239, 68, 68); color: rgb(254, 226, 226); }
+/* DiagnosticReport  (紅色) */
+.type-Dia { background-color: rgb(239, 68, 68); color: rgb(254, 226, 226); }
 
-/* Dx: Diagnosis (綠色) */
+/* Procedure (綠色) */
 .type-Pro { background-color: rgb(132, 204, 22); color: rgb(236, 252, 203); }
 
-/* Rx: Medication (藍色) */
+/* MedicationRequest (藍色) */
 .type-Med { background-color: rgb(14, 165, 233); color: rgb(224, 242, 254); }

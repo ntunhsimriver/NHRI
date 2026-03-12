@@ -94,14 +94,15 @@ def case_detail(case_id, ResearchSubjectStatus):
     # 直接去抓他全部的值
     # getAllInfoResult = fhir.getAllInfo(case_id)
     getAllEncounter = fhir.getAllEncounter(case_id)
-    getAllTreatment = fhir.getAllTreatment(case_id)
+    getAllTreatment = fhir.getAllTreatment(case_id, ['Procedure', 'MedicationRequest'])
+    getAllDiaRep = fhir.getAllTreatment(case_id, ['DiagnosticReport'])
 
     # 這個是畫 生理數據 (Vitals) 的折線圖用的
     getObs14daysResult = fhir.getObs14days(case_id, "")
 
 
     print(getObs14daysResult)
-    return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllEncounter=getAllEncounter, getAllTreatment=getAllTreatment, PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
+    return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllEncounter=getAllEncounter, getAllTreatment=getAllTreatment, getAllDiaRep=getAllDiaRep, PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
 
 # @bp.route("/api/caseManage/<case_id>")
 # def case_encounter(case_id):
@@ -191,29 +192,16 @@ def projectManage():
     #     return redirect(url_for('pages.selectproject'))
     data = fhir.get_Project(session['fhir_practitioner_id'])    
 
-    PatInfo = fhir.getProjectManagePatient(session['study_id'])
+    # PatInfo = fhir.getProjectManagePatient(session['study_id'])
 
     return render_template('projectManage.html', data=data, script_path=url_for('static', filename='Content/Scripts/projectManage.js'))
 
 @bp.route('/api/addProject', methods=['POST'])
 def api_addProject():
     data = request.get_json()
-
-
     res = fhir.addProject_FHIR(data, session['fhir_practitioner_id'])
-    # 進土撥鼠的專案
-    # data_in = {'ProjectGroup': 'THBC_NHRI', 'Project': 'Device', 'data': [data]}
-    # headers_Groundhog = {'WebUsername':'admin@gmail.com', 'WebUserpassword':'aB12345678!'} 
-    # response = requests.post(cfg.Trans_FHIR, headers=headers_Groundhog, json=data_in, verify=False)
-    # json_fhir = json.loads(str(response.text))
-    # response_FHIR = requests.post(cfg.FHIR_SERVER_URL, json=json_fhir, verify=False)
-    return jsonify(res)
 
-# @bp.route('/crossData')
-# def crossData_page():
-#     if 'username' not in session:
-#         return redirect(url_for('auth.login_page'))
-#     return render_template('crossData.html', script_path=url_for('static', filename='Content/Scripts/crossData.js'))
+    return jsonify(res)
 
 
 @bp.route('/api/uploadFHIR', methods=['POST'])
@@ -223,8 +211,6 @@ def api_uploadFHIR():
     pat_id = request.form.get('pat_id')  # 這樣拿
     study_id = session['study_id']
 
-    print(file_type)
-    print(file)
     if file:
         # 1. 定義上傳路徑
         subfilename = file.filename.split('.')[-1]
@@ -238,12 +224,10 @@ def api_uploadFHIR():
 
         # 3. 執行存檔
         save_path = os.path.join(upload_dir, new_filename)
-        print(save_path)
         file.save(save_path)
         # 指針歸0
         file.seek(0)
 
-        print(file_type)
         if file_type == 'FHIR':
             data = json.load(file)
             result = fhir.upload_FHIR(data) # 直接把檔案轉成 Python 字典

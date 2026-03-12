@@ -256,24 +256,26 @@ document.querySelectorAll('#nav-tab button').forEach(btn => {
 
 // 這邊是同意書
 var ModalConsent = document.getElementById('Modal_Consent');
+if (ModalConsent) {
+    ModalConsent.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // 取得被點擊的按鈕
+        var title = button.getAttribute('data-bs-title');
+        var pdfUrl = "/static/data/consent" + button.getAttribute('data-bs-url');
 
-ModalConsent.addEventListener('show.bs.modal', function (event) {
-    var button = event.relatedTarget; // 取得被點擊的按鈕
-    var title = button.getAttribute('data-bs-title');
-    var pdfUrl = "/static/data/consent" + button.getAttribute('data-bs-url');
+        // 更新標題
+        ModalConsent.querySelector('#Modal_Consent_title').textContent = title;
+        // 更新 PDF 檢視器
+        var iframe = ModalConsent.querySelector('#Consent_PDF_Viewer');
+        iframe.src = pdfUrl;
 
-    // 更新標題
-    ModalConsent.querySelector('#Modal_Consent_title').textContent = title;
-    // 更新 PDF 檢視器
-    var iframe = ModalConsent.querySelector('#Consent_PDF_Viewer');
-    iframe.src = pdfUrl;
+    });
 
-});
-
-// 當 Modal 關閉時，清空 src 停止載入，節省資源
-ModalConsent.addEventListener('hidden.bs.modal', function () {
+    // 當 Modal 關閉時，清空 src 停止載入，節省資源
+    ModalConsent.addEventListener('hidden.bs.modal', function () {
     ModalConsent.querySelector('#Consent_PDF_Viewer').src = "";
 });
+}
+
 
 
 

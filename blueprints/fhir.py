@@ -246,7 +246,7 @@ def get_IndexProject(study_id):
     
     months = []
     months_data = []
-
+    total = 0
 
     for i in range(5, -1, -1):
         # 計算該月的開始與結束日期
@@ -256,7 +256,15 @@ def get_IndexProject(study_id):
         end_date = (current_month_start - relativedelta(months=i-1)).strftime('%Y-%m-%d')
 
         months.append(start_date[:7])
-        months_data.append(FHIRData_Handle(None, FHIRSearch_Handle(50, [study_id, start_date, end_date]), 1, 1)[0].SummaryCount) # 這邊直接建查fhir時候要的格式
+        # months_data.append(FHIRData_Handle(None, FHIRSearch_Handle(50, [study_id, start_date, end_date]), 1, 1)[0].SummaryCount) # 這邊直接建查fhir時候要的格式
+        # 收案人數，改成用累計的
+        count = FHIRData_Handle(
+                None,
+                FHIRSearch_Handle(50, [study_id, start_date, end_date]),
+                1, 1
+            )[0].SummaryCount
+        total += count
+        months_data.append(total)
     # print(months_data)
     return getSubjectCount, [months, months_data]
 
@@ -593,25 +601,32 @@ def getAllEncounter(pat_id):
     # PatInfo = FHIRData_Handle(None, Response, 11, 0)[0] # 拿去處理
     return result
 
-def getAllTreatment(pat_id):
-
-    ProBundle = FHIRData_Handle(None, "Procedure?_sort=-date&patient=Patient/" + pat_id, 1, 1)
+def getAllTreatment(pat_id, needType):
     result = []
 
-    for p in ProBundle:
-        if not p.BundleResource:
-            continue
+    for n in needType:
 
-        resource_type = p.BundleResource['resourceType']
-        ResultData = FHIRData_Handle(resource_type, p.BundleResource, 13, 0)
+        Bundles = FHIRData_Handle(None, n + "?_sort=-date&patient=Patient/" + pat_id, 1, 1)
 
-        for model in ResultData:
-            row = model.__dict__.copy()
-            row["type"] = resource_type
-            result.append(row)
+        for b in Bundles:
+            if not b.BundleResource:
+                continue
 
-    print(result)
-    return result
+            resource_type = b.BundleResource['resourceType']
+            ResultData = FHIRData_Handle(resource_type, b.BundleResource, 13, 0)
+
+            for model in ResultData:
+                row = model.__dict__.copy()
+                row["type"] = resource_type
+                result.append(row)
+
+    result_sorted = sorted(
+        result,
+        key=lambda x: x["date"] or "",
+        reverse=True
+    )
+    return result_sorted
+
 
 def getEnc(enc_id):
 
