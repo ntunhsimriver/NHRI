@@ -42,6 +42,7 @@ def post_FHIR_api(resource, FHIR): # 回傳完整
 # 這邊是改用資料庫的內容處理fhir json
 # resource是有些可能會一個Category裡面有很多不同resource，readFlag=1 表示要去抓資料，=0表示是json直接進來
 def FHIRData_Handle(resource, SearchURL, CatId, readFlag): 
+
     getResult = []
 
     # 1.先抓FHIR資料
@@ -49,7 +50,10 @@ def FHIRData_Handle(resource, SearchURL, CatId, readFlag):
         data = read_FHIR_api(SearchURL)
     else:
         data = SearchURL
-    
+
+    if data is None:
+        return []
+
     # 1. 取得內層規則 (不管是不是 Bundle，這都要用到)
     if resource is not None:
         study_rules = FHIR.FhirMappging.query.filter_by(CatId=CatId, resource=resource, Del=0).all()
@@ -176,16 +180,41 @@ def FHIR_listMapping(data, CatId): # 放要進去的值的json, 從資料庫裡�
 def get_AllPatient(study_id): 
     getResult = [] # 準備存處理好的Patient資料
 
+    # 這個是算資料完整度的list
+    resource_types = [
+        "Encounter",
+        "Observation",
+        "MedicationRequest",
+        "Procedure",
+        "Condition",
+        "DiagnosticReport",
+        "Consent",
+        "Device"
+    ]
+
+
     study = FHIRData_Handle(None, FHIRSearch_Handle(10, [study_id]), 5, 1)
     for s in study:
         PatInfo = FHIRData_Handle(None, read_FHIR_api(s.pat_id), 9, 0)
 
         DeviceInfo = FHIRData_Handle(None, FHIRSearch_Handle(42, [s.pat_id]), 6, 1)
+
+        # 算資料完整度
+        completeness = 0
+        for resource_type in resource_types:
+            url = f"{resource_type}?patient={s.pat_id}&_count=1"
+            
+            getCountBundle = FHIRData_Handle(None, read_FHIR_api(url), 1, 0)[0]
+            if getCountBundle.BundleResource is not None:
+                completeness += 1
+        CompleteCount = int(round(completeness / len(resource_types) * 100, 0))
+        print(CompleteCount)
         getResult.append({
                 "startDate": s.start,
                 "PatInfo": PatInfo[0],  # 這裡存的是整個study的資料，他是物件
                 "DeviceInfo": DeviceInfo,  # 這裡存這個患者戴的設備
                 "ResearchSubjectStatus": s.status,    # 這裡存的是PI名字，他是字串
+                "CompleteCount": CompleteCount    # 這裡存每個人的資料完整度
             })
 
 
@@ -251,7 +280,7 @@ def get_Project(pi_id):
 
     return getResult
 
-def getAllInfo(PatID): # 還不是新邏輯
+def getAllInfo(PatID): # 還不是新邏輯(但目前也沒有再用了)
     getResult = []
     # 臨床病歷 (Clinical)那頁，總共需要抓Observation、Condition、MedicationRequest
 
@@ -378,11 +407,11 @@ def getObs14days(PatID, DeviceID):
     storage = {d: {'SBP': [], 'DBP': [], 'HR': []} for d in sorted_dates}
     code_map = {'8480-6': 'SBP', '8462-4': 'DBP', '8867-4': 'HR'}
     for row in rows:
-        if row.BundleResouce:
-            if 'component' in row.BundleResouce:
-                result = FHIRData_Handle(None, row.BundleResouce, 8, 0)
+        if row.BundleResource:
+            if 'component' in row.BundleResource:
+                result = FHIRData_Handle(None, row.BundleResource, 8, 0)
             else:
-                result = FHIRData_Handle(None, row.BundleResouce, 7, 0)
+                result = FHIRData_Handle(None, row.BundleResource, 7, 0)
             for r in result:
                 # 1. 提取日期部分 (取字串前 10 碼: '2026-02-14T08:00:00Z' -> '2026-02-14')
                 row_date = r.effectiveDateTime[:10]
@@ -521,21 +550,13 @@ def addPatient_FHIR(data, study_id):
 
     return Response
 
-
-def getProjectManagePatient(study_id):
-
-    print(study_id)
-
-
-    return 
-
 def upload_Consent(study_id, pat_id, filename):
 
     # 這邊因為Consent我綁的是ResearchSubject，所以要先去抓一下他的id
     getSubject = FHIRData_Handle(None, FHIRSearch_Handle(43, [pat_id,study_id]), 5, 1)[0] 
 
     data = {
-        "status": "",
+        "status": "active",
         "pat_id": "Patient/" + pat_id,
         "subjectId": "ResearchSubject/" + getSubject.id,
         "url": "/consent/" + filename,
@@ -566,7 +587,7 @@ def getAllEncounter(pat_id):
     result = []
     for e in EncBundle:
         # 把他從model轉json
-        enc_data = FHIRData_Handle(None, e.BundleResouce, 11, 0)
+        enc_data = FHIRData_Handle(None, e.BundleResource, 11, 0)
         # print(enc_data)
         result.extend(e.model_dump() for e in enc_data)
     # PatInfo = FHIRData_Handle(None, Response, 11, 0)[0] # 拿去處理
@@ -578,8 +599,11 @@ def getAllTreatment(pat_id):
     result = []
 
     for p in ProBundle:
-        resource_type = p.BundleResouce['resourceType']
-        ResultData = FHIRData_Handle(resource_type, p.BundleResouce, 13, 0)
+        if not p.BundleResource:
+            continue
+
+        resource_type = p.BundleResource['resourceType']
+        ResultData = FHIRData_Handle(resource_type, p.BundleResource, 13, 0)
 
         for model in ResultData:
             row = model.__dict__.copy()
@@ -596,10 +620,10 @@ def getEnc(enc_id):
     EncBundle = FHIRData_Handle(None, "Encounter/" + enc_id + "/$everything", 1, 1)
 
     for e in EncBundle:
-        resource_type = e.BundleResouce['resourceType']
+        resource_type = e.BundleResource['resourceType']
         if resource_type in ['Patient', 'Encounter']:
             continue
-        ResultData = FHIRData_Handle(resource_type, e.BundleResouce, 12, 0)
+        ResultData = FHIRData_Handle(resource_type, e.BundleResource, 12, 0)
         if resource_type not in result:
             result[resource_type] = []
         result[resource_type].extend([model.__dict__ for model in ResultData])

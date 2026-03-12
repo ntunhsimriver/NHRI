@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import traceback
+import datetime
 
 bp = Blueprint("pages", __name__)
 
@@ -226,8 +227,9 @@ def api_uploadFHIR():
     print(file)
     if file:
         # 1. 定義上傳路徑
-        subfilename = file.filename.split('.')[1]
-        new_filename = study_id + '-' + pat_id + '.' + subfilename
+        subfilename = file.filename.split('.')[-1]
+        now = datetime.datetime.now().strftime("%Y%M%d%H%M%S")
+        new_filename = study_id + '-' + pat_id + '-' + now + '.' + subfilename
         upload_dir = "./static/data/" + file_type
         # 2. 檢查資料夾是否存在，不存在就建立 (核心修復)
         if not os.path.exists(upload_dir):

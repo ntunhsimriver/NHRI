@@ -91,10 +91,10 @@
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
                   <div class="h-1.5 w-20 rounded-full bg-slate-100 overflow-hidden">
-                    <div class="h-full rounded-full bg-blue-500" style="width: 80%;">
+                    <div class="h-full rounded-full bg-blue-500" style="width: {{item.CompleteCount}}%;">
                     </div>
                   </div>
-                  <span class="text-xs text-slate-400">80%</span>
+                  <span class="text-xs text-slate-400">{{item.CompleteCount}}%</span>
                 </div>
               </td>
                 <td class="px-6 py-4 text-slate-600">{{item.startDate}}</td>
@@ -292,28 +292,29 @@
               {% for item in getAllTreatment %}
               <div class="relative flex gap-6">
                 <!-- timeline dot -->
-                <div class="relative z-10 flex h-8 w-8 flex-none items-center justify-center rounded-full border-2 border-white bg-gray-500 text-xs text-white shadow-sm">
-                  Pro
+                <div class="relative z-10 flex h-8 w-8 flex-none items-center justify-center rounded-full border-2 border-white text-xs shadow-sm type-{{item['type'][:3]}}">
+                  {{item['type'][:3]}}
                 </div>
 
                 <!-- card -->
                 <div class="flex-1 rounded-lg border border-slate-100 bg-slate-50 p-4 transition-all hover:border-blue-200 hover:bg-white hover:shadow-sm">
                   
                   <!-- clickable summary -->
-                  <div
+                  <!-- <div
                     class="tw-collapse-toggle tw-treatment-one cursor-pointer"
                     data-target="#treatment-detail-{{ item['id'] }}"
                     data-treatment-id="{{ item['id'] }}"
                     role="button"
-                  >
+                  > --> 
+                  <div>
                     <div class="mb-2 flex items-center justify-between gap-4">
                       <h4 class="text-base font-bold text-slate-800">
-                        code: {{ item['code'] }}
+                        治療項目: {{ item['code'] }}
                       </h4>
 
-                      <h4 class="text-base font-bold text-slate-800">
+<!--                       <h4 class="text-base font-bold text-slate-800">
                         category: {{ item['category'] }}
-                      </h4>
+                      </h4> -->
 
                       <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">
                         {{ item['status'] }}
@@ -321,24 +322,13 @@
                     </div>
 
                     <p class="mt-1 text-sm text-slate-600">
-                      reasonCode: {{ item['reasonCode'] }}
+                      治療原因: {{ item['reasonCode'] }}
                     </p>
 
                     <p class="mt-1 text-sm text-slate-600 whitespace-pre-line">
-                      outcome: {{ item['outcome'] }}
+                      治療結果: <br> {{ item['outcome'] }}
                     </p>
                   </div>
-
-                  <!-- expandable detail start -->
-                  <div
-                    id="treatment-detail-{{ item['id'] }}"
-                    class="tw-collapse hidden mt-4 border-t border-slate-100 pt-4"
-                  >
-                    <div class="space-y-4">
-                      資料讀取中......
-                    </div>
-                  </div>
-                  <!-- expandable detail end -->
 
                 </div>
               </div>

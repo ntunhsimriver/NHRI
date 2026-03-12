@@ -306,8 +306,7 @@ function handleFileSelect(event) {
                 // 解析 Flask 回傳的 JSON
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
-                    alert("上傳成功:", response.message);
-                    // 順利上傳後，執行切換到步驟 3 的函式
+                    alert(response.message);
                 } else {
                     alert("伺服器錯誤: " + response.message);
                 }
