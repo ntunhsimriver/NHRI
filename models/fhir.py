@@ -57,6 +57,8 @@ class FhirMapping_Category(db.Model):
     Del = db.Column(db.Text)
 
 
+
+### 下面暫時都是沒用的東西
 class FHIR_Bundle:
     """專門拆解 Bundle 的工具類別"""
     def __init__(self, fhir):

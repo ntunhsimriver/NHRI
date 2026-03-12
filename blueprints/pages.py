@@ -93,18 +93,27 @@ def case_detail(case_id, ResearchSubjectStatus):
     # 直接去抓他全部的值
     # getAllInfoResult = fhir.getAllInfo(case_id)
     getAllEncounter = fhir.getAllEncounter(case_id)
+    getAllTreatment = fhir.getAllTreatment(case_id)
 
     # 這個是畫 生理數據 (Vitals) 的折線圖用的
     getObs14daysResult = fhir.getObs14days(case_id, "")
 
 
     print(getObs14daysResult)
-    return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllEncounter=getAllEncounter, PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
+    return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllEncounter=getAllEncounter, getAllTreatment=getAllTreatment, PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
 
 # @bp.route("/api/caseManage/<case_id>")
 # def case_encounter(case_id):
 #     result = fhir.getAllEncounter(case_id)
 #     return jsonify(result)
+
+@bp.route("/api/getEncounter/<enc_id>")
+def api_getEnc(enc_id):
+    print(enc_id)
+    getEncInfo = fhir.getEnc(enc_id)
+
+    return jsonify(getEncInfo) # 使用 jsonify 確保格式正確
+
 
 @bp.route("/deviceDetail/<pat_id>/<device_id>")
 def deviceDetail(pat_id, device_id):

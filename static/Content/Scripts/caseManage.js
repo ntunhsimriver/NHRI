@@ -329,3 +329,63 @@ function handleFileSelect(event) {
         
     }
 }
+
+
+document.addEventListener("click", function(e){
+
+  const toggle = e.target.closest(".tw-encounter-one")
+  if(!toggle) return
+
+  const encounterId = toggle.dataset.encounterId
+  const target = document.querySelector(toggle.dataset.target)
+
+  const isOpening = target.classList.contains("hidden")
+
+  // 如果是展開
+  if (!isOpening){
+
+    // 這裡 call API
+    fetch(`/api/getEncounter/${encounterId}`)
+        .then(response => response.json())
+        .then(data => {
+
+            const detail = document.querySelector(`#detail-${encounterId}`)
+
+            let html = ""
+
+            if(data.Condition){
+
+                html += `
+                <div>
+                    <div class="mb-2 flex items-center justify-between">
+                        <h5 class="text-sm font-semibold text-slate-800">Condition</h5>
+                        <span class="text-xs text-slate-500">共 ${data.Condition.length} 筆</span>
+                    </div>
+                    <div class="space-y-2">
+                `
+                data.Condition.forEach(c => {
+
+                    html += `
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                        <p class="text-sm font-medium text-slate-800">診斷代碼：${c.code}</p>
+                        <p class="mt-1 text-xs text-slate-500">看診日期：${c.recordedDate}</p>
+                    </div>
+                    `
+                })
+
+                html += `
+                    </div>
+                </div>
+                `
+            }
+
+            detail.innerHTML = html
+        })
+        .catch(err => {
+            console.error("資料抓取失敗:", err);
+            statusText.innerText = "連線逾時";
+            statusText.classList.replace('text-blue-500', 'text-red-500');
+        });
+  }
+
+})
