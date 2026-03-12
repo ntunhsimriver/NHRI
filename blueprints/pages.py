@@ -228,9 +228,9 @@ def api_uploadFHIR():
     if file:
         # 1. 定義上傳路徑
         subfilename = file.filename.split('.')[-1]
-        now = datetime.datetime.now().strftime("%Y%M%d%H%M%S")
-        new_filename = study_id + '-' + pat_id + '-' + now + '.' + subfilename
-        upload_dir = "./static/data/" + file_type
+        now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        new_filename = now + '.' + subfilename
+        upload_dir = "./static/data/" + file_type + '/' + study_id + '-' + pat_id
         # 2. 檢查資料夾是否存在，不存在就建立 (核心修復)
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
@@ -238,6 +238,7 @@ def api_uploadFHIR():
 
         # 3. 執行存檔
         save_path = os.path.join(upload_dir, new_filename)
+        print(save_path)
         file.save(save_path)
         # 指針歸0
         file.seek(0)

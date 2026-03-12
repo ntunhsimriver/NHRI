@@ -559,7 +559,7 @@ def upload_Consent(study_id, pat_id, filename):
         "status": "active",
         "pat_id": "Patient/" + pat_id,
         "subjectId": "ResearchSubject/" + getSubject.id,
-        "url": "/consent/" + filename,
+        "url":  '/' + study_id + '-' + pat_id + '/' + filename,
         "dateTime": datetime.now().strftime('%Y-%m-%d'),
     }
     result = FHIR_listMapping(data, 10)

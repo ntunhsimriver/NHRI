@@ -260,7 +260,7 @@ var ModalConsent = document.getElementById('Modal_Consent');
 ModalConsent.addEventListener('show.bs.modal', function (event) {
     var button = event.relatedTarget; // 取得被點擊的按鈕
     var title = button.getAttribute('data-bs-title');
-    var pdfUrl = "/static/data" + button.getAttribute('data-bs-url');
+    var pdfUrl = "/static/data/consent" + button.getAttribute('data-bs-url');
 
     // 更新標題
     ModalConsent.querySelector('#Modal_Consent_title').textContent = title;
