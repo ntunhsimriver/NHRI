@@ -77,24 +77,38 @@ form.addEventListener('submit', async function (e) {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+
     const statusSelect = document.getElementById('statusSelect');
+    const searchInput = document.getElementById('searchInput');
     const caseRows = document.querySelectorAll('.case-row');
 
-    statusSelect.addEventListener('change', function() {
-        const selectedStatus = this.value;
+    function filterRows() {
+        const selectedStatus = statusSelect.value;
+        const searchText = searchInput.value.toLowerCase();
 
         caseRows.forEach(row => {
-            // 取得該行的狀態資料
-            const rowStatus = row.getAttribute('data-status');
 
-            // 如果選「所有狀態」，或者該行狀態符合選中狀態，則顯示
-            if (selectedStatus === 'all' || rowStatus === selectedStatus) {
-                row.style.display = ''; // 恢復顯示 (table-row)
+            const rowStatus = row.getAttribute('data-status');
+            const hashId = row.getAttribute('data-hash').toLowerCase();
+
+            const matchStatus =
+                selectedStatus === 'all' || rowStatus === selectedStatus;
+
+            const matchSearch =
+                hashId.includes(searchText);
+
+            if (matchStatus && matchSearch) {
+                row.style.display = '';
             } else {
-                row.style.display = 'none'; // 隱藏
+                row.style.display = 'none';
             }
+
         });
-    });
+    }
+
+    statusSelect.addEventListener('change', filterRows);
+    searchInput.addEventListener('input', filterRows);
+
 });
 
 // 這邊寫搜尋受測者的ajax，未來有空再寫

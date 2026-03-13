@@ -13,6 +13,7 @@ class Project(db.Model):
     status = db.Column(db.String(64), default='ACTIVE') # 狀態
     dataType = db.Column(db.String(255), nullable=False) #計畫名稱
     Del = db.Column(db.SmallInteger, default=0)
+    Assistant = db.Column(db.Text)
 
     # def to_dict(self):
     #     return {

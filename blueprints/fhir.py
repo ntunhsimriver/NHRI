@@ -10,6 +10,7 @@ import re
 from datetime import datetime, date, timedelta
 import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
 from models.project import Project
+from models.user import User
 from jsonpath_ng import jsonpath, parse
 from pydantic import create_model
 from collections import Counter
@@ -268,14 +269,35 @@ def get_IndexProject(study_id):
     # print(months_data)
     return getSubjectCount, [months, months_data]
 
+def getAssistant(ProjectId): # 產出助理清單
+    result = []
+    # 先讀資料表，確定這個研究案的助理有誰
+    ProjectInfo = Project.query.filter_by(fhir_study_id='ResearchStudy/'+ProjectId).first()
+    print(ProjectInfo)
+    if ProjectInfo.Assistant is None:
+        return "無指定助理"
+    Assistant_List = ProjectInfo.Assistant.split(';')
+    print(Assistant_List)
+
+    for row_a in Assistant_List:
+        Assistant_Info = User.query.filter_by(id=row_a).first()
+        print(Assistant_Info)
+        result.append(Assistant_Info)
+    result = [model.__dict__ for model in result]
+    print(result)
+    return result
+
+
 def get_Project(pi_id):
     getResult = [] # 準備存處理好的資料
     study = FHIRData_Handle(None, FHIRSearch_Handle(8, [pi_id]), 2, 1)
 
     # 抓每一個ResearchStudy
     for b in study:
-        # 從ResearchStudy裡面抓PI的名字(怕之後會跟db裡面的不一樣，所以先再抓一次)
+        print(b.ProjectId)
+        Assistant = getAssistant(b.ProjectId) # 這邊先去產助理的清單
 
+        # 從ResearchStudy裡面抓PI的名字(怕之後會跟db裡面的不一樣，所以先再抓一次)
         getPIName = FHIRData_Handle(None, b.PI, 3, 1)[0].name
         # 這邊直接count這個study底下有多少ResearchSubject(因為他一個裡面只能放一個人，所以就直接等於count人)
         getSubjectCount = FHIRData_Handle(None, FHIRSearch_Handle(9, [ b.ProjectId]), 1, 1)[0].SummaryCount
@@ -284,6 +306,7 @@ def get_Project(pi_id):
             "study_info": b,  # 這裡存的是整個study的資料，他是物件
             "pi_name": getPIName,    # 這裡存的是PI名字，他是字串
             "SubjectCount": getSubjectCount,    # 這裡存的是這個study底下有多少人，他是字串
+            "Assistant": Assistant,    # 這裡存這個專案底下的助理有誰
         })
 
     return getResult

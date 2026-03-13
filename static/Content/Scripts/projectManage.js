@@ -72,3 +72,55 @@ form.addEventListener('submit', async function (e) {
         msg.classList.add('error-message');
     }
 });
+
+// 新增使用者
+var ModalmemberManage = document.getElementById('Modal_memberManage');
+// 等等要關閉這個彈跳視窗用的
+var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModalmemberManage);
+
+ModalmemberManage.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget; // 取得被點擊的按鈕
+    var input_data = button.getAttribute('data-bs-member')
+    var proid_data = button.getAttribute('data-bs-ProID')
+    // var data = JSON.parse(input_data);
+
+    var memberEl = document.getElementById('item_member');
+    if (memberEl) memberEl.value = input_data;
+
+    var proidEl = document.getElementById('item_proid');
+    if (proidEl) proidEl.value = proid_data;
+
+});
+
+// 先宣告
+const addMemberform = document.getElementById('addMemberForm');
+const addMembermsg = document.getElementById('addMember_message');
+
+addMemberform.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    
+    const item_member = document.getElementById('item_member').value;
+    const item_proid = document.getElementById('item_proid').value;
+
+
+    // 清除前一次樣式
+    msg.classList.remove('error-message', 'success-message');
+
+    const response = await fetch('/api/addMember', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_member, item_proid })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+        msg.textContent = result.message;
+        msg.classList.add('success-message');
+        setTimeout(() => {
+            location.reload();
+        }, 500);
+    } else {
+        msg.textContent = result.message;
+        msg.classList.add('error-message');
+    }
+});

@@ -7,6 +7,9 @@ import os
 import sys
 import traceback
 import datetime
+from models.user import User
+from models.project import Project
+from extensions import db
 
 bp = Blueprint("pages", __name__)
 
@@ -203,6 +206,23 @@ def api_addProject():
 
     return jsonify(res)
 
+@bp.route('/api/addMember', methods=['POST'])
+def api_addMember():
+    data = request.get_json()
+    getMemberEmail = data['item_member']
+    getMember_proid = data['item_proid']
+    getMemberEmail_List = getMemberEmail.split(',')
+    member_result = []
+    for m in getMemberEmail_List:
+        Assistant_Info = User.query.filter_by(email=m).first()
+        member_result.append(str(Assistant_Info.id))
+    member_result = ';'.join(member_result)
+    ProjectInfo = Project.query.filter_by(irb_number=getMember_proid).first()
+
+    if ProjectInfo:
+        ProjectInfo.Assistant = member_result
+        db.session.commit()
+    return jsonify({"success": True, "message": "新增成功"})
 
 @bp.route('/api/uploadFHIR', methods=['POST'])
 def api_uploadFHIR():

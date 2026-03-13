@@ -13,7 +13,6 @@
 </section> -->
 {% if data %}
 
-  
     <div class="space-y-6 fade-in">
       <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
@@ -28,17 +27,17 @@
             <i class="bi bi-plus"></i> 新增個案
           </button>
 
-          <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30"
+          <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             data-bs-toggle="modal" 
             data-bs-for="connect" 
             data-bs-target="#Modal_addPatient">
 
-            <i class="bi bi-link-45deg"></i> 關聯個案
+            <i class="bi bi-link-45deg"></i> 收案個案
           </button>
 
-          <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          <!-- <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
             <i class="bi bi-activity" ></i> 批次匯入
-          </button>
+          </button> -->
         </div>
       </div>
       <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -75,7 +74,7 @@
           <tbody class="divide-y divide-slate-100">
 
             {% for item in data %}
-            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row" data-status="{{ item.ResearchSubjectStatus}}" onclick="window.location.href='{{ url_for('pages.case_detail', case_id=item.PatInfo.id, ResearchSubjectStatus=item.ResearchSubjectStatus) }}'">
+            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row" data-status="{{ item.ResearchSubjectStatus}}" data-hash="{{ item.PatInfo.id }}" onclick="window.location.href='{{ url_for('pages.case_detail', case_id=item.PatInfo.id, ResearchSubjectStatus=item.ResearchSubjectStatus) }}'">
               <td class="px-6 py-4 font-mono font-medium text-blue-600 group-hover:underline">{{ item.PatInfo.id }}</td>
               <td class="px-6 py-4">
                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">{{ item.ResearchSubjectStatus}}</span>
