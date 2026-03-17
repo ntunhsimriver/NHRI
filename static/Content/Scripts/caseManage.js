@@ -41,25 +41,61 @@ modalAddPatient.addEventListener('hidden.bs.modal', function () {
 
 // 先宣告
 const form = document.getElementById('registerForm');
+const patid = document.getElementById("addPatId");
+const patidenti = document.getElementById("addPatIdenti");
+
+function toggleInput() {
+    // 控制 patidenti
+    if (patid.value.trim()) {
+        patidenti.disabled = true;
+        patidenti.classList.add("bg-gray-100", "cursor-not-allowed");
+    } else {
+        patidenti.disabled = false;
+        patidenti.classList.remove("bg-gray-100", "cursor-not-allowed");
+    }
+
+    // 控制 patid
+    if (patidenti.value.trim()) {
+        patid.disabled = true;
+        patid.classList.add("bg-gray-100", "cursor-not-allowed");
+    } else {
+        patid.disabled = false;
+        patid.classList.remove("bg-gray-100", "cursor-not-allowed");
+    }
+}
+
+function resetFormState() {
+    patid.value = "";
+    patidenti.value = "";
+
+    patid.disabled = false;
+    patidenti.disabled = false;
+
+    patid.classList.remove("bg-gray-100", "cursor-not-allowed");
+    patidenti.classList.remove("bg-gray-100", "cursor-not-allowed");
+}
+
+patid.addEventListener("input", toggleInput);
+patidenti.addEventListener("input", toggleInput);
 
 form.addEventListener('submit', async function (e) {
     e.preventDefault();
-    
-    const pat_id = document.getElementById('addPatId').value;
+    const pat_id = patid.value;
+    const pat_identi = patidenti.value;
     const gender = document.getElementById('addGender').value;
     const birthDate = document.getElementById('addBirth').value;
     const start = document.getElementById('addPeriodStart').value;
     const type = document.getElementById('hidden_addPatient').value; // 存這個json到底是新增還是關聯
+    
 
     // const role = document.getElementById('newUser_role').value;
 
     // 清除前一次樣式
     msg.classList.remove('error-message', 'success-message');
-
     const response = await fetch('/api/addPatient', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pat_id, gender, birthDate, start, type })
+        body: JSON.stringify({ pat_id, pat_identi, gender, birthDate, start, type })
     });
 
     const result = await response.json();
@@ -74,6 +110,7 @@ form.addEventListener('submit', async function (e) {
         msg.classList.add('error-message');
     }
 });
+
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -296,7 +333,7 @@ if (ModalConsent) {
 // 同意書上傳的按鈕
 function handleFileSelect(event) {
     const file = event.target.files[0]; // 取得第一個檔案
-    const pat_id = document.querySelector('h2').innerText.trim(); // 抓pat id
+    const patid = document.querySelector('h2').innerText.trim(); // 抓pat id
     if (file) {
         console.log("選取的檔案名稱:", file.name);
         console.log("檔案大小:", (file.size / 1024).toFixed(2), "KB");
@@ -307,7 +344,7 @@ function handleFileSelect(event) {
         const formData = new FormData();
         formData.append('file', file); // 'file' 要對應 Flask 裡的 request.files['file']
         formData.append('fileType', 'Consent');  // 把fileType也一起傳到後端
-        formData.append('pat_id', pat_id);  // 把pat_id也一起傳到後端
+        formData.append('patid', patid);  // 把patid也一起傳到後端
 
         // 3. 建立傳統的 AJAX 請求 (XMLHttpRequest)
         const xhr = new XMLHttpRequest();

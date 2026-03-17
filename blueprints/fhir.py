@@ -582,16 +582,28 @@ def addProject_FHIR(data, pra_id):
 def addPatient_FHIR(data, study_id):
     type = data.get('type')
 
+
+    pat_id = data.get('pat_id')
+    pat_identi = data.get('pat_identi')
+    print(pat_identi)
+
+    if pat_identi is not None:
+        Bundles_Pat = FHIRData_Handle(None, "Patient?identifier=" + pat_identi, 1, 1)[0]
+        PatInfo = FHIRData_Handle(None, Bundles_Pat.BundleResource, 9, 0)[0] # 拿去處理.
+        print(PatInfo)
+        pat_id = PatInfo.id
+
+
     inputResSub = {
-        'pat_id': "Patient/" + data.get('pat_id'),
+        'pat_id': "Patient/" + pat_id,
         'start': data.get('start'),
-        'id': study_id + '-' + data.get('pat_id'),
+        'id': study_id + '-' + pat_id,
         'status': 'on-study',
         'studyId': "ResearchStudy/" + study_id
     }
 
     inputPat = {
-        'id': data.get('pat_id'),
+        'id': pat_id,
         'birthDate': data.get('birthDate'),
         'gender': data.get('gender'),
     }
