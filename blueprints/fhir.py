@@ -16,27 +16,52 @@ from pydantic import create_model
 from collections import Counter
 from dateutil.relativedelta import relativedelta
 
+def get_token():
+    response = requests.post(
+            cfg.OAUTH_URL,
+            data={
+                "grant_type": "client_credentials",
+                "client_id": cfg.OAUTH_CLIENT_ID,
+                "client_secret": cfg.OAUTH_CLIENT_SECRET,
+            },
+            verify=cfg.VERIFY_TLS,  # $export 輪詢間隔秒  20sec
+        )
+    response.raise_for_status()
+
+    token_json = response.json()
+    token = token_json.get('access_token')
+    if not token:
+        raise ValueError("OAuth 回應裡沒有 access_token")
+
+    headers = {
+        'Authorization': f'Bearer {token}',
+    }
+    return headers
+
 def register_fhir(app):
     fhir = FHIRClient()  # 從環境變數讀設定
     app.register_blueprint(create_fhir_blueprint(client=fhir, db=db))
 
 def read_FHIR_api(Resource): # 所有get資料都靠他
+    headers = get_token()
     URL = cfg.FHIR_SERVER_URL + Resource # 搜尋條件
-    res = requests.get(URL, verify=False)
+    res = requests.get(URL, headers=headers, verify=False)
     Response = json.loads(str(res.text))
 
     return Response
 
 def put_FHIR_api(id, FHIR): # 回傳完整
+    headers = get_token()
     URL = cfg.FHIR_SERVER_URL + id # 搜尋條件
-    res = requests.put(URL, json=FHIR, verify=False)
+    res = requests.put(URL, json=FHIR, headers=headers, verify=False)
     # Response = json.loads(str(res.text)) # 先用不到
 
     return res
 
 def post_FHIR_api(resource, FHIR): # 回傳完整
+    headers = get_token()
     URL = cfg.FHIR_SERVER_URL # 搜尋條件
-    res = requests.post(URL+resource, json=FHIR, verify=False)
+    res = requests.post(URL+resource, json=FHIR, headers=headers, verify=False)
 
     return res
 
