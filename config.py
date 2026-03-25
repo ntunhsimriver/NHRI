@@ -6,7 +6,7 @@ class BaseConfig:
 
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "secretData")
     # SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI", "sqlite:///data.db")
-    SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@202.5.255.56:5432/THBCNHRI") # 這邊改成用PosrgreSQL
+    SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@127.0.0.1:5432/THBCNHRI") # 這邊改成用PosrgreSQL
     # SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@localhost:5432/THBCNHRI") # 這邊改成用PosrgreSQL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
@@ -54,10 +54,17 @@ class BaseConfig:
     #fhir config 
     # 後端位址（可被環境變數覆蓋，沒有就用預設）
     Trans_FHIR       = os.getenv("Trans_FHIR", "https://fhir.com.tw/GroundFHIRtest/api/FHIRtransAPItest/FHIRtrans") # 土撥鼠的API
-    OAUTH_URL        = os.getenv("OAUTH_URL", "http://103.124.73.31:8888/realms/HAPI/protocol/openid-connect/token")
-    FHIR_SERVER_URL  = os.getenv("FHIR_SERVER_URL", "http://202.5.255.56:8080/hapi-fhir-nhri/fhir/")
+    
+    # OAUTH_URL        = os.getenv("OAUTH_URL", "http://103.124.73.31:8888/realms/HAPI/protocol/openid-connect/token")
+    # FHIR_SERVER_URL  = os.getenv("FHIR_SERVER_URL", "http://202.5.255.56:8080/hapi-fhir-nhri/fhir/")
+    # OAUTH_CLIENT_ID  = os.getenv("OAUTH_CLIENT_ID", "oauth_tools")
+    # OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET", "auEtGIPotzMP3thaVI1VD1xeFkAtX2FV")  # ⚠️ 正式環境建議用環境變數覆蓋
+    
+    OAUTH_URL        = os.getenv("OAUTH_URL", "http://127.0.0.1:8888/realms/HAPI/protocol/openid-connect/token")
+    FHIR_SERVER_URL  = os.getenv("FHIR_SERVER_URL", "http://127.0.0.1:8080/hapi-fhir-nhri/fhir/")
     OAUTH_CLIENT_ID  = os.getenv("OAUTH_CLIENT_ID", "oauth_tools")
-    OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET", "auEtGIPotzMP3thaVI1VD1xeFkAtX2FV")  # ⚠️ 正式環境建議用環境變數覆蓋
+    OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET", "uFHVjBDFRJBJnRUP0WIconWBywemC2TG")  # ⚠️ 正式環境建議用環境變數覆蓋
+
     VERIFY_TLS = os.getenv("VERIFY_TLS", "true").lower() != "false"  # 自簽憑證可設 false
     NDJSON_DIR = Path(os.getenv("NDJSON_DIR", BASE_DIR / "static/data/data_ndjson"))
     NDJSON_DIR.mkdir(parents=True, exist_ok=True)
