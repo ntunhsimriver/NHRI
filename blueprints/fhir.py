@@ -558,7 +558,7 @@ def getObs14days(PatID, DeviceID, start, end):
 def getDevice():
 
     getResult = [] # 準備存處理好的資料
-    getFHIR = FHIRData_Handle(None, 'Device?_count=100', 6, 1)
+    getFHIR = FHIRData_Handle(None, 'Device?_sort=patient&_sort=status&_count=100', 6, 1)
 
     print(getFHIR)
     # status_counts = Counter(item.status for item in getFHIR)
