@@ -42,13 +42,50 @@ def register_fhir(app):
     fhir = FHIRClient()  # 從環境變數讀設定
     app.register_blueprint(create_fhir_blueprint(client=fhir, db=db))
 
-def read_FHIR_api(Resource): # 所有get資料都靠他
+def read_FHIR_api(Resource, params=None):  # 所有get資料都靠他
     headers = get_token()
-    URL = cfg.FHIR_SERVER_URL + Resource # 搜尋條件
-    res = requests.get(URL, headers=headers, verify=False)
-    Response = json.loads(str(res.text))
+    URL = cfg.FHIR_SERVER_URL + Resource
+    print(URL)
+    try:
+        res = requests.get(URL, headers=headers, params=params, verify=False, timeout=30)
 
-    return Response
+        if res.status_code != 200:
+            return {
+                "resourceType": "OperationOutcome",
+                "issue": [
+                    {
+                        "severity": "error",
+                        "code": "exception",
+                        "diagnostics": f"HTTP {res.status_code}: {res.text[:500]}"
+                    }
+                ]
+            }
+
+        if not res.text or not res.text.strip():
+            return {
+                "resourceType": "OperationOutcome",
+                "issue": [
+                    {
+                        "severity": "error",
+                        "code": "exception",
+                        "diagnostics": "FHIR API returned empty response"
+                    }
+                ]
+            }
+
+        return res.json()
+
+    except Exception as e:
+        return {
+            "resourceType": "OperationOutcome",
+            "issue": [
+                {
+                    "severity": "error",
+                    "code": "exception",
+                    "diagnostics": str(e)
+                }
+            ]
+        }
 
 def put_FHIR_api(id, FHIR): # 回傳完整
     headers = get_token()
@@ -58,10 +95,13 @@ def put_FHIR_api(id, FHIR): # 回傳完整
 
     return res
 
-def post_FHIR_api(resource, FHIR): # 回傳完整
+def post_FHIR_api(FHIR, resource): # 回傳完整
     headers = get_token()
     URL = cfg.FHIR_SERVER_URL # 搜尋條件
-    res = requests.post(URL+resource, json=FHIR, headers=headers, verify=False)
+    full_url = f"{URL}{resource or ''}"
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(full_url)
+    res = requests.post(full_url, json=FHIR, headers=headers, verify=False)
 
     return res
 
@@ -76,7 +116,7 @@ def FHIRData_Handle(resource, SearchURL, CatId, readFlag):
         data = read_FHIR_api(SearchURL)
     else:
         data = SearchURL
-
+    print(SearchURL)
     if data is None:
         return []
 
@@ -234,7 +274,7 @@ def get_AllPatient(study_id):
             if getCountBundle.BundleResource is not None:
                 completeness += 1
         CompleteCount = int(round(completeness / len(resource_types) * 100, 0))
-        print(CompleteCount)
+        # print(CompleteCount)
         getResult.append({
                 "startDate": s.start,
                 "PatInfo": PatInfo[0],  # 這裡存的是整個study的資料，他是物件
@@ -289,7 +329,10 @@ def get_IndexProject(study_id):
                 FHIRSearch_Handle(50, [study_id, start_date, end_date]),
                 1, 1
             )[0].SummaryCount
-        total += count
+        try:
+            total += count
+        except:
+            pass
         months_data.append(total)
     # print(months_data)
     return getSubjectCount, [months, months_data]
@@ -298,7 +341,7 @@ def getAssistant(ProjectId): # 產出助理清單
     result = []
     # 先讀資料表，確定這個研究案的助理有誰
     ProjectInfo = Project.query.filter_by(fhir_study_id='ResearchStudy/'+ProjectId).first()
-    print(ProjectInfo)
+    # print(ProjectInfo)
     if ProjectInfo.Assistant is None:
         return "無指定助理"
     Assistant_List = ProjectInfo.Assistant.split(';')
@@ -497,9 +540,9 @@ def getObs14days(PatID, DeviceID):
 def getDevice():
 
     getResult = [] # 準備存處理好的資料
-    getFHIR = FHIRData_Handle(None, '/Device', 6, 1)
+    getFHIR = FHIRData_Handle(None, 'Device?_count=100', 6, 1)
 
-    # print(len(getFHIR))
+    print(getFHIR)
     # status_counts = Counter(item.status for item in getFHIR)
     status_counts = Counter(
         label
@@ -510,7 +553,6 @@ def getDevice():
     # print(status_counts)
 
     return getFHIR, len(getFHIR), status_counts
-
 
 def set_nested_value(dic, path, value):
     """
@@ -536,7 +578,6 @@ def upload_FHIR(data):
 
     getFHIR = FHIRData_Handle(None, data, 1, 0)
     getFirstInfo = getFHIR[0] # 取第一個就可以知道最外層的，要先確認他到底是什麼Resource
-    # print(getFHIR)
     if getFirstInfo.type == "transaction":
         res = post_FHIR_api(data, "") # transaction可以直接上傳
     else:
@@ -564,6 +605,7 @@ def addProject_FHIR(data, pra_id):
     PI = pra_id
     dataType = data.get('dataType')
     fhir_study_id = 'ResearchStudy/' + ProjectId
+    print(result)
 
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)    
     # print(Response.text)
@@ -634,7 +676,7 @@ def upload_Consent(study_id, pat_id, filename):
 
     # print(result)
 
-    res = post_FHIR_api('Consent', result)
+    res = post_FHIR_api(result, 'Consent')
     # Consent_rules = FHIR.FhirMappging.query.filter_by(CatId=5, Del=0).all()
 
     return res

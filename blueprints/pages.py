@@ -228,7 +228,7 @@ def api_addMember():
 def api_uploadFHIR():
     file = request.files.get('file')
     file_type = request.form.get('fileType')  # 這樣拿
-    pat_id = request.form.get('pat_id')  # 這樣拿
+    pat_id = request.form.get('patid')  # 這樣拿
     study_id = session['study_id']
 
     if file:
@@ -236,7 +236,11 @@ def api_uploadFHIR():
         subfilename = file.filename.split('.')[-1]
         now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         new_filename = now + '.' + subfilename
-        upload_dir = "./static/data/" + file_type + '/' + study_id + '-' + pat_id
+        if file_type == 'Consent':
+
+            upload_dir = "./static/data/" + file_type + '/' + study_id + '-' + pat_id
+        else:
+            upload_dir = "./static/data/" + file_type + '/'
         # 2. 檢查資料夾是否存在，不存在就建立 (核心修復)
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)

@@ -59,9 +59,9 @@
           </td>
           <td class="px-6 py-4">
             <div class="flex flex-wrap gap-1">
-              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">FHIR</span>
-              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Wearable</span>
-              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Questionnaire</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">{{item['study_info'].dataType}}</span>
+<!--               <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Wearable</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Questionnaire</span> -->
             </div>
           </td>
           <td class="px-6 py-4">
@@ -78,6 +78,7 @@
           </td>
         </tr>
       {% endfor %}
+
       </tbody>
     </table>
   </div>
