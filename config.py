@@ -6,7 +6,8 @@ class BaseConfig:
 
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "secretData")
     # SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI", "sqlite:///data.db")
-    SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@127.0.0.1:5432/THBCNHRI") # 這邊改成用PosrgreSQL
+    # SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@127.0.0.1:5432/THBCNHRI") # 這邊改成用PosrgreSQL
+    SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@103.124.75.247:5432/THBCNHRI") # 這邊改成用PosrgreSQL
     # SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@localhost:5432/THBCNHRI") # 這邊改成用PosrgreSQL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
@@ -44,7 +45,7 @@ class BaseConfig:
 
     # Server
     HOST = os.getenv("FLASK_HOST", "0.0.0.0")
-    PORT = int(os.getenv("FLASK_PORT", "3000"))
+    PORT = int(os.getenv("FLASK_PORT", "3001"))
     DEBUG = (
         "--debug" in os.getenv("FLASK_CMDLINE", "")
         or os.getenv("FLASK_ENV", "").strip().lower() == "development"
@@ -60,8 +61,13 @@ class BaseConfig:
     # OAUTH_CLIENT_ID  = os.getenv("OAUTH_CLIENT_ID", "oauth_tools")
     # OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET", "auEtGIPotzMP3thaVI1VD1xeFkAtX2FV")  # ⚠️ 正式環境建議用環境變數覆蓋
     
-    OAUTH_URL        = os.getenv("OAUTH_URL", "http://127.0.0.1:8888/realms/HAPI/protocol/openid-connect/token")
-    FHIR_SERVER_URL  = os.getenv("FHIR_SERVER_URL", "http://127.0.0.1:8080/hapi-fhir-nhri/fhir/")
+    # OAUTH_URL        = os.getenv("OAUTH_URL", "http://127.0.0.1:8888/realms/HAPI/protocol/openid-connect/token")
+    # FHIR_SERVER_URL  = os.getenv("FHIR_SERVER_URL", "http://127.0.0.1:8080/hapi-fhir-nhri/fhir/")
+    # OAUTH_CLIENT_ID  = os.getenv("OAUTH_CLIENT_ID", "oauth_tools")
+    # OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET", "uFHVjBDFRJBJnRUP0WIconWBywemC2TG")  # ⚠️ 正式環境建議用環境變數覆蓋
+    
+    OAUTH_URL        = os.getenv("OAUTH_URL", "http://103.124.75.247:8888/realms/HAPI/protocol/openid-connect/token")
+    FHIR_SERVER_URL  = os.getenv("FHIR_SERVER_URL", "http://103.124.75.247:8080/hapi-fhir-nhri/fhir/")
     OAUTH_CLIENT_ID  = os.getenv("OAUTH_CLIENT_ID", "oauth_tools")
     OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET", "uFHVjBDFRJBJnRUP0WIconWBywemC2TG")  # ⚠️ 正式環境建議用環境變數覆蓋
 

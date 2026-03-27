@@ -603,5 +603,34 @@
                 }
             }
         ]
+    },
+    {
+        "resourceType": "SearchParameter",
+        "id": "researchsubject-period-start",
+        "meta":
+        {
+            "versionId": "1",
+            "lastUpdated": "2026-03-25T16:14:34.390+08:00",
+            "source": "#f7o3IDkj1Q56Aucf"
+        },
+        "url": "http://hl7.org/fhir/SearchParameter/ResearchSubject-period-start",
+        "name": "period-start",
+        "status": "active",
+        "description": "Search by ResearchSubject.period.start",
+        "code": "period-start",
+        "base":
+        [
+            "ResearchSubject"
+        ],
+        "type": "date",
+        "expression": "ResearchSubject.period.start"
+    },
+    {
+        "email": "admin@gmail.com",
+        "full_name": "admin",
+        "organization": "NHRI",
+        "role": "SUPER_ADMIN",
+        "password": "aB12345678!",
+        "fhir_practitioner_id": ""
     }
 ]

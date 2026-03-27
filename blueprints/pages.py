@@ -101,7 +101,9 @@ def case_detail(case_id, ResearchSubjectStatus):
     getAllDiaRep = fhir.getAllTreatment(case_id, ['DiagnosticReport'])
 
     # 這個是畫 生理數據 (Vitals) 的折線圖用的
-    getObs14daysResult = fhir.getObs14days(case_id, "")
+
+
+    getObs14daysResult = fhir.getObs14days(case_id, "", None, None)
 
 
     print(getObs14daysResult)
@@ -132,7 +134,13 @@ def deviceDetail(pat_id, device_id):
 @bp.route("/api/deviceDetailObs14days/<device_id>")
 def api_deviceDetail(device_id):
     print(device_id)
-    getObs14daysResult = fhir.getObs14days("", device_id)
+
+    start = request.args.get("start")
+    end = request.args.get("end")
+
+    print(start)
+    print(end)
+    getObs14daysResult = fhir.getObs14days("", device_id, start, end)
 
     return jsonify(getObs14daysResult) # 使用 jsonify 確保格式正確
 

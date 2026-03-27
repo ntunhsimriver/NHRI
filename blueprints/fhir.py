@@ -324,6 +324,7 @@ def get_IndexProject(study_id):
         months.append(start_date[:7])
         # months_data.append(FHIRData_Handle(None, FHIRSearch_Handle(50, [study_id, start_date, end_date]), 1, 1)[0].SummaryCount) # 這邊直接建查fhir時候要的格式
         # 收案人數，改成用累計的
+
         count = FHIRData_Handle(
                 None,
                 FHIRSearch_Handle(50, [study_id, start_date, end_date]),
@@ -476,14 +477,15 @@ def getAllInfo(PatID): # 還不是新邏輯(但目前也沒有再用了)
 
 
 
-def getObs14days(PatID, DeviceID): 
+def getObs14days(PatID, DeviceID, start, end): 
     # print(datetime.now())
-    # 1. 自動計算日期
+
+
     # 今天日期 (例如: 2026-01-26)
-    today = datetime.now()
+    # today = datetime.now()
     # 14 天前的日期 (例如: 2026-01-12)
-    fourteen_days_ago_noformat = today - timedelta(days=14)
-    fourteen_days_ago = (fourteen_days_ago_noformat).date().isoformat()
+    # fourteen_days_ago_noformat = today - timedelta(days=14)
+    # fourteen_days_ago = (fourteen_days_ago_noformat).date().isoformat()
     # 初始化資料儲存器 (使用字典以確保日期對齊)
     data_map = {} 
     # sorted_dates = []
@@ -498,11 +500,27 @@ def getObs14days(PatID, DeviceID):
 
     # 這邊先抓出所有內容
     if PatID:
-        rows = FHIRData_Handle(None, FHIRSearch_Handle(16, [PatID, target_codes, fourteen_days_ago, '1000']), 1, 1)
+
+        # 今天日期 (例如: 2026-01-26)
+        today = datetime.now()
+        start = today.strftime("%Y-%m-%d")
+        print(start)
+        # 14 天前的日期 (例如: 2026-01-12)
+        fourteen_days_ago_noformat = today - timedelta(days=14)
+        end = (fourteen_days_ago_noformat).date().isoformat()
+
+        rows = FHIRData_Handle(None, FHIRSearch_Handle(16, [PatID, target_codes, end, '1000']), 1, 1)
     elif DeviceID:
-        rows = FHIRData_Handle(None, FHIRSearch_Handle(55, [DeviceID, target_codes, fourteen_days_ago, '1000']), 1, 1)
-        
-    sorted_dates = [ (today - timedelta(days=13-i)).date().isoformat() for i in range(14) ]
+        rows = FHIRData_Handle(None, FHIRSearch_Handle(55, [DeviceID, target_codes, start, end, '1000']), 1, 1)
+    # 先把收到的日期轉成date格式
+    start_date = datetime.strptime(start, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end, "%Y-%m-%d").date()
+    days = (end_date - start_date).days
+
+    sorted_dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(days + 1)
+    ]
     storage = {d: {'SBP': [], 'DBP': [], 'HR': []} for d in sorted_dates}
     code_map = {'8480-6': 'SBP', '8462-4': 'DBP', '8867-4': 'HR'}
     for row in rows:
