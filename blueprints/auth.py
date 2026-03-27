@@ -28,6 +28,7 @@ def register():
     full_name = data.get('full_name')
     organization = data.get('organization')
     role = data.get('role')
+    status = 'active' # 註冊的人先都給他active
 
     if data.get('password'):
         password = data.get('password')
@@ -44,7 +45,7 @@ def register():
         return jsonify({'success': False, 'message': '帳號已存在'})
 
     hashed_password = generate_password_hash(password)
-    new_user = User(id=new_uuid, password_hash = hashed_password, email = email, full_name = full_name, organization = organization, role = role, fhir_practitioner_id = fhir_practitioner_id)
+    new_user = User(id=new_uuid, password_hash = hashed_password, email = email, status=status, full_name = full_name, organization = organization, role = role, fhir_practitioner_id = fhir_practitioner_id)
     db.session.add(new_user)
     db.session.commit()
 

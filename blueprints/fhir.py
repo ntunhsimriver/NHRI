@@ -559,8 +559,6 @@ def getDevice():
 
     getResult = [] # 準備存處理好的資料
     getFHIR = FHIRData_Handle(None, 'Device?_sort=patient&_sort=status&_count=100', 6, 1)
-
-    print(getFHIR)
     # status_counts = Counter(item.status for item in getFHIR)
     status_counts = Counter(
         label
@@ -623,7 +621,6 @@ def addProject_FHIR(data, pra_id):
     PI = pra_id
     dataType = data.get('dataType')
     fhir_study_id = 'ResearchStudy/' + ProjectId
-    print(result)
 
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)    
     # print(Response.text)
@@ -645,12 +642,10 @@ def addPatient_FHIR(data, study_id):
 
     pat_id = data.get('pat_id')
     pat_identi = data.get('pat_identi')
-    print(pat_identi)
 
     if pat_identi is not None:
         Bundles_Pat = FHIRData_Handle(None, "Patient?identifier=" + pat_identi, 1, 1)[0]
         PatInfo = FHIRData_Handle(None, Bundles_Pat.BundleResource, 9, 0)[0] # 拿去處理.
-        print(PatInfo)
         pat_id = PatInfo.id
 
 

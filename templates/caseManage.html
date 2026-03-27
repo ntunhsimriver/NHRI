@@ -77,7 +77,7 @@
             <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row" data-status="{{ item.ResearchSubjectStatus}}" data-hash="{{ item.PatInfo.id }}" onclick="window.location.href='{{ url_for('pages.case_detail', case_id=item.PatInfo.id, ResearchSubjectStatus=item.ResearchSubjectStatus) }}'">
               <td class="px-6 py-4 font-mono font-medium text-blue-600 group-hover:underline">{{ item.PatInfo.id }}</td>
               <td class="px-6 py-4">
-                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">{{ item.ResearchSubjectStatus}}</span>
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ item.ResearchSubjectStatus}}">{{ item.ResearchSubjectStatus}}</span>
               </td>
               <td class="px-6 py-4 text-slate-600">{{ item.PatInfo.gender}}</td>
               <td class="px-6 py-4">

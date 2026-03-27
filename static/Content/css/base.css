@@ -76,3 +76,35 @@
     margin-top: 0.5rem;
     font-weight: 500;
 }
+
+/* 全域的顏色邏輯都是這樣 */
+
+.type-active {
+    background-color: rgb(209 250 229); /* 淺綠底 */
+    color: rgb(6 95 70);           /* 深綠字 */
+}
+
+.type-on-study {
+    background-color: #dbeafe; /* 淺藍底 */
+    color: #1d4ed8;           /* 深藍字 */
+}
+
+.type-inactive {
+    background-color: #dbeafe; /* 淺藍底 */
+    color: #1d4ed8;           /* 深藍字 */
+}
+
+.type-unknown {
+    background-color: #f3e8ff; /* 淺紫底 */
+    color: #7e22ce;           /* 深紫字 */
+}
+
+.type-entered-in-error {
+    background-color: rgb(254, 226, 226); /* 淺紅底 */
+    color: rgb(239, 68, 68);           /* 深紅字 */
+}
+
+.type-None {
+    background-color: rgb(243, 244, 246); /* 淺灰底 */
+    color: rgb(55, 65, 81);              /* 深灰字 */
+}
