@@ -24,6 +24,7 @@
       <i class="bi bi-gear"></i> 新增設備入庫
     </button>
   </div>
+
   <div class="grid gap-4 md:grid-cols-4">
     <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <span class="text-xs text-slate-500">總設備數</span>
@@ -42,10 +43,10 @@
       <p class="text-2xl font-bold text-red-500">{{CountDev['entered-in-error']}}</p>
     </div>
   </div>
-  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
+  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
     <table class="w-full text-left text-sm">
-      <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+      <thead class="border-b border-slate-200 bg-slate-50 text-slate-500">
         <tr>
           <th class="px-6 py-3 font-medium">型號 (Model)</th>
           <th class="px-6 py-3 font-medium">設備機碼 (SN)</th>
@@ -56,40 +57,65 @@
           <th class="px-6 py-3 font-medium text-right">操作</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-slate-100">
 
-        <!-- 迴圈開始 -->
-        {% for item in data %}
-        <tr class="hover:bg-slate-50 transition-colors">
-          <td class="px-6 py-4 font-medium text-slate-900">{{item.model}}</td>
-          <td class="px-6 py-4 font-mono text-slate-600">{{item.id}}</td>
-          <td class="px-6 py-4">
-            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium  type-{{item.status}}">{{item.status}}</span>
-          </td>
-          <td class="px-6 py-4">
-            {% if item.pat_id %}
-              <span class="font-mono text-blue-600 underline cursor-pointer">{{ item.pat_id }}</span>
-            {% else %}
-              <span class="text-slate-400">-</span>
-            {% endif %}
-          </td>
-          <td class="px-6 py-4 text-slate-700">0 筆</td>
-          <td class="px-6 py-4 text-slate-500 text-xs">2024-01-05 14:00</td>
-          <td class="px-6 py-4 text-right">
-            <button class="text-slate-400 hover:text-blue-600"
-              data-bs-toggle="modal" 
-              data-bs-target="#Modal_addDevice"
-              data-bs-value='{{ {"id": item.id, "model": item.model, "status": item.status, "pat_id": item.pat_id} | tojson }}'>
-              <i class="bi bi-gear"></i>
-            </button>
-          </td>
-        </tr>
-        {% endfor %}
-        <!-- 迴圈結束 -->
+      <tbody class="divide-y divide-slate-100">
+        {% if data and data|length > 0 %}
+          {% for item in data %}
+          <tr class="transition-colors hover:bg-slate-50">
+            <td class="px-6 py-4 font-medium text-slate-900">{{ item.model }}</td>
+            <td class="px-6 py-4 font-mono text-slate-600">{{ item.id }}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ item.status }}">
+                {{ item.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              {% if item.pat_id %}
+                <span class="cursor-pointer font-mono text-blue-600 underline">{{ item.pat_id }}</span>
+              {% else %}
+                <span class="text-slate-400">-</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-slate-700">0 筆</td>
+            <td class="px-6 py-4 text-xs text-slate-500">{{ item.lastUpdated[:10] }}</td>
+            <td class="px-6 py-4 text-right">
+              <button class="text-slate-400 hover:text-blue-600"
+                data-bs-toggle="modal" 
+                data-bs-target="#Modal_addDevice"
+                data-bs-value='{{ {"id": item.id, "model": item.model, "status": item.status, "pat_id": item.pat_id} | tojson }}'>
+                <i class="bi bi-gear"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7" class="px-6 py-16">
+              <div class="flex flex-col items-center justify-center text-center">
+                <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
+                  <i class="bi bi-smartwatch text-2xl text-blue-500"></i>
+                </div>
+
+                <h3 class="text-lg font-semibold text-slate-800">尚未匯入任何設備</h3>
+                <p class="mt-2 max-w-md text-sm leading-6 text-slate-500">
+                  目前此計畫尚無設備資料，請先新增設備入庫，建立後即可進行個案綁定與資料同步。
+                </p>
+
+                <div class="mt-6 flex flex-wrap justify-center gap-3">
+                  <button
+                    class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm shadow-blue-500/30"
+                    data-bs-toggle="modal" 
+                    data-bs-target="#Modal_addDevice">
+                    <i class="bi bi-plus-circle"></i> 新增設備入庫
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>
-
 </section>
 
 <!-- 新增使用者的彈跳視窗 開始 -->
@@ -123,8 +149,15 @@
           <option value="entered-in-error">entered-in-error</option>
         </select>
 
-        <label class="block text-sm font-medium text-slate-700" for="PatId">綁定個案(請填入FHIR id)</label>
-        <input type="text" id="PatId" class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Patient/example" >
+        <label class="block text-sm font-medium text-slate-700" for="PatId">綁定個案(請填入FHIR id或身分證字號)
+          <i class="bi bi-question-circle-fill ml-2 text-slate-300 text-sm hover:text-blue-500 cursor-pointer transition"
+             data-bs-toggle="tooltip"
+             data-bs-placement="top"
+             title="請注意，若要輸入FHIR的Patient id則請務必輸入 Patient/ 開頭">
+          </i>
+          
+        </label>
+        <input type="text" id="PatId" class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Patient/example 或 A123456789" >
 
       </div>
 

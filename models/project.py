@@ -14,6 +14,7 @@ class Project(db.Model):
     dataType = db.Column(db.String(255), nullable=False) #計畫名稱
     Del = db.Column(db.SmallInteger, default=0)
     Assistant = db.Column(db.Text)
+    device_list = db.Column(db.Text)
 
     # def to_dict(self):
     #     return {

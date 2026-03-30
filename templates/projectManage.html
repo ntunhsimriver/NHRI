@@ -43,11 +43,11 @@
         <tr class="hover:bg-slate-50">
           <td class="px-6 py-4 font-mono font-medium text-blue-600">{{item['study_info'].ProjectId}}</td>
           <td class="px-6 py-4 font-medium text-slate-900">{{item['study_info'].ProjectName}}
-            <div class="text-xs text-slate-400 mt-1 line-clamp-1 w-64">本研究旨在評估穿戴式裝置在長期監測高血壓患者生理數值之可行性。透過收集受試者連續 6 個月的血壓、心率與活動量數據，探討生活型態介入對血壓控制的影響。</div>
+            <div class="text-xs text-slate-400 mt-1 line-clamp-1 w-64">{{item['study_info'].ProjectNote}}</div>
           </td>
           <td class="px-6 py-4">
             <div class="flex items-center gap-2">
-              <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">D</div>
+              <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">{{item['pi_name'][0:1] | upper }}</div>
               {{item['pi_name']}}
             </div>
           </td>
@@ -67,8 +67,6 @@
                   {{ type }}
                 </span>
               {% endfor %}
-<!--               <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Wearable</span>
-              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Questionnaire</span> -->
             </div>
           </td>
           <td class="px-6 py-4">
@@ -136,6 +134,17 @@
           <input type="checkbox" name="new_dataType" value="Questionnaire" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
           <span class="text-sm text-slate-600">Questionnaire 電子問卷 (ePRO)</span>
         </label>
+
+        <label class="block text-sm font-medium text-slate-700" for="new_note">
+          計畫說明
+        </label>
+        <textarea
+          id="new_note"
+          rows="3"
+          placeholder="請輸入計畫說明（例如：研究目的、資料來源、使用設備等）"
+          class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 
+                 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 
+                 placeholder:text-slate-400 transition resize-none"></textarea> 
 
       </div>
 

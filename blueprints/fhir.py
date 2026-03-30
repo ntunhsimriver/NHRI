@@ -42,6 +42,17 @@ def register_fhir(app):
     fhir = FHIRClient()  # 從環境變數讀設定
     app.register_blueprint(create_fhir_blueprint(client=fhir, db=db))
 
+def find_patient_id(pat_identi):
+    # 不管它到底有沒有重複，就是取第一個
+    Bundles_Pat = FHIRData_Handle(None, "Patient?identifier=" + pat_identi, 1, 1)[0]
+    if Bundles_Pat.BundleResource != None:
+        PatInfo = FHIRData_Handle(None, Bundles_Pat.BundleResource, 9, 0)[0] # 拿去處理
+        pat_id = PatInfo.id
+
+        return pat_id
+    else:
+        return None
+
 def read_FHIR_api(Resource, params=None):  # 所有get資料都靠他
     headers = get_token()
     URL = cfg.FHIR_SERVER_URL + Resource
@@ -547,10 +558,18 @@ def getObs14days(PatID, DeviceID, start, end):
     return sbp_list, dbp_list, hr_list, sorted_dates
 
 
-def getDevice():
+def getDevice(study_id):
+
+    ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
+    device_list = ProjectInfo.device_list
+    print(ProjectInfo.device_list)
+
 
     getResult = [] # 準備存處理好的資料
-    getFHIR = FHIRData_Handle(None, 'Device?_sort=patient&_sort=status&_count=100', 6, 1)
+
+    # Device清單強制轉str，這樣就算沒有，_id=None也頂多是找不到而已，不會有錯
+    getFHIR = FHIRData_Handle(None, 'Device?_id=' + str(device_list) + '&_sort=patient&_sort=status&_count=100', 6, 1)
+    
     # status_counts = Counter(item.status for item in getFHIR)
     status_counts = Counter(
         label
@@ -576,10 +595,38 @@ def set_nested_value(dic, path, value):
             pass 
     # ... (簡化版邏輯)
 
-def addDevice_FHIR(data):
+def addDevice_FHIR(data, study_id):
+
+    print(data)
+
+    # pat_id = find_patient_id(data['pat_id'])
+
+    if 'Patient/' in data['pat_id'] or data['pat_id'] == "":
+        print('FHIR')
+    elif re.match(r'^[A-Za-z][0-9]{9}$', data['pat_id']):
+        pat_id = find_patient_id(data['pat_id'])
+        if pat_id != None:
+            data['pat_id'] = 'Patient/' + pat_id
+        else:
+            return False, "此身份證字號不存在於FHIR Server"
+    else:
+        return False, "儲存失敗"
+    
     result = FHIR_listMapping(data, 6)
-    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)        
-    return Response
+    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
+
+    ProjectInfo = Project.query.filter_by(irb_number=study_id).first()      
+    current_list = ProjectInfo.device_list or ""
+
+    device_ids = [d for d in current_list.split(",") if d]
+    device_ids.append(data['id'])
+    device_ids = list(dict.fromkeys(device_ids))
+
+    ProjectInfo.device_list = ",".join(device_ids)
+
+    db.session.commit()
+
+    return True, Response
 
 
 def upload_FHIR(data):
@@ -639,34 +686,33 @@ def addPatient_FHIR(data, study_id):
     pat_identi = data.get('pat_identi')
 
     if pat_identi is not None:
-        Bundles_Pat = FHIRData_Handle(None, "Patient?identifier=" + pat_identi, 1, 1)[0]
-        PatInfo = FHIRData_Handle(None, Bundles_Pat.BundleResource, 9, 0)[0] # 拿去處理.
-        pat_id = PatInfo.id
+        pat_id = find_patient_id(pat_identi)
+    if pat_id != None:
+        inputResSub = {
+            'pat_id': "Patient/" + pat_id,
+            'start': data.get('start'),
+            'id': study_id + '-' + pat_id,
+            'status': 'on-study',
+            'studyId': "ResearchStudy/" + study_id
+        }
 
+        inputPat = {
+            'id': pat_id,
+            'birthDate': data.get('birthDate'),
+            'gender': data.get('gender'),
+        }
+        ResearchSubject_rules = FHIR.FhirMappging.query.filter_by(CatId=5, Del=0).all()
 
-    inputResSub = {
-        'pat_id': "Patient/" + pat_id,
-        'start': data.get('start'),
-        'id': study_id + '-' + pat_id,
-        'status': 'on-study',
-        'studyId': "ResearchStudy/" + study_id
-    }
+        if type == 'new': # 如果是新增 就要補一個patient進去fhir server
+            result = FHIR_listMapping(inputPat, 9)
+            Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result) 
 
-    inputPat = {
-        'id': pat_id,
-        'birthDate': data.get('birthDate'),
-        'gender': data.get('gender'),
-    }
-    ResearchSubject_rules = FHIR.FhirMappging.query.filter_by(CatId=5, Del=0).all()
+        result = FHIR_listMapping(inputResSub, 5)
+        Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
 
-    if type == 'new': # 如果是新增 就要補一個patient進去fhir server
-        result = FHIR_listMapping(inputPat, 9)
-        Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result) 
-
-    result = FHIR_listMapping(inputResSub, 5)
-    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
-
-    return Response
+        return Response
+    else:
+        return None
 
 def upload_Consent(study_id, pat_id, filename):
 

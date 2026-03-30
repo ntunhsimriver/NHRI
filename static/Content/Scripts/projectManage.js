@@ -45,6 +45,7 @@ form.addEventListener('submit', async function (e) {
     const ProjectId = document.getElementById('new_id').value;
     const ProjectName = document.getElementById('new_name').value;
     const ProjectStatus = document.getElementById('new_status').value;
+    const ProjectNote = document.getElementById('new_note').value;
     const checkboxes = document.querySelectorAll('input[name="new_dataType"]:checked');
     // const role = document.getElementById('newUser_role').value;
 
@@ -57,7 +58,7 @@ form.addEventListener('submit', async function (e) {
     const response = await fetch('/api/addProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ProjectId, ProjectName, ProjectStatus, dataType })
+        body: JSON.stringify({ ProjectId, ProjectName, ProjectStatus, ProjectNote, dataType })
     });
 
     const result = await response.json();

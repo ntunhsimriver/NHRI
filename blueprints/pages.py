@@ -11,15 +11,20 @@ import datetime
 from models.user import User
 from models.project import Project
 from extensions import db
+import re
 
 bp = Blueprint("pages", __name__)
 
 @bp.app_context_processor
 def inject_user():
+    # study_id = session.get('study_id')
+    # ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
+
     return dict(username=session.get('username'), 
         fhir_practitioner_id=session.get('fhir_practitioner_id'),
         study_id=session.get('study_id'), 
-        study_name=session.get('study_name'))
+        study_name=session.get('study_name'),
+        )
 
 @bp.route('/')
 def root():
@@ -58,7 +63,7 @@ def index_page():
     getProjectInfo = getProjectInfo_All[0]
     getMonthProjectInfo = getProjectInfo_All[1]
 
-    getDevice = fhir.getDevice()
+    getDevice = fhir.getDevice(session['study_id'])
     data = getDevice[0] # 所有device的內容
     TotalDev = getDevice[1] # 總設備術
     CountDev = getDevice[2] # 個別設備數
@@ -152,10 +157,13 @@ def api_addPatient():
 
     res = fhir.addPatient_FHIR(data, session['study_id'])
     print(res)
-    if res.ok:
-        return jsonify({'success': True, 'message': '已新增成功'})
+    if res == None:
+        return jsonify({'success': False, 'message': '此身份證字號不存在於FHIR Server'})
     else:
-        return jsonify({'success': False, 'message': '新增失敗'})
+        if res.ok:
+            return jsonify({'success': True, 'message': '已新增成功'})   
+        else:
+            return jsonify({'success': False, 'message': '新增失敗'})
 
 
 @bp.route('/dataImport')
@@ -172,7 +180,7 @@ def deviceManage():
         return redirect(url_for('auth.login_page'))
     elif 'study_id' not in session:
         return redirect(url_for('pages.selectproject'))
-    getDevice = fhir.getDevice()
+    getDevice = fhir.getDevice(session['study_id'])
     data = getDevice[0] # 所有device的內容
     TotalDev = getDevice[1] # 總設備術
     CountDev = getDevice[2] # 個別設備數
@@ -183,17 +191,24 @@ def deviceManage():
 def api_addDevice():
     data = request.get_json()
 
-    res = fhir.addDevice_FHIR(data)
+    # if 'Patient/' in data['pat_id']:
+    #     print('FHIR')
+    # elif re.match(r'^[A-Z][0-9]{9}$', data['pat_id']):
+    #     pat_id = fhir.find_patient_id(data['pat_id'])
+    #     print(pat_id)
+
+    res = fhir.addDevice_FHIR(data, session['study_id'])
     # 進土撥鼠的專案
     # data_in = {'ProjectGroup': 'THBC_NHRI', 'Project': 'Device', 'data': [data]}
     # headers_Groundhog = {'WebUsername':'admin@gmail.com', 'WebUserpassword':'aB12345678!'} 
     # response = requests.post(cfg.Trans_FHIR, headers=headers_Groundhog, json=data_in, verify=False)
     # json_fhir = json.loads(str(response.text))
     # response_FHIR = requests.post(cfg.FHIR_SERVER_URL, json=json_fhir, verify=False)
-    if res.ok:
-        return jsonify({'success': True, 'message': '已新增成功'})
+    if res[0]:
+        if res[1].ok:
+            return jsonify({'success': True, 'message': '已新增成功'})
     else:
-        return jsonify({'success': False, 'message': '新增失敗'})
+        return jsonify({'success': False, 'message': res[1]})
 
 
 @bp.route('/projectManage')
