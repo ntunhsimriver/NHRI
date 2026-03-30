@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request
 from blueprints import fhir 
+from blueprints import api_watch 
 from config import BaseConfig as cfg  # 讀 config
 import requests
 import json
@@ -259,9 +260,9 @@ def api_uploadFHIR():
         file.save(save_path)
         # 指針歸0
         file.seek(0)
+        data = json.load(file)
 
         if file_type == 'FHIR':
-            data = json.load(file)
             result = fhir.upload_FHIR(data) # 直接把檔案轉成 Python 字典
             
             if result.ok:
@@ -277,6 +278,13 @@ def api_uploadFHIR():
                 return jsonify({"success": True, "message": "已收到同意書: " + file.filename})
             else:
                 return jsonify({"success": False, "message": result.text})
+        elif file_type == 'Watch':
+            fhir_project = request.form.get('fhir_project')  # 這樣拿
+            url = f"{cfg.BASE_URL}/api/trans_watch/{fhir_project}"
+
+            res = requests.post(url, json=data)
+
+            return jsonify({"success": True, "message": res.status_code})
     return jsonify({"success": False, "message": "沒收到檔案"})
 
 

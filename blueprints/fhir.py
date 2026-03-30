@@ -45,7 +45,7 @@ def register_fhir(app):
 def read_FHIR_api(Resource, params=None):  # 所有get資料都靠他
     headers = get_token()
     URL = cfg.FHIR_SERVER_URL + Resource
-    print(URL)
+    # print(URL)
     try:
         res = requests.get(URL, headers=headers, params=params, verify=False, timeout=30)
 
@@ -99,8 +99,6 @@ def post_FHIR_api(FHIR, resource): # 回傳完整
     headers = get_token()
     URL = cfg.FHIR_SERVER_URL # 搜尋條件
     full_url = f"{URL}{resource or ''}"
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print(full_url)
     res = requests.post(full_url, json=FHIR, headers=headers, verify=False)
 
     return res
@@ -116,7 +114,6 @@ def FHIRData_Handle(resource, SearchURL, CatId, readFlag):
         data = read_FHIR_api(SearchURL)
     else:
         data = SearchURL
-    print(SearchURL)
     if data is None:
         return []
 
@@ -346,14 +343,11 @@ def getAssistant(ProjectId): # 產出助理清單
     if ProjectInfo.Assistant is None:
         return "無指定助理"
     Assistant_List = ProjectInfo.Assistant.split(';')
-    print(Assistant_List)
 
     for row_a in Assistant_List:
         Assistant_Info = User.query.filter_by(id=row_a).first()
-        print(Assistant_Info)
         result.append(Assistant_Info)
     result = [model.__dict__ for model in result]
-    print(result)
     return result
 
 
@@ -363,7 +357,6 @@ def get_Project(pi_id):
 
     # 抓每一個ResearchStudy
     for b in study:
-        print(b.ProjectId)
         Assistant = getAssistant(b.ProjectId) # 這邊先去產助理的清單
 
         # 從ResearchStudy裡面抓PI的名字(怕之後會跟db裡面的不一樣，所以先再抓一次)
@@ -504,7 +497,6 @@ def getObs14days(PatID, DeviceID, start, end):
         # 今天日期 (例如: 2026-01-26)
         today = datetime.now()
         start = today.strftime("%Y-%m-%d")
-        print(start)
         # 14 天前的日期 (例如: 2026-01-12)
         fourteen_days_ago_noformat = today - timedelta(days=14)
         end = (fourteen_days_ago_noformat).date().isoformat()
@@ -597,7 +589,10 @@ def upload_FHIR(data):
     if getFirstInfo.type == "transaction":
         res = post_FHIR_api(data, "") # transaction可以直接上傳
     else:
-        res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
+        if 'id' in data:
+            res = put_FHIR_api(getFirstInfo.resourceType + '/' + getFirstInfo.id, data)
+        else:
+            res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
     return res
 
 

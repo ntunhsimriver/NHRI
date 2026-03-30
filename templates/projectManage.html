@@ -52,14 +52,21 @@
             </div>
           </td>
           <td class="px-6 py-4 text-slate-600">
-            {% for row in item['Assistant'] %}
-              {% if not loop.first %}, {% endif %}
-              {{ row.full_name }}
-            {% endfor %}
+          {% if item['Assistant'] != "無指定助理" %}
+            {{ item['Assistant'] | map(attribute='full_name') | join(', ') }}
+          {% else %}
+            {{ item['Assistant'] }}
+          {% endif %}
+
+            
           </td>
           <td class="px-6 py-4">
             <div class="flex flex-wrap gap-1">
-              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">{{item['study_info'].dataType}}</span>
+              {% for type in item['study_info'].dataType.split(',') %}
+                <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">
+                  {{ type }}
+                </span>
+              {% endfor %}
 <!--               <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Wearable</span>
               <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">Questionnaire</span> -->
             </div>

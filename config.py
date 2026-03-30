@@ -46,6 +46,9 @@ class BaseConfig:
     # Server
     HOST = os.getenv("FLASK_HOST", "0.0.0.0")
     PORT = int(os.getenv("FLASK_PORT", "3001"))
+    API_HOST = "127.0.0.1" if HOST == "0.0.0.0" else HOST
+    BASE_URL = f"http://{API_HOST}:{PORT}"
+    
     DEBUG = (
         "--debug" in os.getenv("FLASK_CMDLINE", "")
         or os.getenv("FLASK_ENV", "").strip().lower() == "development"

@@ -6,6 +6,8 @@ from flask import send_from_directory
 from blueprints.fhir import register_fhir
 from blueprints.pages import bp as pages_bp
 from blueprints.auth import bp as auth_bp
+from blueprints.api_watch import bp as api_watch_bp
+
 
 
 
@@ -21,7 +23,7 @@ def create_app():
     # 註冊 Blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(pages_bp)
-    # app.register_blueprint(api_data_bp)
+    app.register_blueprint(api_watch_bp)
     # app.register_blueprint(api_w_bp)
     # app.register_blueprint(history_bp)
     register_fhir(app)

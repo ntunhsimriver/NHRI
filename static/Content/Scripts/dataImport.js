@@ -19,6 +19,8 @@ function goToStep2(type) {
     document.getElementById('step-1-content').classList.add('hidden');
     document.getElementById('step-2-content').classList.remove('hidden');
 
+    document.getElementById('fhir_project').classList.add('hidden');
+
     // 2. 更新進度條顏色 (把 2 號圓圈變藍色)
     const circle2 = document.getElementById('step-circle-2');
     circle2.classList.remove('bg-slate-200', 'text-slate-500');
@@ -43,6 +45,12 @@ function goToStep2(type) {
         hintElement.innerText = ".csv,.xlsx";
         infoElement.innerText = "格式範例";
         fileInput.accept = ".csv,.xlsx"; // 其他來源收表格檔
+    }
+    else if (type === 'Watch') {
+        document.getElementById('fhir_project').classList.remove('hidden');
+        hintElement.innerText = ".json";
+        infoElement.innerText = "請直接上傳華碩手表api的回傳檔案，並直接由系統上傳FHIR Server。";
+        fileInput.accept = ".json"; // 其他來源收表格檔
     }
 }
 
@@ -75,19 +83,25 @@ function goToStep1() {
 function handleUpload() {
     const fileInput = document.getElementById('file-upload');
     const fileType = document.getElementById('type-hidden').value;
-    alert(fileType);
+    // alert(fileType);
     const file = fileInput.files[0];
+
+    const select = document.getElementById("fhir_project");
+    if (fileType === "Watch" && !select.value) {
+        alert("Watch 類型必須選擇 FHIR project");
+        return;
+    }
 
     // 1. 基本檢查
     if (!file) {
         alert("請先選擇或拖曳檔案！");
         return;
     }
-
     // 2. 建立 FormData 物件（這是 AJAX 傳檔案的關鍵）
     const formData = new FormData();
     formData.append('file', file); // 'file' 要對應 Flask 裡的 request.files['file']
     formData.append('fileType', fileType);  // 把fileType也一起傳到後端
+    formData.append('fhir_project', select.value);  // 把fileType也一起傳到後端
 
     // 3. 建立傳統的 AJAX 請求 (XMLHttpRequest)
     const xhr = new XMLHttpRequest();
