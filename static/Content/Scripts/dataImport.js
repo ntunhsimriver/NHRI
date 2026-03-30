@@ -88,7 +88,7 @@ function handleUpload() {
 
     const select = document.getElementById("fhir_project");
     if (fileType === "Watch" && !select.value) {
-        alert("Watch 類型必須選擇 FHIR project");
+        alert("手錶資料必須選擇上傳的資料為哪一類型資料!");
         return;
     }
 
