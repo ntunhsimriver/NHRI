@@ -1,0 +1,392 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "questionnaire": "Questionnaire/surveySchema-export-demo2",
+  "status": "completed",
+  "authored": "2026-02-23T08:51:01.364533Z",
+  "item": [
+    {
+      "linkId": "name",
+      "answer": [
+        {
+          "valueString": "詹牧哲"
+        }
+      ]
+    },
+    {
+      "linkId": "sex",
+      "answer": [
+        {
+          "valueInteger": 1
+        }
+      ]
+    },
+    {
+      "linkId": "b_date",
+      "answer": [
+        {
+          "valueString": "1966-01-01"
+        }
+      ]
+    },
+    {
+      "linkId": "retire",
+      "answer": [
+        {
+          "valueBoolean": true
+        }
+      ]
+    },
+    {
+      "linkId": "occup",
+      "answer": [
+        {
+          "valueString": "13"
+        }
+      ]
+    },
+    {
+      "linkId": "income",
+      "answer": [
+        {
+          "valueInteger": 7
+        }
+      ]
+    },
+    {
+      "linkId": "marry",
+      "answer": [
+        {
+          "valueInteger": 2
+        }
+      ]
+    },
+    {
+      "linkId": "edu",
+      "answer": [
+        {
+          "valueInteger": 5
+        }
+      ]
+    },
+    {
+      "linkId": "smoke_1",
+      "answer": [
+        {
+          "valueInteger": 2
+        }
+      ]
+    },
+    {
+      "linkId": "smoke_2_1",
+      "answer": [
+        {
+          "valueDecimal": 20.0
+        }
+      ]
+    },
+    {
+      "linkId": "smoke_2_2",
+      "answer": [
+        {
+          "valueDecimal": 30.0
+        }
+      ]
+    },
+    {
+      "linkId": "smoke_3",
+      "answer": [
+        {
+          "valueDecimal": 3.0
+        }
+      ]
+    },
+    {
+      "linkId": "smoke_6",
+      "answer": [
+        {
+          "valueDecimal": 10.0
+        }
+      ]
+    },
+    {
+      "linkId": "drink_1",
+      "answer": [
+        {
+          "valueBoolean": false
+        }
+      ]
+    },
+    {
+      "linkId": "bete1",
+      "answer": [
+        {
+          "valueInteger": 1
+        }
+      ]
+    },
+    {
+      "linkId": "disease_diagnosis",
+      "answer": [
+        {
+          "valueString": "[\r\n  \"HT\",\r\n  \"HLD\",\r\n  \"DM\"\r\n]"
+        }
+      ]
+    },
+    {
+      "linkId": "ht_y",
+      "answer": [
+        {
+          "valueDecimal": -1.0
+        }
+      ]
+    },
+    {
+      "linkId": "ht_t",
+      "answer": [
+        {
+          "valueDecimal": 1.0
+        }
+      ]
+    },
+    {
+      "linkId": "ht_drug",
+      "answer": [
+        {
+          "valueDecimal": 1.0
+        }
+      ]
+    },
+    {
+      "linkId": "ht_o",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"HT_o_ans\": {\r\n    \"HT_o_1\": 1,\r\n    \"HT_o_2\": -1\r\n  }\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "dm_y",
+      "answer": [
+        {
+          "valueDecimal": 26.0
+        }
+      ]
+    },
+    {
+      "linkId": "dm_t",
+      "answer": [
+        {
+          "valueInteger": 1
+        }
+      ]
+    },
+    {
+      "linkId": "dm_drug",
+      "answer": [
+        {
+          "valueInteger": 1
+        }
+      ]
+    },
+    {
+      "linkId": "dm_o",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"DM_o_ans\": {\r\n    \"DM_o_1\": 0,\r\n    \"DM_o_2\": 2\r\n  }\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "hld_y",
+      "answer": [
+        {
+          "valueDecimal": 26.0
+        }
+      ]
+    },
+    {
+      "linkId": "hld_t",
+      "answer": [
+        {
+          "valueDecimal": 1.0
+        }
+      ]
+    },
+    {
+      "linkId": "hld_drug",
+      "answer": [
+        {
+          "valueDecimal": 1.0
+        }
+      ]
+    },
+    {
+      "linkId": "hld_o",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"HLD_o_ans\": {\r\n    \"HLD_o_1\": 1,\r\n    \"HLD_o_2\": -1\r\n  }\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet1",
+      "answer": [
+        {
+          "valueBoolean": false
+        }
+      ]
+    },
+    {
+      "linkId": "diet2",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet2_1\": \"2\",\r\n  \"Diet2_2\": \"0\",\r\n  \"Diet2_3\": \"0\",\r\n  \"Diet2_4\": \"4\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet3",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet3_1\": \"4\",\r\n  \"Diet3_2\": \"0\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet4",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet4_1\": \"2\",\r\n  \"Diet4_2\": \"1\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet5",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet5_1\": \"2\",\r\n  \"Diet5_2\": \"2\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet6",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet6_1\": \"4\",\r\n  \"Diet6_2\": \"1\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet7",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet7_1\": \"2\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet8",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet8_1\": \"2\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet9",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet9_1\": \"4\",\r\n  \"Diet9_2\": \"3\",\r\n  \"Diet9_3\": \"2\",\r\n  \"Diet9_4\": \"1\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet10",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet10_1\": \"2\",\r\n  \"Diet10_2\": \"2\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet11",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet11_1\": \"4\",\r\n  \"Diet11_2\": \"0\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet12",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet12_1\": \"4\",\r\n  \"Diet12_2\": \"0\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet13",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet13_1\": \"0\",\r\n  \"Diet13_2\": \"0\",\r\n  \"Diet13_3\": \"0\",\r\n  \"Diet13_4\": \"0\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet14",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet14_1\": \"0\",\r\n  \"Diet14_2\": \"0\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet15",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet15_1\": \"4\",\r\n  \"Diet15_2\": \"1\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet16",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet16_1\": \"2\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet17",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet17_1\": \"2\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet18",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet18_1\": \"2\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet19",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet19_1\": \"1\"\r\n}"
+        }
+      ]
+    },
+    {
+      "linkId": "diet20",
+      "answer": [
+        {
+          "valueString": "{\r\n  \"Diet20_1\": \"1\"\r\n}"
+        }
+      ]
+    }
+  ]
+}
