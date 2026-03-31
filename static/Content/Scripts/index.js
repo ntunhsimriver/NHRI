@@ -65,7 +65,7 @@ function drawChart() {
             display: true,
             title: {
               display: true,
-              text: 'Value'
+              text: '累積收案人數'
             },
             suggestedMin: 0,
             suggestedMax: maxValue + 20

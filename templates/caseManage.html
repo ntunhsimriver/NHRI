@@ -120,6 +120,7 @@
       </button>
       <div>
         <div class="flex items-center gap-3">
+          <input type="text" class="hidden" name="pat_id" id="pat_id_hidden" value="{{PatInfo.id}}">
           <h2 class="text-2xl font-bold text-slate-900">{{PatInfo.id}}</h2>
           <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ResearchSubjectStatus}}">{{ResearchSubjectStatus}}</span>
         </div>
@@ -127,9 +128,9 @@
          <!-- | 最後訪視: 2024-01-05 -->
        </p>
       </div>
-      <div class="ml-auto flex gap-2">
+      <!-- <div class="ml-auto flex gap-2">
         <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">編輯個案</button>
-      </div>
+      </div> -->
     </div>
 
 
@@ -147,9 +148,9 @@
           <i class="bi bi-activity"></i>臨床病歷 (Clinical)
         </button>
 
-        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Scales-tab" data-bs-toggle="tab" data-bs-target="#nav-Scales" type="button" role="tab" aria-controls="nav-Scales" aria-selected="true">
+        <!-- <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Scales-tab" data-bs-toggle="tab" data-bs-target="#nav-Scales" type="button" role="tab" aria-controls="nav-Scales" aria-selected="true">
           <i class="bi bi-clipboard2-data"></i>評估量表 (Scales)
-        </button>
+        </button> -->
 
         <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Consents-tab" data-bs-toggle="tab" data-bs-target="#nav-Consents" type="button" role="tab" aria-controls="nav-Consents" aria-selected="true">
           <i class="bi bi-clipboard2-check"></i>同意書 (Consents)
@@ -221,8 +222,39 @@
       
       <div class="tab-pane fade " id="nav-Vitals" role="tabpanel" aria-labelledby="nav-Vitals-tab">
         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" id="nav-Vitals" role="tabpanel" aria-labelledby="nav-Vitals-tab">
-          <h3 class="mb-6 text-lg font-bold text-slate-900" id="myChartText">生理趨勢圖 (近14天)</h3>
-          <canvas id="myChart-Vitals" width="100%" height="50%"></canvas>
+
+          <div class="mb-4 flex items-center justify-between">
+
+            <!-- 標題 -->
+            <h3 class="text-lg font-bold text-slate-900" id="myChartText">
+              生理趨勢圖 (近14天)
+            </h3>
+
+            <!-- 小型日期篩選 -->
+            <div class="flex items-center gap-1 text-xs">
+              <input type="date" id="startDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <span class="text-slate-400">~</span>
+              <input type="date" id="endDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <button
+                onclick="handleFilter()"
+                class="ml-1 rounded-md bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700">
+                查詢
+              </button>
+            </div>
+          </div>
+
+          <div id="chart-loading-spinner" class="text-center py-10 hidden">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2 text-slate-500">正在從伺服器抓取量測紀錄...</p>
+          </div>
+          <div style="height: 100%; width: 100%;">
+              <canvas id="myChart-Vitals"  width="100%" height="50%"></canvas>
+          </div>
+          <!-- <canvas id="myChart-Vitals" width="100%" height="50%"></canvas> -->
+
+          
         </div>
 
         <!-- DiagnosticReport Timeline start -->

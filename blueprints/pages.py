@@ -110,8 +110,11 @@ def case_detail(case_id, ResearchSubjectStatus):
 
     # 這個是畫 生理數據 (Vitals) 的折線圖用的
 
-
-    getObs14daysResult = fhir.getObs14days(case_id, "", None, None)
+    today = datetime.datetime.now()
+    fourteen_days_ago_noformat = today - datetime.timedelta(days=14)
+    end = today.strftime("%Y-%m-%d")
+    start = fourteen_days_ago_noformat.strftime("%Y-%m-%d")
+    getObs14daysResult = fhir.getObs14days(case_id, "", start, end)
 
 
     print(getObs14daysResult)
@@ -141,14 +144,19 @@ def deviceDetail(pat_id, device_id):
 
 @bp.route("/api/deviceDetailObs14days/<device_id>")
 def api_deviceDetail(device_id):
-    print(device_id)
+
+    start = request.args.get("start")
+    end = request.args.get("end")
+    getObs14daysResult = fhir.getObs14days("", device_id, start, end)
+    return jsonify(getObs14daysResult) # 使用 jsonify 確保格式正確
+
+@bp.route("/api/caseManageObs14days/<pat_id>")
+def api_patObs14days(pat_id):
 
     start = request.args.get("start")
     end = request.args.get("end")
 
-    print(start)
-    print(end)
-    getObs14daysResult = fhir.getObs14days("", device_id, start, end)
+    getObs14daysResult = fhir.getObs14days(pat_id, "", start, end)
 
     return jsonify(getObs14daysResult) # 使用 jsonify 確保格式正確
 

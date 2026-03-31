@@ -498,14 +498,6 @@ def getAllInfo(PatID): # 還不是新邏輯(但目前也沒有再用了)
 
 
 def getObs14days(PatID, DeviceID, start, end): 
-    # print(datetime.now())
-
-
-    # 今天日期 (例如: 2026-01-26)
-    # today = datetime.now()
-    # 14 天前的日期 (例如: 2026-01-12)
-    # fourteen_days_ago_noformat = today - timedelta(days=14)
-    # fourteen_days_ago = (fourteen_days_ago_noformat).date().isoformat()
     # 初始化資料儲存器 (使用字典以確保日期對齊)
     data_map = {} 
     # sorted_dates = []
@@ -520,22 +512,15 @@ def getObs14days(PatID, DeviceID, start, end):
 
     # 這邊先抓出所有內容
     if PatID:
-
-        # 今天日期 (例如: 2026-01-26)
-        today = datetime.now()
-        start = today.strftime("%Y-%m-%d")
-        # 14 天前的日期 (例如: 2026-01-12)
-        fourteen_days_ago_noformat = today - timedelta(days=14)
-        end = (fourteen_days_ago_noformat).date().isoformat()
-
-        rows = FHIRData_Handle(None, FHIRSearch_Handle(16, [PatID, target_codes, end, '1000']), 1, 1)
+        print(str([PatID, target_codes, start, end, '1000']))
+        print(FHIRSearch_Handle(16, [PatID, target_codes, start, end, '1000']))
+        rows = FHIRData_Handle(None, FHIRSearch_Handle(16, [PatID, target_codes, start, end, '1000']), 1, 1)
     elif DeviceID:
         rows = FHIRData_Handle(None, FHIRSearch_Handle(55, [DeviceID, target_codes, start, end, '1000']), 1, 1)
     # 先把收到的日期轉成date格式
     start_date = datetime.strptime(start, "%Y-%m-%d").date()
     end_date = datetime.strptime(end, "%Y-%m-%d").date()
     days = (end_date - start_date).days
-
     sorted_dates = [
         (start_date + timedelta(days=i)).isoformat()
         for i in range(days + 1)
@@ -571,6 +556,8 @@ def getObs14days(PatID, DeviceID, start, end):
     dbp_list = final_data["DBP"]
     hr_list = final_data["HR"]
     # print(datetime.now())
+
+    print(sorted_dates)
     return sbp_list, dbp_list, hr_list, sorted_dates
 
 

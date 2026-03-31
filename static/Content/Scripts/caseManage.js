@@ -1,6 +1,32 @@
 // 新增個案及關連個案
 const modalAddPatient = document.getElementById('Modal_addPatient');
 const msg = document.getElementById('message');
+
+const spinner = document.getElementById('chart-loading-spinner');
+
+document.addEventListener("DOMContentLoaded", () => {
+    const startInput = document.getElementById("startDate");
+    const endInput = document.getElementById("endDate");
+
+    // 如果元素不存在就不做
+    if (!startInput || !endInput) return;
+
+    const today = new Date();
+    const end = today.toISOString().split("T")[0];
+
+    const startDate = new Date();
+    startDate.setDate(today.getDate() - 14);
+    const start = startDate.toISOString().split("T")[0];
+
+    // ⭐ 只有在沒有值時才自動填
+    if (!startInput.value) startInput.value = start;
+    if (!endInput.value) endInput.value = end;
+
+    // 限制日期
+    endInput.min = startInput.value;
+    startInput.max = endInput.value;
+});
+
 modalAddPatient.addEventListener('show.bs.modal', async function (event) {
 
     const button = event.relatedTarget;
@@ -183,6 +209,64 @@ if (searchInput) {
 //     // }, 300);
 // });
 
+
+function handleFilter() {
+    const startInput = document.getElementById("startDate");
+    const endInput = document.getElementById("endDate");
+    const patIdInput = document.getElementById("pat_id_hidden");
+    const spinner = document.getElementById("chart-loading-spinner");
+
+    if (!startInput || !endInput || !patIdInput) {
+        console.error("找不到必要的 DOM 元素");
+        return;
+    }
+
+    const start = startInput.value;
+    const end = endInput.value;
+    const patId = patIdInput.value;
+
+    console.log("handleFilter:", { start, end, patId });
+
+    // 清掉舊圖
+    if (vitalsChart) {
+        vitalsChart.destroy();
+        vitalsChart = null;
+    }
+
+    // 顯示 loading
+    if (spinner) {
+        spinner.classList.remove("hidden");
+    }
+
+    fetch(`/api/caseManageObs14days/${patId}?start=${start}&end=${end}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            SERVER_DATA.sbp = data[0];
+            SERVER_DATA.dbp = data[1];
+            SERVER_DATA.hr = data[2];
+            SERVER_DATA.labels = data[3];
+
+            // 隱藏 loading
+            if (spinner) {
+                spinner.classList.add("hidden");
+            }
+            // 直接畫圖
+            drawChart();
+        })
+        .catch(err => {
+            console.error("資料抓取失敗:", err);
+
+            if (spinner) {
+                spinner.classList.add("hidden");
+            }
+        });
+}
+
 let vitalsChart = null;
 
 // 將原本的繪圖邏輯封裝成函式
@@ -262,7 +346,7 @@ function drawChart() {
             display: true,
             title: {
               display: true,
-              text: 'Value'
+              text: '生理量測平均數值'
             },
             suggestedMin: 50,
             suggestedMax: 200

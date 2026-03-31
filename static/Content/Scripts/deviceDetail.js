@@ -184,7 +184,7 @@ function drawChart() {
                     suggestedMax: 160,
                     title: {
                         display: true,
-                        text: '數值'
+                        text: '生理量測平均數值'
                     }
                 }
             }
