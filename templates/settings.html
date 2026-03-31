@@ -36,7 +36,7 @@
             <th class="px-6 py-3 font-medium">Email</th>
             <th class="px-6 py-3 font-medium">角色權限</th>
             <th class="px-6 py-3 font-medium">狀態</th>
-            <th class="px-6 py-3 font-medium">最後登入</th>
+            <th class="px-6 py-3 font-medium">最後更新</th>
             <th class="px-6 py-3 font-medium text-right">操作</th>
           </tr>
         </thead>
@@ -55,7 +55,7 @@
               <td class="px-6 py-4">
                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">{{item.status}}</span>
               </td>
-              <td class="px-6 py-4 text-slate-500 text-xs">2024-05-20 09:00</td>
+              <td class="px-6 py-4 text-slate-500 text-xs">{{item.updated_at}}</td>
               <td class="px-6 py-4 text-right">
                 <button class="text-blue-600 hover:text-blue-800 font-medium text-xs"
                     data-bs-toggle="modal" 
