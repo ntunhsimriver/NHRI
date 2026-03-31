@@ -121,9 +121,11 @@
       <div>
         <div class="flex items-center gap-3">
           <h2 class="text-2xl font-bold text-slate-900">{{PatInfo.id}}</h2>
-          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">{{ResearchSubjectStatus}}</span>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ResearchSubjectStatus}}">{{ResearchSubjectStatus}}</span>
         </div>
-        <p class="text-sm text-slate-500">{{study_id}} | {{PatInfo.gender}} | 最後訪視: 2024-01-05</p>
+        <p class="text-sm text-slate-500">{{study_id}} | {{PatInfo.gender}}
+         <!-- | 最後訪視: 2024-01-05 -->
+       </p>
       </div>
       <div class="ml-auto flex gap-2">
         <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">編輯個案</button>
@@ -189,7 +191,7 @@
           <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:bg-slate-100 transition-colors cursor-pointer" onclick="window.location.href='{{ url_for('pages.deviceDetail', pat_id=PatInfo.id, device_id=item.id) }}'">
             <div class="mb-4 flex items-center justify-between">
               <h3 class="text-lg font-bold text-slate-900">配戴設備狀態</h3>
-              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">{{item.status}}</span>
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">{{item.status}}</span>
             </div>
             <div class="flex items-center gap-4">
               <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
@@ -254,7 +256,7 @@
                         檢查項目: {{ item['code'] }}
                       </h4>
 
-                      <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">
+                      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ item['status'] }}">
                         {{ item['status'] }}
                       </span>
                     </div>
@@ -308,7 +310,7 @@
                     <div class="mb-2 flex items-center justify-between">
                       <h4 class="text-base font-bold text-slate-800">就醫型態: {{item['class']}}</h4>
                       <h4 class="text-base font-bold text-slate-800">就醫科別: {{item['serviceType']}}</h4>
-                      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-slate-100 text-slate-800">{{item['status']}}</span>
+                      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item['status']}}">{{item['status']}}</span>
                     </div>
                     <p class="mt-1 text-sm text-slate-600">就醫日期: {{item['start']}}</p>
                     <p class="mt-1 text-sm text-slate-600">離院日期: {{item['end']}}</p>
@@ -365,7 +367,7 @@
                       <h4 class="text-base font-bold text-slate-800">
                         治療項目: {{ item['code'] }}
                       </h4>
-                      <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">
+                      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ item['status'] }}">
                         {{ item['status'] }}
                       </span>
                     </div>
@@ -425,7 +427,7 @@
                   <div class="rounded-lg bg-red-50 p-2 text-red-500 d-flex align-items-center justify-content-center" style="width: 3rem; height: 3rem; flex-shrink: 0;">
                     <i class="bi bi-file-earmark-medical" style="font-size: 1.5rem;-webkit-text-stroke: 0.2px;"></i>
                   </div>
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-800">
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">
                   {{item.status}}</span>
                 </div>
                 <h4 class="font-medium text-slate-900">{{item.title}}</h4>

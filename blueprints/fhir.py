@@ -16,6 +16,18 @@ from pydantic import create_model
 from collections import Counter
 from dateutil.relativedelta import relativedelta
 
+
+# 這個是算資料完整度的list
+resource_types = [
+        "Encounter",
+        "Observation",
+        "MedicationRequest",
+        "Procedure",
+        "Condition",
+        "DiagnosticReport",
+        "Consent",
+        "Device"
+    ]
 def get_token():
     response = requests.post(
             cfg.OAUTH_URL,
@@ -254,19 +266,6 @@ def FHIR_listMapping(data, CatId): # 放要進去的值的json, 從資料庫裡�
 def get_AllPatient(study_id): 
     getResult = [] # 準備存處理好的Patient資料
 
-    # 這個是算資料完整度的list
-    resource_types = [
-        "Encounter",
-        "Observation",
-        "MedicationRequest",
-        "Procedure",
-        "Condition",
-        "DiagnosticReport",
-        "Consent",
-        "Device"
-    ]
-
-
     study = FHIRData_Handle(None, FHIRSearch_Handle(10, [study_id]), 5, 1)
     for s in study:
         PatInfo = FHIRData_Handle(None, read_FHIR_api(s.pat_id), 9, 0)
@@ -310,10 +309,27 @@ def get_Patient(PatID, study_id): # 同意書可以一起讀
 
     return PatInfo, FirstDate, getConsent, DeviceInfo
 
-def get_IndexProject(study_id):
-    getSubjectCount = FHIRData_Handle(None, FHIRSearch_Handle(9, [ study_id]), 1, 1)[0].SummaryCount
+# 算一下主頁的資料量
+# def countAllData(study_id):
+def countAllData():
+    today = datetime.now().strftime("%Y-%m-%d")
+    TotlaData = 0
 
-    # print("getSubjectCount"+str(getSubjectCount))
+    # getAllSubject = FHIRData_Handle(None, FHIRSearch_Handle(10, [study_id]), 1, 1)
+    # print(getAllSubject[0].BundleResource)
+    # for s in getAllSubject:
+    #     subject_id = FHIRData_Handle(None, s.BundleResource, 1, 0)[0].id
+    
+    # 先改成 單純把他的資料量都滾出來，之後想要加邏輯再說
+    for type in resource_types:
+        # print(read_FHIR_api(Resource, params=None))
+        CountData = FHIRData_Handle(None, type + "?_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
+        TotlaData += int(CountData)
+
+    return TotlaData
+
+def get_IndexProject(study_id):
+    getSubjectCount = FHIRData_Handle(None, FHIRSearch_Handle(9, [study_id]), 1, 1)[0].SummaryCount
 
     # 開始抓這個月開始的前六個月，每個月的收案人數
     current_month_start = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)

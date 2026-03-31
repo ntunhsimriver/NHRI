@@ -78,33 +78,47 @@
 }
 
 /* 全域的顏色邏輯都是這樣 */
-
 .type-active {
-    background-color: rgb(209 250 229); /* 淺綠底 */
-    color: rgb(6 95 70);           /* 深綠字 */
+    background-color: rgb(209 250 229); /* green-100 */
+    color: rgb(6 95 70);               /* green-800 */
 }
 
 .type-on-study {
-    background-color: #dbeafe; /* 淺藍底 */
-    color: #1d4ed8;           /* 深藍字 */
+    background-color: rgb(219 234 254); /* blue-100 */
+    color: rgb(29 78 216);              /* blue-700 */
 }
 
 .type-inactive {
-    background-color: #dbeafe; /* 淺藍底 */
-    color: #1d4ed8;           /* 深藍字 */
+    background-color: rgb(243 244 246); /* slate-100 */
+    color: rgb(100 116 139);            /* slate-500 */
 }
 
 .type-unknown {
-    background-color: #f3e8ff; /* 淺紫底 */
-    color: #7e22ce;           /* 深紫字 */
+    background-color: rgb(254 249 195); /* yellow-100 */
+    color: rgb(202 138 4);              /* yellow-600 */
 }
 
 .type-entered-in-error {
-    background-color: rgb(254, 226, 226); /* 淺紅底 */
-    color: rgb(239, 68, 68);           /* 深紅字 */
+    background-color: rgb(254 226 226); /* red-100 */
+    color: rgb(239 68 68);              /* red-500 */
 }
 
 .type-None {
-    background-color: rgb(243, 244, 246); /* 淺灰底 */
-    color: rgb(55, 65, 81);              /* 深灰字 */
+    background-color: rgb(248 250 252); /* slate-50 */
+    color: rgb(148 163 184);            /* slate-400 */
+}
+
+.type-completed {
+    background-color: rgb(220 252 231); /* green-100 */
+    color: rgb(22 163 74);              /* green-600 */
+}
+
+.type-final {
+    background-color: rgb(224 242 254); /* sky-100 */
+    color: rgb(2 132 199);              /* sky-600 */
+}
+
+.type-finished {
+    background-color: rgb(220 252 231); /* green-100 */
+    color: rgb(22 163 74);              /* green-600 */
 }

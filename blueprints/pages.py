@@ -63,12 +63,14 @@ def index_page():
     getProjectInfo = getProjectInfo_All[0]
     getMonthProjectInfo = getProjectInfo_All[1]
 
+    CountAllData = fhir.countAllData()
+
     getDevice = fhir.getDevice(session['study_id'])
     data = getDevice[0] # 所有device的內容
     TotalDev = getDevice[1] # 總設備術
     CountDev = getDevice[2] # 個別設備數
 
-    return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, script_path=url_for('static', filename='Content/Scripts/index.js'))
+    return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, CountAllData=CountAllData, script_path=url_for('static', filename='Content/Scripts/index.js'))
 
 @bp.route('/set_study_session/<study_id>/<study_name>') # 這個是為了先把study ID寄進去session裡面，這樣後續要抓資料比較好抓，不用再透過PI
 def set_study_session(study_id, study_name):
@@ -303,3 +305,8 @@ def api_uploadFHIR():
     return jsonify({"success": False, "message": "沒收到檔案"})
 
 
+@bp.route('/api/test', methods=['POST'])
+def api_test():
+    test = "IRB-2026-001"
+    result = fhir.countAllData(test)
+    return result
