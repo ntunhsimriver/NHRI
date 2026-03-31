@@ -79,7 +79,7 @@
               data-bs-target="#Modal_memberManage"
               data-bs-ProID="{{item['study_info'].ProjectId}}"
               data-bs-member="{% for row in item['Assistant'] %}{% if not loop.first %},{% endif %}{{ row.email }}{% endfor %}"
-               >案例管理</button>
+               >成員管理</button>
           </td>
         </tr>
       {% endfor %}
@@ -164,7 +164,7 @@
     <form id="addMemberForm" class="modal-content border-0 shadow-2xl rounded-xl">
       
       <div class="modal-header border-b border-slate-100 p-4">
-        <h3 id="Modal_memberManage_title" class="text-lg font-bold text-slate-900">新增計畫</h3>
+        <h3 id="Modal_memberManage_title" class="text-lg font-bold text-slate-900">新增助理</h3>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 

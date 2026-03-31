@@ -47,6 +47,7 @@
       </a>
     </li>
 
+    {% if role != 'ASSISTANT'  %}
     <li class="sidenav-item {% if request.path == url_for('pages.projectManage') %}active{% endif %}">
       <a href="{{ url_for('pages.projectManage') }}" class="sidenav-link">
         <i class="sidenav-icon feather icon-briefcase"></i>
@@ -60,7 +61,7 @@
         <div>系統設定</div>
       </a>
     </li>
-
+    {%endif%}
   </ul>
 </div>
 

@@ -22,6 +22,7 @@ def inject_user():
 
     return dict(username=session.get('username'), 
         fhir_practitioner_id=session.get('fhir_practitioner_id'),
+        role=session.get('role'),
         study_id=session.get('study_id'), 
         study_name=session.get('study_name'),
         )
@@ -63,14 +64,17 @@ def index_page():
     getProjectInfo = getProjectInfo_All[0]
     getMonthProjectInfo = getProjectInfo_All[1]
 
-    CountAllData = fhir.countAllData()
+    CountAllData_All = fhir.countAllData()
+    CountAllData = CountAllData_All[0]
+    getCountDataList = CountAllData_All[1:]
+    print(getCountDataList)
 
     getDevice = fhir.getDevice(session['study_id'])
     data = getDevice[0] # 所有device的內容
     TotalDev = getDevice[1] # 總設備術
     CountDev = getDevice[2] # 個別設備數
 
-    return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, CountAllData=CountAllData, script_path=url_for('static', filename='Content/Scripts/index.js'))
+    return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, CountAllData=CountAllData, getCountDataList=getCountDataList, script_path=url_for('static', filename='Content/Scripts/index.js'))
 
 @bp.route('/set_study_session/<study_id>/<study_name>') # 這個是為了先把study ID寄進去session裡面，這樣後續要抓資料比較好抓，不用再透過PI
 def set_study_session(study_id, study_name):

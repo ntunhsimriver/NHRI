@@ -68,9 +68,11 @@ def api_login():
     # 這邊直接抓full_name當username
     username = user.full_name
     fhir_practitioner_id = user.fhir_practitioner_id
+    role = user.role
     if user and user.check_password(password):
         session['username'] = username
         session['fhir_practitioner_id'] = fhir_practitioner_id
+        session['role'] = role.value
         print(f"[LOGIN] 成功登入：{username}")
         return jsonify({'success': True, 'redirect': '/selectproject'})
     else:

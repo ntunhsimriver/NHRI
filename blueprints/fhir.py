@@ -314,6 +314,7 @@ def get_Patient(PatID, study_id): # 同意書可以一起讀
 def countAllData():
     today = datetime.now().strftime("%Y-%m-%d")
     TotlaData = 0
+    CountDataList = []
 
     # getAllSubject = FHIRData_Handle(None, FHIRSearch_Handle(10, [study_id]), 1, 1)
     # print(getAllSubject[0].BundleResource)
@@ -324,9 +325,10 @@ def countAllData():
     for type in resource_types:
         # print(read_FHIR_api(Resource, params=None))
         CountData = FHIRData_Handle(None, type + "?_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
+        CountDataList.append(CountData)
         TotlaData += int(CountData)
 
-    return TotlaData
+    return TotlaData, resource_types, CountDataList
 
 def get_IndexProject(study_id):
     getSubjectCount = FHIRData_Handle(None, FHIRSearch_Handle(9, [study_id]), 1, 1)[0].SummaryCount

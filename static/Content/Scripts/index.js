@@ -76,3 +76,100 @@ function drawChart() {
 }
 
 drawChart();
+
+
+
+const resourceTypes = ["Encounter", "Observation", "MedicationRequest", "Procedure", "Condition", "DiagnosticReport", "Consent", "Device"];
+
+// 模擬數據，實際請替換為你的 API 資料
+const mockData = [12, 45, 7, 15, 22, 5, 2, 8];
+
+function CountDataChart() {
+    const canvas = document.getElementById('CountDataChart');
+    if (!canvas) return; // 安全檢查
+
+    const ctx = canvas.getContext('2d');
+    
+    // 如果圖表實例已存在，先銷毀它，避免重複渲染 bug
+    if (window.myChart instanceof Chart) {
+        window.myChart.destroy();
+    }
+
+    // 定義 8 種不同的柔和、現代感醫療風格顏色
+    const fhirPalette = [
+        '#60a5fa', // Blue (Encounter)
+        '#16a34a', // Green (Observation)
+        '#fb923c', // Orange (MedicationRequest)
+        '#a78bfa', // Violet (Procedure)
+        '#f87171', // Red (Condition)
+        '#22d3ee', // Cyan (DiagnosticReport)
+        '#fbbf24', // Amber (Consent)
+        '#94a3b8'  // Slate (Device)
+    ];
+
+    const rawMax = Math.max(...SERVER_DATA.CountData_data);
+    const chartMax = Math.ceil(rawMax <= 0 ? 10 : rawMax * 1.2); // 如果沒數據，預設 max 為 10
+
+    window.myChart = new Chart(ctx, {
+        type: 'bar', // 垂直直條圖
+        data: {
+            labels: SERVER_DATA.CountData_list,
+            datasets: [{
+                // label: '今日匯入數量', // 隱藏 legend 了，這裡可寫可不寫
+                data: SERVER_DATA.CountData_data, // 這裡之後記得換成 SERVER_DATA 的值
+                backgroundColor: fhirPalette, // 賦予不同的顏色陣列
+                borderRadius: 6, // 頂部圓角，更顯現代感
+                barPercentage: 0.7, // 調整直條寬度佔比 (0-1)，讓柱子之間有呼吸空間
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // 搭配 CSS fixed height 防止無限拉長
+            plugins: {
+                legend: {
+                    display: false // 隱藏上方的數據標籤，因為顏色已經區分了
+                },
+                tooltip: {
+                    // 優化滑鼠移上去時的提示框
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)', // slate-900
+                    padding: 12,
+                    cornerRadius: 8,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    callbacks: {
+                        label: function(context) {
+                            return ` 匯入數量: ${context.parsed.y}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { 
+                        display: false // 隱藏 X 軸網格線，畫面更乾淨
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: '#64748b', // slate-500
+                        font: { size: 12 } 
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    border: {
+                        display: false // 隱藏 Y 軸邊框線
+                    },
+                    grid: {
+                        color: '#f1f5f9' // 使用輕微的灰色網格線 (slate-100)
+                    },
+                    ticks: {
+                        color: '#64748b', // slate-500
+                        stepSize: 10 // 根據數據量調整刻度間隔
+                    }
+                }
+            }
+        }
+    });
+}
+CountDataChart();
