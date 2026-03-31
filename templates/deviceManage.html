@@ -62,22 +62,22 @@
         {% if data and data|length > 0 %}
           {% for item in data %}
           <tr class="transition-colors hover:bg-slate-50">
-            <td class="px-6 py-4 font-medium text-slate-900">{{ item.model }}</td>
-            <td class="px-6 py-4 font-mono text-slate-600">{{ item.id }}</td>
+            <td class="px-6 py-4 font-medium text-slate-900">{{ item['model'] }}</td>
+            <td class="px-6 py-4 font-mono text-slate-600">{{ item['id'] }}</td>
             <td class="px-6 py-4">
               <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ item.status }}">
-                {{ item.status }}
+                {{ item['status'] }}
               </span>
             </td>
             <td class="px-6 py-4">
-              {% if item.pat_id %}
-                <span class="cursor-pointer font-mono text-blue-600 underline">{{ item.pat_id }}</span>
+              {% if item['pat_id'] %}
+                <span class="cursor-pointer font-mono text-blue-600 underline">{{ item['pat_id'] }}</span>
               {% else %}
                 <span class="text-slate-400">-</span>
               {% endif %}
             </td>
-            <td class="px-6 py-4 text-slate-700">0 筆</td>
-            <td class="px-6 py-4 text-xs text-slate-500">{{ item.lastUpdated[:10] }}</td>
+            <td class="px-6 py-4 text-slate-700">{{ "{:,}".format(item['countData'] | default(0) | int) }} 筆</td>
+            <td class="px-6 py-4 text-xs text-slate-500">{{ item['lastUpdated'][:10] }}</td>
             <td class="px-6 py-4 text-right">
               <button class="text-slate-400 hover:text-blue-600"
                 data-bs-toggle="modal" 
