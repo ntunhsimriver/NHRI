@@ -47,6 +47,8 @@ def get_token():
 
     headers = {
         'Authorization': f'Bearer {token}',
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache"
     }
     return headers
 
@@ -642,7 +644,7 @@ def addDevice_FHIR(data, study_id):
 
 
 def upload_FHIR(data):
-
+    print(data)
     getFHIR = FHIRData_Handle(None, data, 1, 0)
     getFirstInfo = getFHIR[0] # 取第一個就可以知道最外層的，要先確認他到底是什麼Resource
     if getFirstInfo.type == "transaction":
@@ -654,6 +656,129 @@ def upload_FHIR(data):
             res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
     return res
 
+# 這個是補subject用的，(進來的json, 我的fhir路徑 如subject.reference, 要填進去的值 如Patient/test)
+def set_nested_value(data, path, value):
+    """
+    支援路徑中包含 [*] 的自動填充
+    範例：path = 'subject[*].reference'
+    """
+    parts = path.split('.')
+    
+    current = data
+    for i, key in enumerate(parts):
+        # 檢查是否包含 [*]
+        if '[*]' in key:
+            real_key = key.replace('[*]', '')
+            # 確保該鍵值存在且是列表
+            if real_key not in current or not isinstance(current[real_key], list):
+                current[real_key] = [{}] # 至少建立一個空物件
+            
+            # 剩餘的路徑遞迴處理
+            remaining_path = ".".join(parts[i+1:])
+            for item in current[real_key]:
+                set_nested_value(item, remaining_path, value)
+            return data # 陣列處理完畢，直接返回
+            
+        # 處理最後一層
+        if i == len(parts) - 1:
+            current[key] = value
+        else:
+            # 處理中間層
+            current = current.setdefault(key, {})
+            
+    return data
+
+def findReference(resource_info):
+    Type = resource_info.Type
+    Name = resource_info.Name
+    Card = resource_info.Card
+    if '*' in Card: # 有*字表示，他是多層
+        Name = Name + '[*]'
+
+    # print(Type)
+
+    if 'Reference' in Type:
+        PathResult = Name + '.reference'
+    elif 'canonical' in Type:
+        PathResult = Name
+    print(PathResult)
+    return PathResult
+
+
+def upload_FHIR_changeID(pat_id, data):
+    resourceType = data['resourceType']
+    pat_id = f"Patient/{pat_id}"
+
+    resource_info_list = FHIR.resourceInfo.query.filter(
+        FHIR.resourceInfo.ResourceType == resourceType,  # 找他是哪個resource
+        # FHIR.resourceInfo.Type.like('%Reference(%Patient%'), # 這裡也要加 FHIR.
+        FHIR.resourceInfo.MainPatient == 1 # 這邊標註 誰是主要的人(因為Patient可能會有很多，所以特別標註哪個欄位是表示 真的患者)
+    ).first()
+    PathResult = findReference(resource_info_list)
+    result = set_nested_value(data, PathResult, pat_id)
+    print(type(result))
+    res = upload_FHIR(result)
+    return res
+def merge_to_simple_json(q_data, r_data):
+    # 1. 建立題目字典 (Key 轉小寫以利對照)
+    q_map = {item['linkId'].lower(): item for item in q_data.get('item', [])}
+    
+    merged_results = []
+
+    # 2. 遍歷 QuestionnaireResponse 的答案項目
+    for resp_item in r_data.get('item', []):
+        link_id_lower = resp_item['linkId'].lower()
+        question = q_map.get(link_id_lower)
+        
+        if not question:
+            continue
+
+        simple_answers = []
+        for ans in resp_item.get('answer', []):
+            # 取得原始答案值 (不論是 String, Integer, Boolean)
+            raw_val = list(ans.values())[0]
+            
+            # 如果是選擇題 (choice)，嘗試找尋對應的顯示文字 (display)
+            display_text = str(raw_val)
+            if question.get('type') == 'choice':
+                options = question.get('answerOption', [])
+                for opt in options:
+                    coding = opt.get('valueCoding', {})
+                    if str(coding.get('code')) == str(raw_val):
+                        display_text = coding.get('display')
+                        break
+            
+            # 直接存入字串
+            simple_answers.append(display_text)
+
+        # 組合成簡化格式
+        merged_results.append({
+            "linkId": question['linkId'],    # 保留原始題目 ID
+            "text": question['text'],        # 題目文字
+            "answers": simple_answers        # 只有文字的列表
+        })
+
+    return merged_results
+
+def getQA(pat_id):
+    result = []
+    BundleInfo = FHIRData_Handle(None, 'QuestionnaireResponse?subject=Patient/' + pat_id + '&_sort=-authored', 1, 1)
+    for bundle in BundleInfo:
+        result_list = {}
+        r_json = bundle.BundleResource
+        if not r_json:
+            continue
+        q_json = read_FHIR_api(r_json['questionnaire'])
+        q_map = {item['linkId'].lower(): item for item in q_json.get('item', [])}
+        qa_list = merge_to_simple_json(q_json, r_json)
+        
+        result_list['Q_id'] = r_json['questionnaire']
+        result_list['A_id'] = 'QuestionnaireResponse' + r_json['id']
+        result_list['QA'] = qa_list
+        result_list['status'] = r_json['status']
+
+        result.append(result_list)
+    return result
 
 def addProject_FHIR(data, pra_id):
 

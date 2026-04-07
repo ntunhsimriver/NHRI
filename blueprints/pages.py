@@ -105,7 +105,7 @@ def case_detail(case_id, ResearchSubjectStatus):
     FirstDate = getPatInfo[1] # 最後更新日期(當作收案日)
     getConsent = getPatInfo[2] # 抓同意書內容
     getDeviceInfo = getPatInfo[3] # 抓所有設備的資訊
-    print(getDeviceInfo)
+
     # 直接去抓他全部的值
     # getAllInfoResult = fhir.getAllInfo(case_id)
     getAllEncounter = fhir.getAllEncounter(case_id)
@@ -120,9 +120,11 @@ def case_detail(case_id, ResearchSubjectStatus):
     start = fourteen_days_ago_noformat.strftime("%Y-%m-%d")
     getObs14daysResult = fhir.getObs14days(case_id, "", start, end)
 
+    # 這邊是問卷資料
+    getQAInfo = fhir.getQA(case_id)
 
-    print(getObs14daysResult)
-    return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllEncounter=getAllEncounter, getAllTreatment=getAllTreatment, getAllDiaRep=getAllDiaRep, PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
+
+    return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllEncounter=getAllEncounter, getAllTreatment=getAllTreatment, getAllDiaRep=getAllDiaRep, PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, getQAInfo=getQAInfo, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
 
 # @bp.route("/api/caseManage/<case_id>")
 # def case_encounter(case_id):
@@ -268,17 +270,16 @@ def api_uploadFHIR():
     file_type = request.form.get('fileType')  # 這樣拿
     pat_id = request.form.get('patid')  # 這樣拿
     study_id = session['study_id']
-
     if file:
         # 1. 定義上傳路徑
         subfilename = file.filename.split('.')[-1]
         now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         new_filename = now + '.' + subfilename
         if file_type == 'Consent':
-
             upload_dir = "./static/data/" + file_type + '/' + study_id + '-' + pat_id
         else:
             upload_dir = "./static/data/" + file_type + '/'
+
         # 2. 檢查資料夾是否存在，不存在就建立 (核心修復)
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
@@ -289,9 +290,10 @@ def api_uploadFHIR():
         file.save(save_path)
         # 指針歸0
         file.seek(0)
-        data = json.load(file)
+        # data = json.load(file)
 
         if file_type == 'FHIR':
+            data = json.load(file)
             result = fhir.upload_FHIR(data) # 直接把檔案轉成 Python 字典
             
             if result.ok:
@@ -301,24 +303,31 @@ def api_uploadFHIR():
         elif file_type == 'Excel':
             return jsonify({"success": True, "message": file.filename})
         elif file_type == 'Consent':
-            
             result = fhir.upload_Consent(study_id, pat_id, new_filename) # 直接把檔案轉成 Python 字典
             if result.ok:
                 return jsonify({"success": True, "message": "已收到同意書: " + file.filename})
             else:
                 return jsonify({"success": False, "message": result.text})
         elif file_type == 'Watch':
+            data = json.load(file)
             fhir_project = request.form.get('fhir_project')  # 這樣拿
             url = f"{cfg.BASE_URL}/api/trans_watch/{fhir_project}"
 
             res = requests.post(url, json=data)
 
             return jsonify({"success": True, "message": res.status_code})
-    return jsonify({"success": False, "message": "沒收到檔案"})
+        elif file_type == 'Questionnaire':
+            data = json.load(file)
+            result = fhir.upload_FHIR_changeID(pat_id, data)
+            if result.ok:
+                return jsonify({"success": True, "message": "已收到問卷: " + file.filename})
+            else:
+                return jsonify({"success": False, "message": "上傳失敗"})
+    return jsonify({"success": False, "message": "上傳失敗"})
 
 
 @bp.route('/api/test', methods=['POST'])
 def api_test():
-    test = "IRB-2026-001"
-    result = fhir.countAllData(test)
+    pat_id = '657dc112-d78f-4fdd-93bb-be6b9d241796'
+    result = fhir.getQA(pat_id)
     return result

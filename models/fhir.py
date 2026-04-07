@@ -4,7 +4,7 @@ import uuid
 import enum
 from datetime import datetime, date
 
-class ResourceInfo(db.Model):
+class resourceInfo(db.Model):
     __tablename__ = 'resourceInfo'
     
     Id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -20,10 +20,11 @@ class ResourceInfo(db.Model):
     ValueSet = db.Column(db.Text)
     Reference = db.Column(db.Text)
     Title = db.Column(db.Text)
+    MainPatient = db.Column(db.SmallInteger)
 
 
 
-class Datatypes(db.Model):
+class datatypes(db.Model):
     __tablename__ = 'datatypes'
     
     Id = db.Column(db.Integer, primary_key=True, autoincrement=True)

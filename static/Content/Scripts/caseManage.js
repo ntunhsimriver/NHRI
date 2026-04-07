@@ -415,7 +415,7 @@ if (ModalConsent) {
 
 
 // 同意書上傳的按鈕
-function handleFileSelect(event) {
+function handleFileSelect(event, fileType) {
     const file = event.target.files[0]; // 取得第一個檔案
     const patid = document.querySelector('h2').innerText.trim(); // 抓pat id
     if (file) {
@@ -427,7 +427,7 @@ function handleFileSelect(event) {
 
         const formData = new FormData();
         formData.append('file', file); // 'file' 要對應 Flask 裡的 request.files['file']
-        formData.append('fileType', 'Consent');  // 把fileType也一起傳到後端
+        formData.append('fileType', fileType);  // 把fileType也一起傳到後端
         formData.append('patid', patid);  // 把patid也一起傳到後端
 
         // 3. 建立傳統的 AJAX 請求 (XMLHttpRequest)
@@ -444,6 +444,7 @@ function handleFileSelect(event) {
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
                     alert(response.message);
+                    location.reload();
                 } else {
                     alert("伺服器錯誤: " + response.message);
                 }
