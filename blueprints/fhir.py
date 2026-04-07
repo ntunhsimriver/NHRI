@@ -54,6 +54,7 @@ def register_fhir(app):
     fhir = FHIRClient()  # 從環境變數讀設定
     app.register_blueprint(create_fhir_blueprint(client=fhir, db=db))
 
+# 這邊是用身份證字號去抓人的id，暫時沒用了
 def find_patient_id(pat_identi):
     # 不管它到底有沒有重複，就是取第一個
     Bundles_Pat = FHIRData_Handle(None, "Patient?identifier=" + pat_identi, 1, 1)[0]
@@ -608,20 +609,20 @@ def set_nested_value(dic, path, value):
 
 def addDevice_FHIR(data, study_id):
 
-    print(data)
+    # print(data)
 
-    # pat_id = find_patient_id(data['pat_id'])
+    pat_id = find_patient_id(data['pat_id'])
 
-    if 'Patient/' in data['pat_id'] or data['pat_id'] == "":
-        print('FHIR')
-    elif re.match(r'^[A-Za-z][0-9]{9}$', data['pat_id']):
-        pat_id = find_patient_id(data['pat_id'])
-        if pat_id != None:
-            data['pat_id'] = 'Patient/' + pat_id
-        else:
-            return False, "此身份證字號不存在於FHIR Server"
-    else:
-        return False, "儲存失敗"
+    # if 'Patient/' in data['pat_id'] or data['pat_id'] == "":
+    #     print('FHIR')
+    # elif re.match(r'^[A-Za-z][0-9]{9}$', data['pat_id']):
+    #     pat_id = find_patient_id(data['pat_id'])
+    #     if pat_id != None:
+    #         data['pat_id'] = 'Patient/' + pat_id
+    #     else:
+    #         return False, "此身份證字號不存在於FHIR Server"
+    # else:
+    #     return False, "儲存失敗"
     
     result = FHIR_listMapping(data, 6)
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
@@ -694,10 +695,10 @@ def addPatient_FHIR(data, study_id):
 
 
     pat_id = data.get('pat_id')
-    pat_identi = data.get('pat_identi')
+    # pat_identi = data.get('pat_identi')
 
-    if pat_identi is not None:
-        pat_id = find_patient_id(pat_identi)
+    # if pat_identi is not None:
+    #     pat_id = find_patient_id(pat_identi)
     if pat_id != None:
         inputResSub = {
             'pat_id': "Patient/" + pat_id,

@@ -68,46 +68,46 @@ modalAddPatient.addEventListener('hidden.bs.modal', function () {
 // 先宣告
 const form = document.getElementById('registerForm');
 const patid = document.getElementById("addPatId");
-const patidenti = document.getElementById("addPatIdenti");
+// const patidenti = document.getElementById("addPatIdenti");
+// // 這邊是原本有身份證字號時用的，現在沒用了
+// function toggleInput() {
+//     // 控制 patidenti
+//     if (patid.value.trim()) {
+//         patidenti.disabled = true;
+//         patidenti.classList.add("bg-gray-100", "cursor-not-allowed");
+//     } else {
+//         patidenti.disabled = false;
+//         patidenti.classList.remove("bg-gray-100", "cursor-not-allowed");
+//     }
 
-function toggleInput() {
-    // 控制 patidenti
-    if (patid.value.trim()) {
-        patidenti.disabled = true;
-        patidenti.classList.add("bg-gray-100", "cursor-not-allowed");
-    } else {
-        patidenti.disabled = false;
-        patidenti.classList.remove("bg-gray-100", "cursor-not-allowed");
-    }
+//     // 控制 patid
+//     if (patidenti.value.trim()) {
+//         patid.disabled = true;
+//         patid.classList.add("bg-gray-100", "cursor-not-allowed");
+//     } else {
+//         patid.disabled = false;
+//         patid.classList.remove("bg-gray-100", "cursor-not-allowed");
+//     }
+// }
 
-    // 控制 patid
-    if (patidenti.value.trim()) {
-        patid.disabled = true;
-        patid.classList.add("bg-gray-100", "cursor-not-allowed");
-    } else {
-        patid.disabled = false;
-        patid.classList.remove("bg-gray-100", "cursor-not-allowed");
-    }
-}
+// function resetFormState() {
+//     patid.value = "";
+//     patidenti.value = "";
 
-function resetFormState() {
-    patid.value = "";
-    patidenti.value = "";
+//     patid.disabled = false;
+//     patidenti.disabled = false;
 
-    patid.disabled = false;
-    patidenti.disabled = false;
-
-    patid.classList.remove("bg-gray-100", "cursor-not-allowed");
-    patidenti.classList.remove("bg-gray-100", "cursor-not-allowed");
-}
+//     patid.classList.remove("bg-gray-100", "cursor-not-allowed");
+//     patidenti.classList.remove("bg-gray-100", "cursor-not-allowed");
+// }
 
 patid.addEventListener("input", toggleInput);
-patidenti.addEventListener("input", toggleInput);
+// patidenti.addEventListener("input", toggleInput);
 
 form.addEventListener('submit', async function (e) {
     e.preventDefault();
     const pat_id = patid.value;
-    const pat_identi = patidenti.value;
+    // const pat_identi = patidenti.value;
     const gender = document.getElementById('addGender').value;
     const birthDate = document.getElementById('addBirth').value;
     const start = document.getElementById('addPeriodStart').value;
@@ -121,7 +121,7 @@ form.addEventListener('submit', async function (e) {
     const response = await fetch('/api/addPatient', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pat_id, pat_identi, gender, birthDate, start, type })
+        body: JSON.stringify({ pat_id, gender, birthDate, start, type })
     });
 
     const result = await response.json();
