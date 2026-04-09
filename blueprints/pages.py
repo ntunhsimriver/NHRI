@@ -294,7 +294,7 @@ def api_uploadFHIR():
 
         if file_type == 'FHIR':
             data = json.load(file)
-            result = fhir.upload_FHIR(data) # 直接把檔案轉成 Python 字典
+            result = fhir.upload_FHIR_changeID(pat_id, data) # 直接把檔案轉成 Python 字典
             
             if result.ok:
                 return jsonify({"success": True, "message": file.filename})
@@ -323,11 +323,14 @@ def api_uploadFHIR():
                 return jsonify({"success": True, "message": "已收到問卷: " + file.filename})
             else:
                 return jsonify({"success": False, "message": "上傳失敗"})
+        # elif file_type == 'FHIR_ChangeId':
+        #     data = json.load(file)
     return jsonify({"success": False, "message": "上傳失敗"})
 
 
 @bp.route('/api/test', methods=['POST'])
 def api_test():
     pat_id = '657dc112-d78f-4fdd-93bb-be6b9d241796'
-    result = fhir.getQA(pat_id)
+    data = request.get_json()
+    result = fhir.upload_FHIR_changeID(pat_id, data)
     return result

@@ -688,35 +688,65 @@ def set_nested_value(data, path, value):
             
     return data
 
-def findReference(resource_info):
-    Type = resource_info.Type
-    Name = resource_info.Name
-    Card = resource_info.Card
-    if '*' in Card: # 有*字表示，他是多層
-        Name = Name + '[*]'
+def findReference(data):
+    resourceType = data['resourceType']
+    query = FHIR.resourceInfo.query.filter(
+        FHIR.resourceInfo.ResourceType == resourceType,
+        # FHIR.resourceInfo.Type.like('%Reference(%Patient%'),
+        FHIR.resourceInfo.MainPatient == '1'
 
-    # print(Type)
+    )
 
-    if 'Reference' in Type:
-        PathResult = Name + '.reference'
-    elif 'canonical' in Type:
-        PathResult = Name
-    print(PathResult)
-    return PathResult
+    resource_info = query.first()
+    # if not results:
+    #     resource_info = None
+    # elif len(results) == 1:
+    #     resource_info = results[0]
+    # else:
+    #     resource_info = next(
+    #         (r for r in results if r.MainPatient == 1),
+    #         results[0] 
+    #     )
+    print(resource_info)
+    if resource_info is None:
+        return  None
+    else:
+        print(resource_info)
+        Type = resource_info.Type
+        Name = resource_info.Name
+        Card = resource_info.Card
+        if '*' in Card: # 有*字表示，他是多層
+            Name = Name + '[*]'
+
+        # print(Type)
+
+        if 'Reference' in Type:
+            PathResult = Name + '.reference'
+        elif 'canonical' in Type:
+            PathResult = Name
+        return PathResult
 
 
 def upload_FHIR_changeID(pat_id, data):
-    resourceType = data['resourceType']
-    pat_id = f"Patient/{pat_id}"
+    pat_id = f"Patient/{pat_id}" # 先拼一下Patient得id格式
+    BundleInfo = FHIRData_Handle(None, data, 1, 0)
+    resourceType = BundleInfo[0].resourceType # 用第一層看一下這個resources是不是bundle
+    
+    if resourceType != 'Bundle':
+        PathResult = findReference(data)
+        if PathResult is not None:
+            result = set_nested_value(data, PathResult, pat_id)
+        else:
+            result = data
 
-    resource_info_list = FHIR.resourceInfo.query.filter(
-        FHIR.resourceInfo.ResourceType == resourceType,  # 找他是哪個resource
-        # FHIR.resourceInfo.Type.like('%Reference(%Patient%'), # 這裡也要加 FHIR.
-        FHIR.resourceInfo.MainPatient == 1 # 這邊標註 誰是主要的人(因為Patient可能會有很多，所以特別標註哪個欄位是表示 真的患者)
-    ).first()
-    PathResult = findReference(resource_info_list)
-    result = set_nested_value(data, PathResult, pat_id)
-    print(type(result))
+    elif resourceType == 'Bundle':
+        for i, row in enumerate(BundleInfo):
+            PathResult = findReference(row.BundleResource)
+            if PathResult is not None:
+                data["entry"][i]["resource"] = set_nested_value(row.BundleResource, PathResult, pat_id)
+            
+        result = data
+    print(result)
     res = upload_FHIR(result)
     return res
 def merge_to_simple_json(q_data, r_data):
