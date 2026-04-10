@@ -333,4 +333,5 @@ def api_test():
     pat_id = '657dc112-d78f-4fdd-93bb-be6b9d241796'
     data = request.get_json()
     result = fhir.upload_FHIR_changeID(pat_id, data)
-    return result
+
+    return jsonify(result)

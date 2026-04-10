@@ -644,9 +644,10 @@ def addDevice_FHIR(data, study_id):
 
 
 def upload_FHIR(data):
-    print(data)
+    # print(data)
     getFHIR = FHIRData_Handle(None, data, 1, 0)
     getFirstInfo = getFHIR[0] # 取第一個就可以知道最外層的，要先確認他到底是什麼Resource
+    print(getFirstInfo)
     if getFirstInfo.type == "transaction":
         res = post_FHIR_api(data, "") # transaction可以直接上傳
     else:
@@ -654,6 +655,7 @@ def upload_FHIR(data):
             res = put_FHIR_api(getFirstInfo.resourceType + '/' + getFirstInfo.id, data)
         else:
             res = post_FHIR_api(data, getFirstInfo.resourceType) # Bundle及其他resource都要加上resourceType
+    # print(res.text)
     return res
 
 # 這個是補subject用的，(進來的json, 我的fhir路徑 如subject.reference, 要填進去的值 如Patient/test)
@@ -690,51 +692,60 @@ def set_nested_value(data, path, value):
 
 def findReference(data):
     resourceType = data['resourceType']
-    query = FHIR.resourceInfo.query.filter(
-        FHIR.resourceInfo.ResourceType == resourceType,
-        # FHIR.resourceInfo.Type.like('%Reference(%Patient%'),
-        FHIR.resourceInfo.MainPatient == '1'
 
-    )
-
-    resource_info = query.first()
-    # if not results:
-    #     resource_info = None
-    # elif len(results) == 1:
-    #     resource_info = results[0]
-    # else:
-    #     resource_info = next(
-    #         (r for r in results if r.MainPatient == 1),
-    #         results[0] 
-    #     )
-    print(resource_info)
-    if resource_info is None:
-        return  None
+    if resourceType == 'Patient':
+        return  'Patient'
     else:
-        print(resource_info)
-        Type = resource_info.Type
-        Name = resource_info.Name
-        Card = resource_info.Card
-        if '*' in Card: # 有*字表示，他是多層
-            Name = Name + '[*]'
+        query = FHIR.resourceInfo.query.filter(
+            FHIR.resourceInfo.ResourceType == resourceType,
+            # FHIR.resourceInfo.Type.like('%Reference(%Patient%'),
+            FHIR.resourceInfo.MainPatient == '1'
 
-        # print(Type)
+        )
 
-        if 'Reference' in Type:
-            PathResult = Name + '.reference'
-        elif 'canonical' in Type:
-            PathResult = Name
-        return PathResult
+        resource_info = query.first()
+        # if not results:
+        #     resource_info = None
+        # elif len(results) == 1:
+        #     resource_info = results[0]
+        # else:
+        #     resource_info = next(
+        #         (r for r in results if r.MainPatient == 1),
+        #         results[0] 
+        #     )
+        # print(resource_info)
+        if resource_info is None:
+            return  None
+        else:
+            # print(resource_info)
+            Type = resource_info.Type
+            Name = resource_info.Name
+            Card = resource_info.Card
+            if '*' in Card: # 有*字表示，他是多層
+                Name = Name + '[*]'
+
+            # print(Type)
+
+            if 'Reference' in Type:
+                PathResult = Name + '.reference'
+            elif 'canonical' in Type:
+                PathResult = Name
+            return PathResult
 
 
 def upload_FHIR_changeID(pat_id, data):
+    just_id = pat_id
     pat_id = f"Patient/{pat_id}" # 先拼一下Patient得id格式
     BundleInfo = FHIRData_Handle(None, data, 1, 0)
     resourceType = BundleInfo[0].resourceType # 用第一層看一下這個resources是不是bundle
     
     if resourceType != 'Bundle':
         PathResult = findReference(data)
-        if PathResult is not None:
+        if PathResult == 'Patient':
+            print(PathResult)
+            data['id'] = just_id
+            result = data
+        elif PathResult is not None:
             result = set_nested_value(data, PathResult, pat_id)
         else:
             result = data
@@ -742,12 +753,32 @@ def upload_FHIR_changeID(pat_id, data):
     elif resourceType == 'Bundle':
         for i, row in enumerate(BundleInfo):
             PathResult = findReference(row.BundleResource)
-            if PathResult is not None:
+            if PathResult == 'Patient':
+                entry = data["entry"][i]
+
+                # request.url
+                req = entry.get("request")
+                if isinstance(req, dict) and "url" in req:
+                    req["url"] = pat_id
+
+                # resource.id
+                res = entry.get("resource")
+                if isinstance(res, dict) and "id" in res:
+                    res["id"] = just_id
+
+                # fullUrl
+                full = entry.get("fullUrl")
+                if isinstance(full, str) and "Patient" in full:
+                    entry["fullUrl"] = full.split("Patient")[0] + pat_id
+            elif PathResult is not None:
                 data["entry"][i]["resource"] = set_nested_value(row.BundleResource, PathResult, pat_id)
             
         result = data
-    print(result)
+    with open("input_result.json", "w", encoding='utf-8') as json_file:
+        json.dump(result, json_file)  
+    # print(result)
     res = upload_FHIR(result)
+    print(res.text)
     return res
 def merge_to_simple_json(q_data, r_data):
     # 1. 建立題目字典 (Key 轉小寫以利對照)
