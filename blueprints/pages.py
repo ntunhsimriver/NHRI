@@ -309,8 +309,8 @@ def api_uploadFHIR():
 
 @bp.route('/api/test', methods=['POST'])
 def api_test():
-    data = 'IRB-2026-002'
+    data = 'IRB-2026-001'
     # data = request.get_json()
-    result = fhir.getAssistant(data)
+    result = fhir.getBULK(data)
 
     return jsonify(result)

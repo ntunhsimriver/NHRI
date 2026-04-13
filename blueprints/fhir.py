@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 import json
 import re
 from datetime import datetime, date, timedelta
+import time
 import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
 from models.project import Project
 from models.user import User
@@ -221,41 +222,78 @@ def FHIRSearch_Handle(SearchId, SearchData):
     return Result
 
 def FHIR_mappingJson(data, path, value):
-    # 使用正則表達式拆分路徑，同時處理屬性名和陣列索引（如 identifier[0]）
-    parts = re.findall(r'([^.\[\]]+)|\[(\d+)\]', path)
-    
-    current = data
-    for i in range(len(parts)):
-        key, index = parts[i]
-        
-        # 處理陣列索引情況 [n]
-        if index:
-            index = int(index)
-            # 如果目前位置不是列表，或長度不足，則補齊
-            while len(current) <= index:
-                current.append({})
-            
-            # 如果這是路徑的最後一部分，直接賦值
-            if i == len(parts) - 1:
-                current[index] = value
+    parts = re.findall(r'([^\.\[\]]+)|\[(\d+|\*)\]', path)
+
+    def set_path(current, parts, value):
+        for i in range(len(parts)):
+            key, index = parts[i]
+
+            if index != '':
+                if index == '*':
+                    if not isinstance(value, list):
+                        raise ValueError("當路徑含 [*] 時，value 必須是 list")
+
+                    result_list = []
+                    remaining_parts = parts[i+1:]
+
+                    for item in value:
+                        obj = {}
+                        set_path(obj, remaining_parts, item)
+                        result_list.append(obj)
+
+                    return result_list
+
+                index = int(index)
+
+                while len(current) <= index:
+                    current.append({})
+
+                if i == len(parts) - 1:
+                    current[index] = value
+                else:
+                    next_part_is_index = parts[i+1][1] != ''
+                    if not current[index]:
+                        current[index] = [] if next_part_is_index else {}
+                    current = current[index]
+
             else:
-                # 準備進入下一層
-                next_part_is_index = parts[i+1][1] != ''
-                if not current[index]:
-                    current[index] = [] if next_part_is_index else {}
-                current = current[index]
-        
-        # 處理屬性名稱情況
-        else:
-            # 如果這是路徑的最後一部分，直接賦值
-            if i == len(parts) - 1:
-                current[key] = value
+                if i == len(parts) - 1:
+                    current[key] = value
+                else:
+                    next_part_is_index = parts[i+1][1] != ''
+                    if key not in current:
+                        current[key] = [] if next_part_is_index else {}
+                    elif parts[i+1][1] == '*' and key not in current:
+                        current[key] = []
+                    current = current[key]
+
+        return current
+
+    # 特別處理 [*]
+    if '[*]' in path:
+        star_match = re.match(r'^(.*?)\[\*\](\..+)?$', path)
+        if not star_match:
+            raise ValueError("不支援的 [*] 路徑格式")
+
+        prefix = star_match.group(1)
+        suffix = star_match.group(2) or ""
+
+        if prefix not in data:
+            data[prefix] = []
+
+        if not isinstance(value, list):
+            raise ValueError("當使用 [*] 時，value 必須是 list")
+
+        for item in value:
+            obj = {}
+            if suffix.startswith('.'):
+                set_path(obj, re.findall(r'([^\.\[\]]+)|\[(\d+|\*)\]', suffix[1:]), item)
             else:
-                # 檢查下一層是陣列還是物件，先行初始化
-                next_part_is_index = parts[i+1][1] != ''
-                if key not in current:
-                    current[key] = [] if next_part_is_index else {}
-                current = current[key]
+                obj = item
+            data[prefix].append(obj)
+    else:
+        set_path(data, parts, value)
+
 def FHIR_listMapping(data, CatId): # 放要進去的值的json, 從資料庫裡面取出來的json
     result = {}
     study_rules = FHIR.FhirMappging.query.filter_by(CatId=CatId, Del=0).all()
@@ -1011,3 +1049,149 @@ def getEnc(enc_id):
         result[resource_type].extend([model.__dict__ for model in ResultData])
 
     return result
+
+def getBULK(ProjectId):
+    ProjectInfo = FHIRData_Handle(None, "ResearchSubject?study=ResearchStudy/" + ProjectId, 5, 1)
+    
+    pat_id_list = []
+    for item in ProjectInfo:
+        pat_id_list.append(item.pat_id)
+    today = datetime.now()
+    data = {
+        "pat_id": pat_id_list,
+        "actual": "true",
+        "type": "person",
+        "date": today.strftime("%Y-%m-%dT%H:%M:%S"),
+        "id": ProjectId + "-" + today.strftime("%Y%m%d"),
+    }
+    result = FHIR_listMapping(data, 14)
+
+    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
+    Export_data(ProjectId, result['resourceType'] + "/" + result['id'])
+    return Response.json()
+
+
+def Export_data(ProjectId, GroupId):
+    """啟動 $export，輪詢，下載 NDJSON；全程回傳可偵錯的 JSON"""
+    def get_token():
+        resp = requests.post(
+            cfg.OAUTH_URL,
+            data={
+                "grant_type": "client_credentials",
+                "client_id": cfg.OAUTH_CLIENT_ID,
+                "client_secret": cfg.OAUTH_CLIENT_SECRET,
+            },
+            timeout=cfg.REQUEST_TIMEOUT, #requests 逾時秒數  30sec
+            verify=cfg.VERIFY_TLS,  # $export 輪詢間隔秒  20sec
+        )
+        try:
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception as e:
+            return None, {"ok": False, "stage": "oauth", "http": getattr(resp, "status_code", None),
+                          "message": f"取得 token 失敗: {e}", "text": getattr(resp, "text", "")}
+        return data.get("access_token"), {"ok": True, "stage": "oauth"}
+
+    # 1) 取得 token
+    token, odebug = get_token()
+    if not token:
+        return odebug
+
+    FHIR_BASE = cfg.FHIR_SERVER_URL.rstrip("/") + "/" + GroupId + "/"
+    headers = {
+        "Prefer": "respond-async",
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "Accept": "application/fhir+json"
+    }
+
+    # 2) 啟動 $export
+    try:
+        r = requests.get(FHIR_BASE + "$export", headers=headers,
+                         timeout=cfg.REQUEST_TIMEOUT, verify=cfg.VERIFY_TLS)
+    except Exception as e:
+        return {"ok": False, "stage": "kickoff", "message": f"$export 請求失敗: {e}"}
+
+    kickoff_info = {
+        "status": r.status_code,
+        "content_location": r.headers.get("Content-Location"),
+        "body_sample": r.text[:500]
+    }
+    if r.status_code != 202:
+        return {"ok": False, "stage": "kickoff", "http": r.status_code,
+                "message": "啟動 $export 未回 202，請確認伺服器是否支援或權限是否足夠",
+                "detail": kickoff_info}
+
+    job_url = r.headers.get("Content-Location")
+    if not job_url:
+        return {"ok": False, "stage": "kickoff", "http": r.status_code,
+                "message": "未收到 Content-Location（工作查詢網址）", "detail": kickoff_info}
+
+    # 3) 輪詢
+    # 輪詢前先建資料表，然後先把jobId存起來備用(以jobid有成功為前題就表示bulk應該會成功)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_root = cfg.NDJSON_DIR
+    out_root.mkdir(parents=True, exist_ok=True)
+    folder_pro = out_root / f"{ProjectId}"
+    folder_pro.mkdir(exist_ok=True)
+    folder = folder_pro / ts
+    folder.mkdir(exist_ok=True)
+    (folder / "JobId.txt").write_text(job_url, encoding="utf-8")
+
+    last = {}
+    while True:
+        try:
+            # 每次輪詢可更新 token（避免過期）
+            token, _ = get_token()
+            if not token:
+                return {"ok": False, "stage": "poll", "message": "輪詢時重新取得 token 失敗"}
+            headers["Authorization"] = f"Bearer {token}"
+
+            p = requests.get(job_url, headers=headers,
+                             timeout=cfg.REQUEST_TIMEOUT, verify=cfg.VERIFY_TLS)
+            last = {"status": p.status_code, "body_sample": p.text[:500]}
+            if p.status_code == 202:
+                time.sleep(cfg.POLL_INTERVAL)
+                continue
+            if p.status_code != 200:
+                return {"ok": False, "stage": "poll", "http": p.status_code,
+                        "message": "輪詢未完成或發生錯誤", "detail": last}
+            # 200：成功
+            result = p.json()
+            break
+        except Exception as e:
+            time.sleep(cfg.POLL_INTERVAL)
+
+    if not isinstance(result, dict) or "output" not in result:
+        return {"ok": False, "stage": "poll", "message": "完成回應缺少 output", "detail": result}
+
+    # 4) 下載 NDJSON
+
+    files = []
+    for i, item in enumerate(result["output"], start=1):
+        try:
+            token, _ = get_token()
+            if not token:
+                return {"ok": False, "stage": "download", "message": "下載前取得 token 失敗"}
+            h = {"Authorization": f"Bearer {token}", "Accept": "application/x-ndjson"}
+            nd = requests.get(item["url"], headers=h,
+                              timeout=max(cfg.REQUEST_TIMEOUT, 60),
+                              verify=cfg.VERIFY_TLS)
+            if nd.status_code == 200:
+                path = folder / f"{i}_{item['type']}.ndjson"
+                path.write_bytes(nd.content)
+                files.append(path.name)
+            else:
+                return {"ok": False, "stage": "download", "http": nd.status_code,
+                        "message": f"下載 {item.get('type')} 失敗", "url": item.get("url")}
+        except Exception as e:
+            return {"ok": False, "stage": "download", "message": f"下載異常: {e}"}
+
+    return {
+        "ok": True,
+        "stage": "done",
+        "folder": str(folder.resolve()),
+        "ndjson_count": len(files),
+        "ndjson_files": files[:10],  # 預覽前 10 筆
+        "job_url": job_url
+    }
