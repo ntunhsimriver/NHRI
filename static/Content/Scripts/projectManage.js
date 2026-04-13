@@ -80,29 +80,55 @@ var ModalmemberManage = document.getElementById('Modal_memberManage');
 var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModalmemberManage);
 
 ModalmemberManage.addEventListener('show.bs.modal', function (event) {
-    var button = event.relatedTarget; // 取得被點擊的按鈕
-    var input_data = button.getAttribute('data-bs-member')
-    var proid_data = button.getAttribute('data-bs-ProID')
-    // var data = JSON.parse(input_data);
+    var button = event.relatedTarget;
 
-    var memberEl = document.getElementById('item_member');
-    if (memberEl) memberEl.value = input_data;
+    var input_data = button.getAttribute('data-bs-member');
+    var proid_data = button.getAttribute('data-bs-ProID');
 
+    // 解析 JSON（重點）
+    var members = JSON.parse(input_data);
+
+    // 設定 hidden input
     var proidEl = document.getElementById('item_proid');
     if (proidEl) proidEl.value = proid_data;
+
+    // 顯示 checkbox 的地方
+    var container = document.getElementById('item_member');
+    container.innerHTML = "";
+
+    // 動態產生 checkbox
+    members.forEach(item => {
+        container.innerHTML += `
+            <div>
+                <label>
+                    <input 
+                        type="checkbox"
+                        name="assistant_ids"
+                        value="${item.id}"
+                        ${item.selected ? "checked" : ""}
+                    >
+                    ${item.full_name} (${item.email})
+                </label>
+            </div>
+        `;
+    });
 
 });
 
 // 先宣告
 const addMemberform = document.getElementById('addMemberForm');
 const addMembermsg = document.getElementById('addMember_message');
-
+// 抓選項用的
+function getSelectedAssistants() {
+    const checkedBoxes = document.querySelectorAll('input[name="assistant_ids"]:checked');
+    const selected = Array.from(checkedBoxes).map(cb => cb.value);
+    const selectedStr = selected.join(';');
+    return selectedStr;
+}
 addMemberform.addEventListener('submit', async function (e) {
     e.preventDefault();
-    
-    const item_member = document.getElementById('item_member').value;
+    const item_member = getSelectedAssistants();
     const item_proid = document.getElementById('item_proid').value;
-
 
     // 清除前一次樣式
     msg.classList.remove('error-message', 'success-message');

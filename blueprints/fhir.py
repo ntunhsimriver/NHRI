@@ -370,16 +370,29 @@ def get_IndexProject(study_id):
 def getAssistant(ProjectId): # 產出助理清單
     result = []
     # 先讀資料表，確定這個研究案的助理有誰
-    ProjectInfo = Project.query.filter_by(fhir_study_id='ResearchStudy/'+ProjectId).first()
-    # print(ProjectInfo)
-    if ProjectInfo.Assistant is None:
-        return "無指定助理"
-    Assistant_List = ProjectInfo.Assistant.split(';')
+    ProjectInfo = Project.query.filter_by(irb_number = ProjectId).first()
 
-    for row_a in Assistant_List:
-        Assistant_Info = User.query.filter_by(id=row_a).first()
-        result.append(Assistant_Info)
-    result = [model.__dict__ for model in result]
+    Assistant_List = ProjectInfo.Assistant.split(';') if ProjectInfo.Assistant not in [None, ''] else []
+
+    print(Assistant_List)
+
+    Assistant_Info_list = User.query.filter_by(role="ASSISTANT").all()
+    print(Assistant_Info_list)
+
+    for row in Assistant_Info_list:
+        print(row.id)
+        row_data = {
+            "id": str(row.id),
+            "full_name": row.full_name,   # 建議加
+            "email": row.email,   # 建議加
+            "selected": str(row.id) in Assistant_List
+        }
+        result.append(row_data)
+    # for row_a in Assistant_List:
+    #     Assistant_Info = User.query.filter_by(id=row_a).first()
+    #     result.append(Assistant_Info)
+    # result = [model.__dict__ for model in result]
+    print(result)
     return result
 
 

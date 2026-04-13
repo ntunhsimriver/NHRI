@@ -52,13 +52,11 @@
             </div>
           </td>
           <td class="px-6 py-4 text-slate-600">
-          {% if item['Assistant'] != "無指定助理" %}
-            {{ item['Assistant'] | map(attribute='full_name') | join(', ') }}
-          {% else %}
-            {{ item['Assistant'] }}
-          {% endif %}
-
-            
+            {% for a in item.Assistant %}
+              {% if a.selected %}
+                <span class="tag">{{ a.full_name }}</span>
+              {% endif %}
+            {% endfor %}
           </td>
           <td class="px-6 py-4">
             <div class="flex flex-wrap gap-1">
@@ -78,7 +76,7 @@
               data-bs-toggle="modal" 
               data-bs-target="#Modal_memberManage"
               data-bs-ProID="{{item['study_info'].ProjectId}}"
-              data-bs-member="{% for row in item['Assistant'] %}{% if not loop.first %},{% endif %}{{ row.email }}{% endfor %}"
+              data-bs-member="{{ item.Assistant  | tojson  | forceescape}}"
                >成員管理</button>
           </td>
         </tr>
@@ -171,10 +169,10 @@
       <div id="Modal_memberManage_body" class="p-6 space-y-6" style="max-height: 90vh; overflow: hidden;">
         <div id="addMember_message" class="message"></div>
 
-        <label class="block text-sm font-medium text-slate-700" for="item_member">助理email</label>
-        <input type="text" id="item_member" class="mt-1 block w-full rounded-md px-3 py-2 text-sm !border !border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+        <label class="block text-sm font-medium text-slate-700" for="item_member">請選擇助理</label>
+        <div id="item_member" name="item_member"></div>
 
-        <input type="text" id="item_proid" class="hidden">
+        <input type="text" id="item_proid"  class="hidden">
 
       </div>
 

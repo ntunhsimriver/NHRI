@@ -206,20 +206,7 @@ def deviceManage():
 @bp.route('/api/addDevice', methods=['POST'])
 def api_addDevice():
     data = request.get_json()
-
-    # if 'Patient/' in data['pat_id']:
-    #     print('FHIR')
-    # elif re.match(r'^[A-Z][0-9]{9}$', data['pat_id']):
-    #     pat_id = fhir.find_patient_id(data['pat_id'])
-    #     print(pat_id)
-
     res = fhir.addDevice_FHIR(data, session['study_id'])
-    # 進土撥鼠的專案
-    # data_in = {'ProjectGroup': 'THBC_NHRI', 'Project': 'Device', 'data': [data]}
-    # headers_Groundhog = {'WebUsername':'admin@gmail.com', 'WebUserpassword':'aB12345678!'} 
-    # response = requests.post(cfg.Trans_FHIR, headers=headers_Groundhog, json=data_in, verify=False)
-    # json_fhir = json.loads(str(response.text))
-    # response_FHIR = requests.post(cfg.FHIR_SERVER_URL, json=json_fhir, verify=False)
     if res[0]:
         if res[1].ok:
             return jsonify({'success': True, 'message': '已新增成功'})
@@ -231,10 +218,8 @@ def api_addDevice():
 def projectManage():
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
-    # elif 'study_id' not in session:
-    #     return redirect(url_for('pages.selectproject'))
     data = fhir.get_Project(session['fhir_practitioner_id'])    
-
+    print(data)
     # PatInfo = fhir.getProjectManagePatient(session['study_id'])
 
     return render_template('projectManage.html', data=data, script_path=url_for('static', filename='Content/Scripts/projectManage.js'))
@@ -249,14 +234,8 @@ def api_addProject():
 @bp.route('/api/addMember', methods=['POST'])
 def api_addMember():
     data = request.get_json()
-    getMemberEmail = data['item_member']
+    member_result = data['item_member']
     getMember_proid = data['item_proid']
-    getMemberEmail_List = getMemberEmail.split(',')
-    member_result = []
-    for m in getMemberEmail_List:
-        Assistant_Info = User.query.filter_by(email=m).first()
-        member_result.append(str(Assistant_Info.id))
-    member_result = ';'.join(member_result)
     ProjectInfo = Project.query.filter_by(irb_number=getMember_proid).first()
 
     if ProjectInfo:
@@ -330,8 +309,8 @@ def api_uploadFHIR():
 
 @bp.route('/api/test', methods=['POST'])
 def api_test():
-    pat_id = '657dc112-d78f-4fdd-93bb-be6b9d241796'
-    data = request.get_json()
-    result = fhir.upload_FHIR_changeID(pat_id, data)
+    data = 'IRB-2026-002'
+    # data = request.get_json()
+    result = fhir.getAssistant(data)
 
     return jsonify(result)
