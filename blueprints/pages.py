@@ -13,7 +13,10 @@ from models.project import Project
 from extensions import db
 import re
 from pathlib import Path
-import shutil
+# import shutil
+import pyminizip
+import tempfile
+
 
 bp = Blueprint("pages", __name__)
 
@@ -206,7 +209,7 @@ def dataExport():
 def api_export():
     data = request.get_json()
     print(data)
-    res = fhir.getBULK(data['project_id'])
+    res = fhir.getBULK(data['project_id'], data['zip_password'])
     print(res)
     return res
 
@@ -330,20 +333,52 @@ def api_uploadFHIR():
 @bp.route('/api/download', methods=['GET'])
 def download_export():
     folder_name = request.args.get("folder_name")
-
     base_path = Path(cfg.NDJSON_DIR) / folder_name
 
     if not base_path.exists():
         return {"error": "資料夾不存在"}, 404
 
-    zip_path = shutil.make_archive(
-        str(base_path),
-        "zip",
-        root_dir=base_path
+    password_file = base_path / "zip_password.txt"
+    if not password_file.exists():
+        return {"error": "找不到 zip_password.txt"}, 404
+
+    zip_password = password_file.read_text(encoding="utf-8").strip()
+    if not zip_password:
+        return {"error": "zip_password.txt 內容是空的"}, 400
+
+    # 暫存 zip 檔
+    temp_zip = Path(cfg.NDJSON_DIR) / f"{folder_name}.zip"
+
+    # 收集資料夾內所有檔案
+    file_list = []
+    relative_list = []
+
+    for root, dirs, files in os.walk(base_path):
+        for file in files:
+            # 不把密碼檔自己壓進去
+            if file == "zip_password.txt":
+                continue
+
+            full_path = Path(root) / file
+            rel_path = full_path.relative_to(base_path)
+
+            file_list.append(str(full_path))
+            relative_list.append(str(rel_path.parent) if str(rel_path.parent) != "." else "")
+
+    if not file_list:
+        return {"error": "沒有可壓縮的檔案"}, 400
+
+    # 建立加密 zip
+    pyminizip.compress_multiple(
+        file_list,
+        relative_list,
+        str(temp_zip),
+        zip_password,
+        5
     )
 
     return send_file(
-        zip_path,
+        str(temp_zip),
         as_attachment=True,
         download_name=f"{folder_name}.zip"
     )

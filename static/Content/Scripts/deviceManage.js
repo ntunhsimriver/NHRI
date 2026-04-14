@@ -64,7 +64,7 @@ form.addEventListener('submit', async function (e) {
         msg.classList.add('success-message');
         setTimeout(() => {
             location.reload();
-        }, 1000);
+        }, 500);
     } else {
         msg.textContent = result.message;
         msg.classList.add('error-message');

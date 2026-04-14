@@ -57,6 +57,15 @@ class FhirMapping_Category(db.Model):
     Note = db.Column(db.Text)
     Del = db.Column(db.Text)
 
+class device_history(db.Model):
+    __tablename__ = "device_history"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    device_id = db.Column(db.Text, nullable=False)
+    patient_id = db.Column(db.Text, nullable=False)
+    start_datetime = db.Column(db.DateTime, nullable=False)
+    end_datetime = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), nullable=False, server_default="active")
+    note = db.Column(db.Text, nullable=True)
 
 
 ### 下面暫時都是沒用的東西

@@ -1,28 +1,33 @@
 async function ExportAPI(projectId) {
+  // 跳出輸入框
+  const password = prompt("請輸入ZIP壓縮密碼：");
+
+  // 使用者按取消
+  if (password === null) {
+    return;
+  }
+
   const button = event.currentTarget;
   button.disabled = true;
   button.innerText = '匯出中...';
 
   try {
-    const res = await fetch('/api/export', {
+    await fetch('/api/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ project_id: projectId })
+      body: JSON.stringify({ 
+        project_id: projectId,
+        zip_password: password   // 👈 把密碼送出去
+      })
     });
 
-    const data = await res.json();
-
-    // 🔥 顯示提示
-    alert(data.message || '匯出已開始');
-
-    // 🔥 稍等再刷新
     setTimeout(() => {
       window.location.reload();
-    }, 1500);
+    }, 500);
 
   } catch (err) {
     console.error(err);
-    alert(data.message);
+    alert('匯出失敗');
   }
 }
 

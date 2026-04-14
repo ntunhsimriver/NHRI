@@ -702,22 +702,81 @@ def set_nested_value(dic, path, value):
             pass 
     # ... (簡化版邏輯)
 
+from datetime import datetime
+
+from datetime import datetime
+
+def update_device_history(device_id, patient_id, note=None):
+    """
+    處理 device 綁定歷史
+
+    情境:
+    1. device 沒綁過人，patient_id 有值 -> 新增綁定
+    2. device 原本有人，patient_id 有值 -> 換人
+    3. device 原本有人，patient_id=None 或 "" -> 解綁
+    """
+
+    now_time = datetime.now()
+
+    old_history = FHIR.device_history.query.filter_by(
+        device_id=device_id,
+        status="active"
+    ).filter(
+        FHIR.device_history.end_datetime.is_(None)
+    ).first()
+
+    # 情境 3：原本有人，現在要解綁
+    if patient_id is "":
+        print("情境 3")
+        if old_history:
+            old_history.end_datetime = now_time
+            old_history.status = "ended"
+            if note:
+                old_history.note = note
+        db.session.commit()
+        return True
+
+    # 情境 1：原本沒綁過人，現在新綁一個人
+    if not old_history:
+        print("情境 1")
+        new_history = FHIR.device_history(
+            device_id=device_id,
+            patient_id=patient_id,
+            start_datetime=now_time,
+            end_datetime=None,
+            status="active",
+            note=note
+        )
+        db.session.add(new_history)
+        db.session.commit()
+        return True
+
+    # 如果目前就是同一個人，就不重複新增
+    if old_history.patient_id == patient_id:
+        print("同一個人，不處理")
+        return True
+
+    # 情境 2：原本有人，現在換人
+    print("情境 2")
+    old_history.end_datetime = now_time
+    old_history.status = "ended"
+
+    new_history = FHIR.device_history(
+        device_id=device_id,
+        patient_id=patient_id,
+        start_datetime=now_time,
+        end_datetime=None,
+        status="active",
+        note=note
+    )
+    db.session.add(new_history)
+    db.session.commit()
+
+    return True
+
 def addDevice_FHIR(data, study_id):
 
-    # print(data)
-
-    pat_id = find_patient_id(data['pat_id'])
-
-    # if 'Patient/' in data['pat_id'] or data['pat_id'] == "":
-    #     print('FHIR')
-    # elif re.match(r'^[A-Za-z][0-9]{9}$', data['pat_id']):
-    #     pat_id = find_patient_id(data['pat_id'])
-    #     if pat_id != None:
-    #         data['pat_id'] = 'Patient/' + pat_id
-    #     else:
-    #         return False, "此身份證字號不存在於FHIR Server"
-    # else:
-    #     return False, "儲存失敗"
+    pat_id = data['pat_id']
     
     result = FHIR_listMapping(data, 6)
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
@@ -730,6 +789,13 @@ def addDevice_FHIR(data, study_id):
     device_ids = list(dict.fromkeys(device_ids))
 
     ProjectInfo.device_list = ",".join(device_ids)
+    # 如果有綁病人，就順便記錄歷史
+    
+    update_device_history(
+        device_id=data['id'],
+        patient_id=pat_id,
+        note=""
+    )
 
     db.session.commit()
 
@@ -1092,11 +1158,11 @@ def getEnc(enc_id):
 
     return result
 
-def run_export(ProjectId, result):
+def run_export(ProjectId, result, zip_password):
     put_FHIR_api(result['resourceType'] + "/" + result['id'], result)
-    Export_data(ProjectId, result['resourceType'] + "/" + result['id'])
+    Export_data(ProjectId, result['resourceType'] + "/" + result['id'], zip_password)
 
-def getBULK(ProjectId):
+def getBULK(ProjectId, zip_password):
     ProjectInfo = FHIRData_Handle(None, "ResearchSubject?study=ResearchStudy/" + ProjectId, 5, 1)
     
     pat_id_list = []
@@ -1120,7 +1186,7 @@ def getBULK(ProjectId):
         result = FHIR_listMapping(data, 14)
 
         # 🔥 背景執行（重點）
-        t = threading.Thread(target=run_export, args=(ProjectId, result))
+        t = threading.Thread(target=run_export, args=(ProjectId, result, zip_password))
         t.start()
 
         # 🔥 直接回應（不等）
@@ -1131,7 +1197,7 @@ def getBULK(ProjectId):
         }), 202
 
 
-def Export_data(ProjectId, GroupId):
+def Export_data(ProjectId, GroupId, zip_password):
     """啟動 $export，輪詢，下載 NDJSON；全程回傳可偵錯的 JSON"""
     def get_token():
         resp = requests.post(
@@ -1197,6 +1263,7 @@ def Export_data(ProjectId, GroupId):
     folder = folder_pro / ts
     folder.mkdir(exist_ok=True)
     (folder / "JobId.txt").write_text(job_url, encoding="utf-8")
+    (folder / "zip_password.txt").write_text(zip_password, encoding="utf-8")
 
     last = {}
     while True:
@@ -1255,8 +1322,6 @@ def Export_data(ProjectId, GroupId):
         "ndjson_files": files[:10],  # 預覽前 10 筆
         "job_url": job_url
     }
-
-from pathlib import Path
 
 def get_latest_export_status(project_id):
     base_folder = Path(cfg.NDJSON_DIR) / project_id
