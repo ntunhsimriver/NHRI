@@ -122,3 +122,8 @@
     background-color: rgb(220 252 231); /* green-100 */
     color: rgb(22 163 74);              /* green-600 */
 }
+
+.type-running {
+    background-color: rgb(255 237 213); /* orange-100 */
+    color: rgb(234 88 12);              /* orange-600 */
+}

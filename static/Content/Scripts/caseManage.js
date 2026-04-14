@@ -101,7 +101,7 @@ const patid = document.getElementById("addPatId");
 //     patidenti.classList.remove("bg-gray-100", "cursor-not-allowed");
 // }
 
-patid.addEventListener("input", toggleInput);
+// patid.addEventListener("input", toggleInput);
 // patidenti.addEventListener("input", toggleInput);
 
 form.addEventListener('submit', async function (e) {

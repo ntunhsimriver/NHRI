@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app
+from flask import Blueprint, current_app, jsonify
 from routes.fhir_api import create_fhir_blueprint
 from mylib.fhir_client import FHIRClient
 from extensions import db
@@ -17,6 +17,7 @@ from pydantic import create_model
 from collections import Counter
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
+import threading
 
 # 這個是算資料完整度的list
 resource_types = [
@@ -351,25 +352,66 @@ def get_Patient(PatID, study_id): # 同意書可以一起讀
     return PatInfo, FirstDate, getConsent, DeviceInfo
 
 # 算一下主頁的資料量
-# def countAllData(study_id):
-def countAllData():
+def countAllData(study_id):
+    
     today = datetime.now().strftime("%Y-%m-%d")
     TotlaData = 0
     CountDataList = []
 
-    # getAllSubject = FHIRData_Handle(None, FHIRSearch_Handle(10, [study_id]), 1, 1)
-    # print(getAllSubject[0].BundleResource)
-    # for s in getAllSubject:
-    #     subject_id = FHIRData_Handle(None, s.BundleResource, 1, 0)[0].id
-    
-    # 先改成 單純把他的資料量都滾出來，之後想要加邏輯再說
-    for type in resource_types:
-        # print(read_FHIR_api(Resource, params=None))
-        CountData = FHIRData_Handle(None, type + "?_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
-        CountDataList.append(CountData)
-        TotlaData += int(CountData)
+    ProjectInfo = FHIRData_Handle(None, "ResearchSubject?study=ResearchStudy/" + study_id, 5, 1)
+    pat_id_list = []
+    for item in ProjectInfo:
+        pat_id_list.append(item.pat_id)
+    if pat_id_list == []:
+        return 0, resource_types, [0, 0, 0, 0, 0, 0, 0, 0]
+    else:
+        pat_str = ",".join(pat_id_list) # 這邊抓Patient id 之後把它弄成fhir可以search的樣子
+        print(pat_str)
+        ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
+        device_list = ProjectInfo.device_list
+        if device_list:
+            device_list_id = "Device/" + device_list.replace(",", ",Device/")
+        else:
+            device_list_id = ""
 
-    return TotlaData, resource_types, CountDataList
+        # 先改成 單純把他的資料量都滾出來，之後想要加邏輯再說
+        for type in resource_types:
+            # print(read_FHIR_api(Resource, params=None))
+            if type == "Observation" and device_list_id != "":
+                CountData_pat = FHIRData_Handle(None, type + "?patient=" + pat_str +  " &_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
+                CountData_device = FHIRData_Handle(None, type + "?device=" + device_list_id +  "&_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
+                CountData_all = FHIRData_Handle(None, type + "?device=" + device_list_id + "&patient=" + pat_str + "&_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
+                CountData = int(CountData_pat)+int(CountData_device)-int(CountData_all)
+            else:
+                url = type + "?patient=" + pat_str +  "&_lastUpdated=" + today + "&_summary=count"
+                CountData = FHIRData_Handle(None, url, 1, 1)[0].SummaryCount
+                
+            print(CountData)
+            CountDataList.append(CountData)
+            TotlaData += int(CountData)
+        print(TotlaData, resource_types, CountDataList)
+        return TotlaData, resource_types, CountDataList
+
+# def countAllData(study_id):
+
+
+#     today = datetime.now().strftime("%Y-%m-%d")
+#     TotlaData = 0
+#     CountDataList = []
+
+#     # getAllSubject = FHIRData_Handle(None, FHIRSearch_Handle(10, [study_id]), 1, 1)
+#     # print(getAllSubject[0].BundleResource)
+#     # for s in getAllSubject:
+#     #     subject_id = FHIRData_Handle(None, s.BundleResource, 1, 0)[0].id
+    
+#     # 先改成 單純把他的資料量都滾出來，之後想要加邏輯再說
+#     for type in resource_types:
+#         # print(read_FHIR_api(Resource, params=None))
+#         CountData = FHIRData_Handle(None, type + "?_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
+#         CountDataList.append(CountData)
+#         TotlaData += int(CountData)
+
+#     return TotlaData, resource_types, CountDataList
 
 def get_IndexProject(study_id):
     getSubjectCount = FHIRData_Handle(None, FHIRSearch_Handle(9, [study_id]), 1, 1)[0].SummaryCount
@@ -621,7 +663,7 @@ def getDevice(study_id):
 
     ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
     device_list = ProjectInfo.device_list
-    print(ProjectInfo.device_list)
+    # print(ProjectInfo.device_list)
 
 
     getResult = [] # 準備存處理好的資料
@@ -634,7 +676,7 @@ def getDevice(study_id):
         device_dict['countData'] = countData
         getResult.append(device_dict)
         
-        print(device)
+        # print(device)
     # status_counts = Counter(item.status for item in getFHIR)
     status_counts = Counter(
         label
@@ -1050,25 +1092,43 @@ def getEnc(enc_id):
 
     return result
 
+def run_export(ProjectId, result):
+    put_FHIR_api(result['resourceType'] + "/" + result['id'], result)
+    Export_data(ProjectId, result['resourceType'] + "/" + result['id'])
+
 def getBULK(ProjectId):
     ProjectInfo = FHIRData_Handle(None, "ResearchSubject?study=ResearchStudy/" + ProjectId, 5, 1)
     
     pat_id_list = []
     for item in ProjectInfo:
         pat_id_list.append(item.pat_id)
-    today = datetime.now()
-    data = {
-        "pat_id": pat_id_list,
-        "actual": "true",
-        "type": "person",
-        "date": today.strftime("%Y-%m-%dT%H:%M:%S"),
-        "id": ProjectId + "-" + today.strftime("%Y%m%d"),
-    }
-    result = FHIR_listMapping(data, 14)
+    if pat_id_list == []:
+        return jsonify({
+            "success": False,
+            "message": "無資料可匯出",
+            "project_id": ProjectId
+        }), 202
+    else:
+        today = datetime.now()
+        data = {
+            "pat_id": pat_id_list,
+            "actual": "true",
+            "type": "person",
+            "date": today.strftime("%Y-%m-%dT%H:%M:%S"),
+            "id": ProjectId + "-" + today.strftime("%Y%m%d"),
+        }
+        result = FHIR_listMapping(data, 14)
 
-    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
-    Export_data(ProjectId, result['resourceType'] + "/" + result['id'])
-    return
+        # 🔥 背景執行（重點）
+        t = threading.Thread(target=run_export, args=(ProjectId, result))
+        t.start()
+
+        # 🔥 直接回應（不等）
+        return jsonify({
+            "success": True,
+            "message": "匯出已開始",
+            "project_id": ProjectId
+        }), 202
 
 
 def Export_data(ProjectId, GroupId):

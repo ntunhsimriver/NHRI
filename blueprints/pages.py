@@ -66,7 +66,7 @@ def index_page():
     getProjectInfo = getProjectInfo_All[0]
     getMonthProjectInfo = getProjectInfo_All[1]
 
-    CountAllData_All = fhir.countAllData()
+    CountAllData_All = fhir.countAllData(session['study_id'])
     CountAllData = CountAllData_All[0]
     getCountDataList = CountAllData_All[1:]
     print(getCountDataList)
@@ -208,11 +208,7 @@ def api_export():
     print(data)
     res = fhir.getBULK(data['project_id'])
     print(res)
-    return jsonify({
-        "success": True,
-        "message": "匯出已開始",
-        "project_id": project_id
-    }), 202
+    return res
 
 
 @bp.route('/deviceManage')
