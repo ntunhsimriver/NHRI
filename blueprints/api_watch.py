@@ -23,6 +23,7 @@ TransFHIR_list = [
 
 # 轉土撥鼠的東西
 def handler_watch(data, project_type):
+    data = watch_mapping_patient(data)
     inputdata = {
         "ProjectGroup": "THBC_NHRI",
         "Project": project_type}
@@ -51,13 +52,8 @@ def clean_duplicate_entries_with_server_check(bundle_json, auth_token=None):
         full_url = entry.get('fullUrl')
         # 1. 檢查 Device 是否已經存在於 FHIR Server
         if res_type == 'Device' and res_id:
-            # 建立該資源在 Server 上的存取路徑
-            # check_url = f"{ServerIP_Full}Device/{res_id}"
-            # print(check_url)
             try:
                 # 使用 GET 請求確認資源是否存在
-                # headers = fhir.get_token()
-                # response = requests.get(check_url, headers=headers)
                 response = fhir.read_FHIR_api(f"Device/{res_id}")
 
                 # 如果有回傳資料（代表存在）
@@ -75,8 +71,17 @@ def clean_duplicate_entries_with_server_check(bundle_json, auth_token=None):
             unique_entries.append(entry)
 
     bundle_json['entry'] = unique_entries
+
+
     return bundle_json
 
+def watch_mapping_patient(data):
+    result = []
+    for row in data:
+        print(f"Device/{row['deviceid']}")
+        DeviceInfo = fhir.FHIRData_Handle(None, f"Device/{row['deviceid']}", 6, 1)
+        print(DeviceInfo)
+    return data
 
 @bp.route('/api/trans_watch/<datatype>', methods=['POST'])
 def api_trans_watch(datatype):
@@ -84,19 +89,19 @@ def api_trans_watch(datatype):
 
     data = request.get_json()
     try:
-
         if datatype == "historic_data_origin":
             for row in data['daily_data']:
                 res_Groundhog = handler_watch([row], datatype)
                 CleanJson = clean_duplicate_entries_with_server_check(res_Groundhog)
-                res = fhir.post_FHIR_api(CleanJson, "")
-                break
+                # res = fhir.post_FHIR_api(CleanJson, "")
+                # break
         else:
             res_Groundhog = handler_watch(data, datatype)
             CleanJson = clean_duplicate_entries_with_server_check(res_Groundhog)
-            res = fhir.post_FHIR_api(CleanJson, "")
+            # res = fhir.post_FHIR_api(CleanJson, "")
 
-        return jsonify(res.json()), res.status_code
+        # return jsonify(res.json()), res.status_code
+        return res_Groundhog
         
     except Exception as e:
         print("ERROR:", e)
