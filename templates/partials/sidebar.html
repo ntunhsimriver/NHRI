@@ -35,8 +35,15 @@
 
     <li class="sidenav-item {% if request.path == url_for('pages.dataImport') %}active{% endif %}">
       <a href="{{ url_for('pages.dataImport') }}" class="sidenav-link">
-        <i class="sidenav-icon bi bi-database"></i>
+        <i class="sidenav-icon bi bi-database-up"></i>
         <div>數據匯入</div>
+      </a>
+    </li>
+
+    <li class="sidenav-item {% if request.path == url_for('pages.dataExport') %}active{% endif %}">
+      <a href="{{ url_for('pages.dataExport') }}" class="sidenav-link">
+        <i class="sidenav-icon bi bi-database-down"></i>
+        <div>數據匯出</div>
       </a>
     </li>
 

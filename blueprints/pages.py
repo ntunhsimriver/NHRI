@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request
+from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request, send_file
 from blueprints import fhir 
 from blueprints import api_watch 
 from config import BaseConfig as cfg  # 讀 config
@@ -12,6 +12,8 @@ from models.user import User
 from models.project import Project
 from extensions import db
 import re
+from pathlib import Path
+import shutil
 
 bp = Blueprint("pages", __name__)
 
@@ -190,6 +192,29 @@ def dataImport():
         return redirect(url_for('pages.selectproject'))
     return render_template('dataImport.html', script_path=url_for('static', filename='Content/Scripts/dataImport.js'))
 
+@bp.route('/dataExport')
+def dataExport():
+    if 'username' not in session:
+        return redirect(url_for('auth.login_page'))
+    elif 'study_id' not in session:
+        return redirect(url_for('pages.selectproject'))
+    data = fhir.get_latest_export_status(session['study_id'])
+
+    return render_template('dataExport.html', data=data, script_path=url_for('static', filename='Content/Scripts/dataExport.js'))
+
+@bp.route('/api/export', methods=['POST'])
+def api_export():
+    data = request.get_json()
+    print(data)
+    res = fhir.getBULK(data['project_id'])
+    print(res)
+    return jsonify({
+        "success": True,
+        "message": "匯出已開始",
+        "project_id": project_id
+    }), 202
+
+
 @bp.route('/deviceManage')
 def deviceManage():
     if 'username' not in session:
@@ -306,11 +331,32 @@ def api_uploadFHIR():
         #     data = json.load(file)
     return jsonify({"success": False, "message": "上傳失敗"})
 
+@bp.route('/api/download', methods=['GET'])
+def download_export():
+    folder_name = request.args.get("folder_name")
 
+    base_path = Path(cfg.NDJSON_DIR) / folder_name
+
+    if not base_path.exists():
+        return {"error": "資料夾不存在"}, 404
+
+    zip_path = shutil.make_archive(
+        str(base_path),
+        "zip",
+        root_dir=base_path
+    )
+
+    return send_file(
+        zip_path,
+        as_attachment=True,
+        download_name=f"{folder_name}.zip"
+    )
 @bp.route('/api/test', methods=['POST'])
 def api_test():
     data = 'IRB-2026-001'
     # data = request.get_json()
-    result = fhir.getBULK(data)
+    # result = fhir.check_export_folder(data)
+    result = fhir.get_latest_export_status(data)
 
     return jsonify(result)
+

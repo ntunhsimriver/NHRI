@@ -16,7 +16,7 @@ from jsonpath_ng import jsonpath, parse
 from pydantic import create_model
 from collections import Counter
 from dateutil.relativedelta import relativedelta
-
+from pathlib import Path
 
 # 這個是算資料完整度的list
 resource_types = [
@@ -1068,7 +1068,7 @@ def getBULK(ProjectId):
 
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
     Export_data(ProjectId, result['resourceType'] + "/" + result['id'])
-    return Response.json()
+    return
 
 
 def Export_data(ProjectId, GroupId):
@@ -1186,7 +1186,7 @@ def Export_data(ProjectId, GroupId):
                         "message": f"下載 {item.get('type')} 失敗", "url": item.get("url")}
         except Exception as e:
             return {"ok": False, "stage": "download", "message": f"下載異常: {e}"}
-
+    (folder / "OK.txt").write_text("OK", encoding="utf-8")
     return {
         "ok": True,
         "stage": "done",
@@ -1195,3 +1195,56 @@ def Export_data(ProjectId, GroupId):
         "ndjson_files": files[:10],  # 預覽前 10 筆
         "job_url": job_url
     }
+
+from pathlib import Path
+
+def get_latest_export_status(project_id):
+    base_folder = Path(cfg.NDJSON_DIR) / project_id
+    # 資料夾不存在
+    if not base_folder.exists():
+        return []
+
+    subfolders = [f for f in base_folder.iterdir() if f.is_dir()]
+
+    results = []
+
+    for sub in subfolders:
+        files = list(sub.iterdir())
+
+        job_file = sub / "JobId.txt"
+        OK_file = sub / "OK.txt"
+        ndjson_files = [f for f in files if f.suffix == ".ndjson"]
+
+        # 判斷狀態
+        if not files:
+            status = "empty"
+            status_text = "資料夾為空"
+
+        elif job_file.exists() and not ndjson_files:
+            status = "running"
+            status_text = "執行中"
+
+        elif OK_file.exists() and ndjson_files:
+            status = "completed"
+            status_text = "已完成"
+
+        else:
+            status = "error"
+            status_text = "異常"
+
+        # 取最後更新時間（資料夾時間）
+        last_updated = datetime.fromtimestamp(sub.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+
+        results.append({
+            "project_id": project_id,
+            "folder": sub.name,
+            "status": status,
+            "status_text": status_text,
+            "countData": len(ndjson_files),
+            "lastUpdated": last_updated
+        })
+
+    # 排序（最新在前）
+    results.sort(key=lambda x: x["folder"], reverse=True)
+
+    return results
