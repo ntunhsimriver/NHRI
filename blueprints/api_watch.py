@@ -80,8 +80,13 @@ def watch_mapping_patient(data):
     for row in data:
         print(f"Device/{row['deviceid']}")
         DeviceInfo = fhir.FHIRData_Handle(None, f"Device/{row['deviceid']}", 6, 1)
-        print(DeviceInfo)
-    return data
+        # print(DeviceInfo.pat_id)
+        pat_id = DeviceInfo[0].pat_id
+        if pat_id is not None:
+            row['PatientID'] = pat_id.replace("Patient/", "")
+        result.append(row)
+    # print(result)
+    return result
 
 @bp.route('/api/trans_watch/<datatype>', methods=['POST'])
 def api_trans_watch(datatype):
