@@ -911,6 +911,41 @@ def findReference(data):
                 PathResult = Name
             return PathResult
 
+def upload_FHIR_mappingID(study_id, data):
+    ProjectMemberInfo = ProjectMember.query.filter_by(
+        project_id=study_id,
+        Del=0
+    ).all()
+
+    # 🔥 1. 先做你原本的 replace（處理 reference）
+    json_str = json.dumps(data)
+
+    for row in ProjectMemberInfo:
+        json_str = json_str.replace(row.old_patient_id, row.new_patient_id)
+
+    data = json.loads(json_str)
+
+    # 🔥 2. 再專門處理 Patient.id
+    for entry in data.get("entry", []):
+        resource = entry.get("resource", {})
+
+        if resource.get("resourceType") == "Patient":
+            old_id = resource.get("id")
+            if not old_id:
+                continue
+
+            old_ref = f"Patient/{old_id}"
+
+            for row in ProjectMemberInfo:
+                if row.old_patient_id == old_ref:
+                    # 👉 只取 uuid 部分（去掉 Patient/）
+                    new_id = row.new_patient_id.split("/", 1)[-1]
+                    resource["id"] = new_id
+                    break
+    res = upload_FHIR(data)
+    with open("input_result.json", "w", encoding='utf-8') as json_file:
+        json.dump(data, json_file)  
+    return res
 
 def upload_FHIR_changeID(pat_id, data):
     just_id = pat_id
@@ -1082,9 +1117,11 @@ def addPatient_FHIR(data, study_id):
 
         if type == 'new': # 如果是新增 就要補一個patient進去fhir server
             result = FHIR_listMapping(inputPat, 9)
+            print(result)
             Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result) 
-
+            print(Response.json())
         result = FHIR_listMapping(inputResSub, 5)
+        print(result)
         Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
 
         return Response

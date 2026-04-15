@@ -98,13 +98,13 @@ def caseManage():
     data = fhir.get_AllPatient(session['study_id'])
     return render_template('caseManage.html', data=data, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
 
-@bp.route('/caseMember')
-def caseMember():
+@bp.route('/caseMember/<study_id>')
+def caseMember(study_id):
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
     elif 'study_id' not in session:
         return redirect(url_for('pages.selectproject'))
-    data = ProjectMember.query.filter_by(project_id=session['study_id'], Del=0).all()
+    data = ProjectMember.query.filter_by(project_id=study_id, Del=0).all()
     return render_template('caseMember.html', data=data, script_path=url_for('static', filename='Content/Scripts/caseMember.js'))
 
 @bp.route("/caseManage/<case_id>/<ResearchSubjectStatus>")
@@ -306,6 +306,14 @@ def api_uploadFHIR():
 
         if file_type == 'FHIR':
             data = json.load(file)
+            result = fhir.upload_FHIR_mappingID(study_id, data) # 直接把檔案轉成 Python 字典
+            
+            if result.ok:
+                return jsonify({"success": True, "message": file.filename})
+            else:
+                return jsonify({"success": False, "message": result.text})
+        elif file_type == 'FHIR_pat':
+            data = json.load(file)
             result = fhir.upload_FHIR_changeID(pat_id, data) # 直接把檔案轉成 Python 字典
             
             if result.ok:
@@ -429,7 +437,18 @@ def save_all_project_member():
 
             if not old_patient_id or not new_patient_id:
                 continue
+            PatInfo = fhir.read_FHIR_api(new_patient_id)
+            print(PatInfo['resourceType'])
+            if PatInfo['resourceType'] != 'Patient':
+                data_addPatient = {
+                  "pat_id": new_patient_id.replace("Patient/", ""),
+                  "gender": "unknown",
+                  "start": datetime.datetime.now().strftime("%Y-%m-%d"),
+                  "type": "new"
+                }
 
+                addPatientResult = fhir.addPatient_FHIR(data_addPatient, project_id)
+                print(addPatientResult)
             member = ProjectMember(
                 project_id=project_id,
                 old_patient_id=old_patient_id,
@@ -451,10 +470,10 @@ def save_all_project_member():
 
 @bp.route('/api/test', methods=['POST'])
 def api_test():
-    data = 'IRB-2026-001'
-    # data = request.get_json()
+    study_id = 'IRB-2026-001'
+    data = request.get_json()
     # result = fhir.check_export_folder(data)
-    result = fhir.get_latest_export_status(data)
+    result = fhir.upload_FHIR_mappingID(study_id, data)
 
     return jsonify(result)
 
