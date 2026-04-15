@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}NHRI - 臨床研究數據平台{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/caseMember.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- <section class="welcome">
+  <h2>歡迎來到健康資料平台</h2>
+  <p>探索病人的健康事件與醫療資訊。</p>
+</section> -->
+{% if data %}
+
+    <div class="space-y-6 fade-in">
+      <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">個案人員清單</h2>
+          <p class="text-sm text-slate-500">因部分醫院來源資料可能會有重複的狀況，因此可由此頁面管理所有受試者對應的Patient id對應。</p>
+        </div>
+        <div class="flex gap-3">
+          <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30"
+            onclick="addList('{{study_id}}')">
+            <i class="bi bi-plus"></i> 新增個案
+          </button>
+
+          <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            onclick="sendList()">
+
+            <i class="bi bi-link-45deg"></i> 送出清單
+          </button>
+
+          <!-- <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            <i class="bi bi-activity" ></i> 批次匯入
+          </button> -->
+        </div>
+      </div>
+      <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="relative flex-1">
+          <i class="bi bi-search absolute left-3 top-2 h-4 w-4 text-slate-400"></i>
+        <input type="text" placeholder="搜尋 Hash ID..." 
+          class="w-full rounded-lg !border !border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+          id="searchInput">
+        </div>
+        
+        </div>
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        
+        <!-- 這個table要換掉 -->
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-3 font-medium">計畫代碼</th>
+            <th class="px-6 py-3 font-medium">原有ID</th>
+            <th class="px-6 py-3 font-medium">系統ID</th>
+            <th class="px-6 py-3 font-medium">創立日期</th>
+            <th class="px-3 py-3 font-medium">刪除</th>
+          </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100" id="caseTableBody">
+
+            {% for item in data %}
+            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row">
+              <td class="px-6 py-4 font-mono font-medium text-blue-600 group-hover:underline">{{ item.project_id }}</td>
+              <td class="px-6 py-4 text-slate-600">
+                <input 
+                  type="text"
+                  value="{{ item.old_patient_id }}"
+                  class="w-full rounded-md !border !border-slate-300 px-2 py-1 text-sm bg-slate-10">
+                </td>
+              <td class="px-6 py-4 text-slate-600">
+                <input 
+                  type="text"
+                  value="{{ item.new_patient_id }}"
+                  readonly
+                  class="w-full rounded-md !border !border-slate-300 px-2 py-1 text-sm bg-slate-100 cursor-not-allowed">
+                </td>
+                <td class="px-6 py-4 text-slate-600">{{item.created_at}}</td>
+                <td class="px-6 py-4">
+                <button class="text-slate-400 hover:text-red-600" onclick="removeRow(this)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+{% endif%}
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='Content/Scripts/caseMember.js') }}"></script>
+{% endblock %}

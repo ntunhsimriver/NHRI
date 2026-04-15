@@ -10,7 +10,7 @@ import re
 from datetime import datetime, date, timedelta
 import time
 import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
-from models.project import Project
+from models.project import Project, ProjectMember
 from models.user import User
 from jsonpath_ng import jsonpath, parse
 from pydantic import create_model
@@ -18,6 +18,9 @@ from collections import Counter
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
 import threading
+import secrets
+import hashlib
+import uuid
 
 # 這個是算資料完整度的list
 resource_types = [
@@ -57,6 +60,23 @@ def get_token():
 def register_fhir(app):
     fhir = FHIRClient()  # 從環境變數讀設定
     app.register_blueprint(create_fhir_blueprint(client=fhir, db=db))
+
+
+def get_new_patient_id(project_id):
+    project_id = str(project_id).strip()
+
+    if not project_id:
+        return None
+    salt = cfg.PATIENT_ID_SALT
+    timestamp_str = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    rand_str = secrets.token_hex(8)
+    raw = f"{project_id}|{timestamp_str}|{rand_str}|{salt}"
+    # 先做 sha256
+    digest = hashlib.sha256(raw.encode("utf-8")).digest()
+    # 取前16 bytes 轉 UUID
+    new_uuid = uuid.UUID(bytes=digest[:16])
+    return str(new_uuid)
+
 
 # 這邊是用身份證字號去抓人的id，暫時沒用了
 def find_patient_id(pat_identi):
@@ -1373,3 +1393,5 @@ def get_latest_export_status(project_id):
     results.sort(key=lambda x: x["folder"], reverse=True)
 
     return results
+
+

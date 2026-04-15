@@ -9,7 +9,7 @@ import sys
 import traceback
 import datetime
 from models.user import User
-from models.project import Project
+from models.project import Project, ProjectMember
 from extensions import db
 import re
 from pathlib import Path
@@ -97,6 +97,15 @@ def caseManage():
         return redirect(url_for('pages.selectproject'))
     data = fhir.get_AllPatient(session['study_id'])
     return render_template('caseManage.html', data=data, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
+
+@bp.route('/caseMember')
+def caseMember():
+    if 'username' not in session:
+        return redirect(url_for('auth.login_page'))
+    elif 'study_id' not in session:
+        return redirect(url_for('pages.selectproject'))
+    data = ProjectMember.query.filter_by(project_id=session['study_id'], Del=0).all()
+    return render_template('caseMember.html', data=data, script_path=url_for('static', filename='Content/Scripts/caseMember.js'))
 
 @bp.route("/caseManage/<case_id>/<ResearchSubjectStatus>")
 def case_detail(case_id, ResearchSubjectStatus):
@@ -382,6 +391,64 @@ def download_export():
         as_attachment=True,
         download_name=f"{folder_name}.zip"
     )
+
+
+@bp.route("/api/getNewID", methods=["POST"])
+def api_getNewID():
+    data = request.get_json()
+    result = fhir.get_new_patient_id(data['projectId'])
+    print(result)
+    return jsonify(f"Patient/{result}")
+
+@bp.route("/api/project_member/save_all", methods=["POST"])
+def save_all_project_member():
+    data = request.get_json(silent=True) or {}
+    rows = data.get("data", [])
+    print(rows)
+
+    if not rows:
+        return jsonify({"error": "沒有資料"}), 400
+
+    # 👉 取 project_id（假設全部同一個）
+    project_id = rows[0].get("project_id")
+
+    if not project_id:
+        return jsonify({"error": "缺少 project_id"}), 400
+
+    try:
+        # 🔥 1. 先全部標記為刪除
+        ProjectMember.query.filter_by(project_id=project_id).update({
+            "Del": 1
+        })
+
+        # 🔥 2. 再重新新增
+        for item in rows:
+            old_patient_id = item.get("old_patient_id")
+            new_patient_id = item.get("new_patient_id")
+            created_at = item.get("created_at")
+
+            if not old_patient_id or not new_patient_id:
+                continue
+
+            member = ProjectMember(
+                project_id=project_id,
+                old_patient_id=old_patient_id,
+                new_patient_id=new_patient_id,
+                created_at=created_at,
+                Del=0
+            )
+
+            db.session.add(member)
+
+        db.session.commit()
+
+        return jsonify({"message": "更新成功"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("錯誤:", e)
+        return jsonify({"error": "更新失敗"}), 500
+
 @bp.route('/api/test', methods=['POST'])
 def api_test():
     data = 'IRB-2026-001'

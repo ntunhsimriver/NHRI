@@ -25,3 +25,12 @@ class Project(db.Model):
     #         "createdAt": int(self.created_at.timestamp()*1000),
     #         "resultCount": self.result_count,
     #     }
+
+class ProjectMember(db.Model):
+    __tablename__ = "project_member"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    project_id = db.Column(db.Text, nullable=False)
+    old_patient_id = db.Column(db.Text, nullable=False)
+    new_patient_id = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    Del = db.Column(db.SmallInteger, nullable=True)   # NULL = 還活著
