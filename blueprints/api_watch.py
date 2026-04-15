@@ -98,15 +98,15 @@ def api_trans_watch(datatype):
             for row in data['daily_data']:
                 res_Groundhog = handler_watch([row], datatype)
                 CleanJson = clean_duplicate_entries_with_server_check(res_Groundhog)
-                # res = fhir.post_FHIR_api(CleanJson, "")
+                res = fhir.post_FHIR_api(CleanJson, "")
                 # break
         else:
             res_Groundhog = handler_watch(data, datatype)
             CleanJson = clean_duplicate_entries_with_server_check(res_Groundhog)
-            # res = fhir.post_FHIR_api(CleanJson, "")
+            res = fhir.post_FHIR_api(CleanJson, "")
 
-        # return jsonify(res.json()), res.status_code
-        return res_Groundhog
+        return jsonify(res.json()), res.status_code
+        # return res_Groundhog
         
     except Exception as e:
         print("ERROR:", e)
