@@ -1,4 +1,33 @@
 // 新增個案及關連個案
+document.querySelectorAll('.progress-bar').forEach(el => {
+    el.style.width = el.dataset.width + '%';
+});
+
+
+document.querySelectorAll('.case-row').forEach(row => {
+    row.addEventListener('click', function () {
+        window.location.href = this.dataset.url;
+    });
+});
+document.querySelectorAll('.btn-back').forEach(btn => {
+    btn.addEventListener('click', function () {
+        history.back();
+    });
+});
+
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.file-trigger');
+    if (!btn) return;
+
+    const targetId = btn.dataset.target;
+    const input = document.getElementById(targetId);
+
+    if (input) {
+        input.click();
+    }
+});
+
+
 const modalAddPatient = document.getElementById('Modal_addPatient');
 const msg = document.getElementById('message');
 
@@ -64,6 +93,11 @@ modalAddPatient.addEventListener('hidden.bs.modal', function () {
     msg.className = 'message';
 });
 
+document.querySelectorAll('[data-url]').forEach(btn => {
+    btn.addEventListener('click', function () {
+        window.location.href = this.dataset.url;
+    });
+});
 
 // 先宣告
 const form = document.getElementById('registerForm');
@@ -169,8 +203,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    statusSelect.addEventListener('change', filterRows);
-    searchInput.addEventListener('input', filterRows);
+     if (statusSelect) {
+        statusSelect.addEventListener('change', filterRows);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterRows);
+    }
+
 
 });
 
@@ -208,6 +248,12 @@ if (searchInput) {
 //     //         .catch(err => console.error('搜尋失敗:', err));
 //     // }, 300);
 // });
+const btn = document.getElementById('btn-filter');
+if (btn) {
+    btn.addEventListener('click', function () {
+        handleFilter();
+    });
+}
 
 
 function handleFilter() {
@@ -396,7 +442,6 @@ if (ModalConsent) {
         var button = event.relatedTarget; // 取得被點擊的按鈕
         var title = button.getAttribute('data-bs-title');
         var pdfUrl = "/static/data/consent" + button.getAttribute('data-bs-url');
-
         // 更新標題
         ModalConsent.querySelector('#Modal_Consent_title').textContent = title;
         // 更新 PDF 檢視器

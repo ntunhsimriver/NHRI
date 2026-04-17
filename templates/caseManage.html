@@ -20,7 +20,7 @@
           <p class="text-sm text-slate-500">管理所有受試者、同意書狀態與設備配發</p>
         </div>
         <div class="flex gap-3">
-          <button class="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30" onclick="window.location.href='/caseMember/{{ study_id }}'">
+          <button class="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30" data-url="/caseMember/{{ study_id }}">
             <i class="bi bi-list-ul"></i> 管理清單
           </button>
 
@@ -78,7 +78,7 @@
           <tbody class="divide-y divide-slate-100">
 
             {% for item in data %}
-            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row" data-status="{{ item.ResearchSubjectStatus}}" data-hash="{{ item.PatInfo.id }}" onclick="window.location.href='{{ url_for('pages.case_detail', case_id=item.PatInfo.id, ResearchSubjectStatus=item.ResearchSubjectStatus) }}'">
+            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row" data-status="{{ item.ResearchSubjectStatus}}" data-hash="{{ item.PatInfo.id }}" data-url="{{ url_for('pages.case_detail', case_id=item.PatInfo.id, ResearchSubjectStatus=item.ResearchSubjectStatus) }}">
               <td class="px-6 py-4 font-mono font-medium text-blue-600 group-hover:underline">{{ item.PatInfo.id }}</td>
               <td class="px-6 py-4">
                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ item.ResearchSubjectStatus}}">{{ item.ResearchSubjectStatus}}</span>
@@ -94,7 +94,7 @@
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
                   <div class="h-1.5 w-20 rounded-full bg-slate-100 overflow-hidden">
-                    <div class="h-full rounded-full bg-blue-500" style="width: {{item.CompleteCount}}%;">
+                    <div class="h-full rounded-full bg-blue-500 progress-bar" data-width="{{item.CompleteCount}}">
                     </div>
                   </div>
                   <span class="text-xs text-slate-400">{{item.CompleteCount}}%</span>
@@ -119,7 +119,7 @@
 <main class="flex-1 overflow-auto bg-slate-50 p-8">
   <div class="space-y-6 fade-in h-full flex flex-col">
     <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
-      <button class="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-100 transition-colors" onclick="history.back()";>
+      <button class="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-100 transition-colors btn-back">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="m15 18-6-6 6-6"></path></svg>
       </button>
       <div>
@@ -137,10 +137,9 @@
       </div> -->
 
       <div class="ml-auto flex gap-2">
-        <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="handleFileSelect(event, 'FHIR_pat')">
-        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" 
-          type="button"
-          onclick="document.getElementById('fileInput').click()">
+        <input type="file" id="fileInput_FHIR" hidden accept=".json">
+        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 file-trigger" data-target="fileInput_FHIR"
+          type="button" id="fileInput_FHIR_btn" >
           <i class="bi bi-upload"></i>
           上傳FHIR資料
         </button>
@@ -205,14 +204,14 @@
           </div>
 
           {% for item in getDeviceInfo %}
-          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:bg-slate-100 transition-colors cursor-pointer" onclick="window.location.href='{{ url_for('pages.deviceDetail', pat_id=PatInfo.id, device_id=item.id) }}'">
+          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:bg-slate-100 transition-colors cursor-pointer" data-url="{{ url_for('pages.deviceDetail', pat_id=PatInfo.id, device_id=item.id) }}">
             <div class="mb-4 flex items-center justify-between">
               <h3 class="text-lg font-bold text-slate-900">配戴設備狀態</h3>
               <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">{{item.status}}</span>
             </div>
             <div class="flex items-center gap-4">
               <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                <i class="bi bi-watch" style="font-size: 2rem;"></i>
+                <i class="bi bi-watch text-2xl"></i>
               </div>
               <div>
                 <p class="text-lg font-semibold text-slate-900">{{item.model}} (ID: {{item.id}})</p>
@@ -254,7 +253,7 @@
               <input type="date" id="endDate"
                 class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
               <button
-                onclick="handleFilter()"
+                 id="btn-filter"
                 class="ml-1 rounded-md bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700">
                 查詢
               </button>
@@ -265,7 +264,7 @@
               <div class="spinner-border text-primary" role="status"></div>
               <p class="mt-2 text-slate-500">正在從伺服器抓取量測紀錄...</p>
           </div>
-          <div style="height: 100%; width: 100%;">
+          <div width="100%" height="100%">
               <canvas id="myChart-Vitals"  width="100%" height="50%"></canvas>
           </div>
           <!-- <canvas id="myChart-Vitals" width="100%" height="50%"></canvas> -->
@@ -455,10 +454,9 @@
             
 
             <!-- 隱藏的上傳口 -->
-            <input type="file" id="fileInput_QA" style="display: none;" accept=".json" onchange="handleFileSelect(event, 'Questionnaire')">
-            <button  type="button"
-              onclick="document.getElementById('fileInput_QA').click()"
-              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
+            <input type="file" id="fileInput_QA" hidden accept=".json">
+            <button  type="button" id="fileInput_QA_btn" 
+              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput_QA">
               <i class="bi bi-upload"></i> 
               上傳新文件
             </button>
@@ -530,10 +528,9 @@
             <h3 class="text-lg font-bold text-slate-900">已簽署文件</h3>
 
             <!-- 隱藏的上傳口 -->
-            <input type="file" id="fileInput" style="display: none;" accept=".pdf, image/*" onchange="handleFileSelect(event, 'Consent')">
-            <button  type="button"
-              onclick="document.getElementById('fileInput').click()"
-              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
+            <input type="file" id="fileInput"  hidden  accept=".pdf, image/*">
+            <button  type="button" id="fileInput_Consent_btn" 
+=              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput">
               <i class="bi bi-upload"></i> 
               上傳新文件
             </button>
@@ -546,8 +543,8 @@
               {% for item in getConsent %}
               <div class="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
                 <div class="mb-3 flex items-start justify-between">
-                  <div class="rounded-lg bg-red-50 p-2 text-red-500 d-flex align-items-center justify-content-center" style="width: 3rem; height: 3rem; flex-shrink: 0;">
-                    <i class="bi bi-file-earmark-medical" style="font-size: 1.5rem;-webkit-text-stroke: 0.2px;"></i>
+                  <div class="rounded-lg bg-red-50 p-2 text-red-500 d-flex align-items-center justify-content-center" id="ContentInfo">
+                    <i class="bi bi-file-earmark-medical" id="ContentInfo_i"></i>
                   </div>
                   <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">
                   {{item.status}}</span>
@@ -586,7 +583,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <div id="Modal_Consent_body" class="modal-body overflow-y-auto p-6 text-sm text-slate-600 leading-relaxed whitespace-pre-line" style="height: 80vh; overflow: hidden;">
+      <div id="Modal_Consent_body" class="modal-body overflow-y-auto p-6 text-sm text-slate-600 leading-relaxed whitespace-pre-line">
         <iframe id="Consent_PDF_Viewer" src="" width="100%" height="100%" frameborder="0"></iframe>
       </div>
 
@@ -700,7 +697,7 @@
       </div>
 
       <div class="modal-footer border-t border-slate-100 p-3">
-        <button type="button" class="mr-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" data-bs-dismiss="modal"onclick="resetFormState()">取消</button>
+        <button type="button" class="mr-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" data-bs-dismiss="modal">取消</button>
         <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">新增個案</button>
       </div>
       
@@ -711,7 +708,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ g.nonce }}" >
   {% if getObs14daysResult %}
 
   // 傳後端來的數值到js的檔案
@@ -724,5 +721,5 @@
 
   {% endif %}
 </script>
-<script src="{{ url_for('static', filename='Content/Scripts/caseManage.js') }}"></script>
+<script nonce="{{ g.nonce }}"  src="{{ url_for('static', filename='Content/Scripts/caseManage.js') }}"></script>
 {% endblock %}

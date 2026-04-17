@@ -128,7 +128,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <div id="Modal_addDevice_body" class="p-6 space-y-6" style="max-height: 90vh; overflow: hidden;">
+      <div id="Modal_addDevice_body" class="p-6 space-y-6">
         <div id="message" class="message"></div>
 
 
@@ -173,5 +173,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='Content/Scripts/deviceManage.js') }}"></script>
+<script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='Content/Scripts/deviceManage.js') }}"></script>
 {% endblock %}

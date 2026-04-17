@@ -98,7 +98,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <div id="Modal_addProject_body" class="p-6 space-y-6" style="max-height: 90vh; overflow: hidden;">
+      <div id="Modal_addProject_body" class="p-6 space-y-6 Modal_body_class">
         <div id="message" class="message"></div>
 
         <label class="block text-sm font-medium text-slate-700" for="new_id">計劃編號</label>
@@ -166,7 +166,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <div id="Modal_memberManage_body" class="p-6 space-y-6" style="max-height: 90vh; overflow: hidden;">
+      <div id="Modal_memberManage_body" class="p-6 space-y-6 Modal_body_class">
         <div id="addMember_message" class="message"></div>
 
         <label class="block text-sm font-medium text-slate-700" for="item_member">請選擇助理</label>
@@ -189,6 +189,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='Content/Scripts/projectManage.js') }}">
-</script>
+<script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='Content/Scripts/projectManage.js') }}"></script>
 {% endblock %}

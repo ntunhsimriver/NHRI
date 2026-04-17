@@ -2,6 +2,13 @@ let SERVER_DATA = null;
 let vitalsChart = null;
 let collapseObserverBound = false;
 
+document.addEventListener('click', function (e) {
+    if (e.target.closest('.btn-filter')) {
+        document.getElementById('myChartText').innerText = "生理趨勢圖";
+        handleFilter();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     const today = new Date();
     const end = today.toISOString().split("T")[0];

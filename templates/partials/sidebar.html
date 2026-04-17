@@ -73,6 +73,6 @@
 </div>
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='assets/css/tailwindcss.css') }}"></script>
+<script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/tailwindcss.js') }}"></script>
 <script src="{{ url_for('static', filename='Content/Scripts/sidebar.js') }}"></script>
 {% endblock %}

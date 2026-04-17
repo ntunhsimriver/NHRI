@@ -34,3 +34,27 @@ button:focus {
 
 /* MedicationRequest (藍色) */
 .type-Med { background-color: rgb(14, 165, 233); color: rgb(224, 242, 254); }
+
+#caseDetial {
+  width: 80%;
+}
+
+#fileInput {
+  display: none;
+  }
+
+#ContentInfo {
+  width: 3rem; 
+  height: 3rem; 
+  flex-shrink: 0;
+}
+
+#ContentInfo_i {
+  font-size: 1.5rem;
+  -webkit-text-stroke: 0.2px;
+}
+
+#Modal_Consent_body{
+  height: 80vh; 
+  overflow: hidden;
+  }

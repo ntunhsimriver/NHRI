@@ -11,3 +11,8 @@
 .collapse.show {
   display: block !important;
 }
+
+#myChart-Vitals-div{
+  height: 300px; 
+  width: 100%;
+}

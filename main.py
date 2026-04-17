@@ -1,5 +1,5 @@
 import os, sys, signal, time
-from flask import Flask, render_template
+from flask import Flask, render_template, g
 from config import BaseConfig
 from extensions import db
 from flask import send_from_directory
@@ -7,7 +7,7 @@ from blueprints.fhir import register_fhir
 from blueprints.pages import bp as pages_bp
 from blueprints.auth import bp as auth_bp
 from blueprints.api_watch import bp as api_watch_bp
-
+import secrets
 
 
 
@@ -39,6 +39,28 @@ def create_app():
         print("✅ Flask 已正常關閉")
         raise SystemExit(0)
     signal.signal(signal.SIGTERM, handle_sigterm)
+
+    @app.before_request
+    def generate_nonce():
+        g.nonce = secrets.token_urlsafe(16)
+
+    @app.after_request
+    def add_csp(response):
+        nonce = g.nonce
+        response.headers["Content-Security-Policy"] = (
+            f"default-src 'self'; "
+            f"script-src 'self' 'nonce-{nonce}'; "
+            f"style-src 'self' 'unsafe-inline'; "   # ← 暫時保留
+            f"img-src 'self' data:; "
+            f"font-src 'self' data:; "
+            f"connect-src 'self'; "
+            f"base-uri 'self'; "
+            f"form-action 'self'; "
+            f"frame-ancestors 'self'; "
+            f"object-src 'none';"
+        )
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        return response
 
     # CSP 的東西，可以解決弱掃的問題，但JS都會失效
     # @app.after_request

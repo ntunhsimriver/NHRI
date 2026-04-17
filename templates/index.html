@@ -19,7 +19,7 @@
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-slate-500">總收案人數</span>
           <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 p-2">
-            <i class="bi bi-people" style="font-size: 1rem;"></i>
+            <i class="bi bi-people text-sm"></i>
           </div>
         </div>
         <div class="mt-4 flex items-baseline gap-2">
@@ -32,7 +32,7 @@
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-slate-500">今日匯入筆數</span>
           <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 p-2">
-            <i class="bi bi-database" style="font-size: 1rem;"></i>
+            <i class="bi bi-database text-sm" ></i>
           </div>
         </div>
         <div class="mt-4 flex items-baseline gap-2">
@@ -45,7 +45,7 @@
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-slate-500">設備使用率</span>
           <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 p-2">
-            <i class="bi bi-watch" style="font-size: 1rem;"></i>
+            <i class="bi bi-watch text-sm"></i>
           </div>
         </div>
         <div class="mt-4 flex items-baseline gap-2">
@@ -80,7 +80,7 @@
         </div>
         <div class="h-[300px] w-full">
 
-          <div class="recharts-responsive-container" style="width: 100%; height: 100%; min-width: 0px;">
+          <div class="recharts-responsive-container" >
             <canvas id="myChart-SubjectIn" width="100%" height="100%"></canvas>
           </div>
         </div>
@@ -88,7 +88,7 @@
 
       <div class="col-span-3 rounded-xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col">
         <h3 class="text-lg font-bold text-slate-900">今日匯入FHIR資源數量</h3>
-        <div class="recharts-responsive-container" style="width: 100%; height: 100%; min-width: 0px;">
+        <div class="recharts-responsive-container" >
           <canvas id="CountDataChart"  width="100%" height="100%"></canvas>
         </div>
       </div>
@@ -144,7 +144,7 @@
 
 {% block scripts %}
 
-<script>
+<script nonce="{{ g.nonce }}">
   {% if getMonthProjectInfo %}
 
   // 傳後端來的數值到js的檔案
@@ -158,5 +158,5 @@
 
   {% endif %}
 </script>
-<script src="{{ url_for('static', filename='Content/Scripts/index.js') }}"></script>
+<script  nonce="{{ g.nonce }}" src="{{ url_for('static', filename='Content/Scripts/index.js') }}"></script>
 {% endblock %}

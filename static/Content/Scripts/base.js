@@ -17,3 +17,9 @@ document.addEventListener("click", function(e) {
 
   target.classList.toggle("hidden");
 });
+
+document.querySelectorAll('.btn-back').forEach(btn => {
+    btn.addEventListener('click', function () {
+        history.back();
+    });
+});

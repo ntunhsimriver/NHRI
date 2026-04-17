@@ -1,3 +1,30 @@
+document.addEventListener('DOMContentLoaded', function () {
+
+    document.addEventListener('click', function (e) {
+
+        // 匯出
+        const exportBtn = e.target.closest('.btn-export');
+        if (exportBtn) {
+            const studyId = exportBtn.dataset.studyId;
+            ExportAPI(studyId);
+            return;
+        }
+
+        // 下載
+        const downloadBtn = e.target.closest('.btn-download');
+        if (downloadBtn) {
+            const projectId = downloadBtn.dataset.projectId;
+            const folder = downloadBtn.dataset.folder;
+            const status = downloadBtn.dataset.status;
+
+            downloadData(projectId, folder, status);
+            return;
+        }
+
+    });
+
+});
+
 async function ExportAPI(projectId) {
   // 跳出輸入框
   const password = prompt("請輸入ZIP壓縮密碼：");

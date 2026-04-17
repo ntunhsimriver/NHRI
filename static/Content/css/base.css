@@ -127,3 +127,8 @@
     background-color: rgb(255 237 213); /* orange-100 */
     color: rgb(234 88 12);              /* orange-600 */
 }
+
+.Modal_body_class{
+  max-height: 90vh; 
+  overflow: hidden;
+}

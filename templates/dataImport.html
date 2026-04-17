@@ -38,7 +38,7 @@
       </div>
       <div class="grid gap-4 md:grid-cols-3">
 
-        <button onclick="goToStep2('FHIR')" class="flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-blue-500 hover:bg-blue-50 hover:shadow-md">
+        <button data-type="FHIR" class="step-btn flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-blue-500 hover:bg-blue-50 hover:shadow-md">
           <div class="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 p-3 text-blue-600">
             <i class="bi bi-file-earmark-text text-2xl"></i>
           </div>
@@ -46,7 +46,7 @@
           <span class="text-xs text-slate-400">JSON 格式</span>
         </button>
 
-        <button  onclick="goToStep2('Excel')" class="flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-md">
+        <button data-type="Excel" class="step-btn flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-md">
           <div class="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 p-3 text-emerald-600">
             <i class="bi bi-activity text-2xl"></i>
           </div>
@@ -54,7 +54,7 @@
           <span class="text-xs text-slate-400">CSV / XLSX 格式</span>
         </button>
 
-        <button  onclick="goToStep2('Watch')" class="flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-purple-500 hover:bg-purple-50 hover:shadow-md">
+        <button  data-type="Watch" class="step-btn flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-purple-500 hover:bg-purple-50 hover:shadow-md">
           <div class="flex h-14 w-14 items-center justify-center rounded-full bg-purple-100 p-3 text-purple-600">
             <i class="bi bi-watch text-2xl"></i>
           </div>
@@ -96,8 +96,8 @@
         </p>
       </label>
       <div class="flex justify-end gap-3">
-        <button onclick="goToStep1()" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">上一步</button>
-        <button onclick="handleUpload()" class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">開始驗證與匯入</button>
+        <button class="btn-step-back rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">上一步</button>
+        <button class="btn-upload flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">開始驗證與匯入</button>
       </div>
     </div>
 
@@ -117,11 +117,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='Scripts/d3js-7.9.0.js') }}">
-</script>
-<script>
-  
-</script>
-<script src="{{ url_for('static', filename='Content/Scripts/dataImport.js') }}">
-</script>
+<script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='Scripts/d3js-7.9.0.js') }}"></script>
+<script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='Content/Scripts/dataImport.js') }}"></script>
 {% endblock %}

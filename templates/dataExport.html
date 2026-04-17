@@ -23,7 +23,7 @@
     </div>
     <div class="flex gap-3">
 
-      <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" onclick="ExportAPI('{{study_id}}')">
+      <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 btn-export" data-study-id="{{ study_id }}">
         <i class="bi bi-link-45deg"></i> 匯出資料
       </button>
     </div>
@@ -57,7 +57,10 @@
               <td class="px-6 py-4 font-medium text-slate-600">{{ item.countData }} 筆</td>
               <td class="px-6 py-4 font-medium text-slate-600">{{ item.lastUpdated }}</td>
               <td class="px-6 py-4 font-medium text-slate-600">
-                <button onclick="downloadData('{{ item.project_id }}', '{{ item.folder }}', '{{ item.status }}')">  
+                <button class="btn-download"
+                  data-project-id="{{ item.project_id }}"
+                  data-folder="{{ item.folder }}"
+                  data-status="{{ item.status }}">  
                   <i class="bi bi-download"></i>
                 </button>
                 
@@ -79,8 +82,7 @@
 
                 <div class="mt-6 flex flex-wrap justify-center gap-3">
                   <button
-                    class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm shadow-blue-500/30"
-                    onclick="ExportAPI('{{study_id}}')">
+                    class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm shadow-blue-500/30 btn-export" data-study-id="{{ study_id }}">
                     <i class="bi bi-plus-circle"></i> 匯出資料
                   </button>
                 </div>
@@ -97,11 +99,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='Scripts/d3js-7.9.0.js') }}">
-</script>
-<script>
-  
-</script>
-<script src="{{ url_for('static', filename='Content/Scripts/dataExport.js') }}">
-</script>
+<script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='Scripts/d3js-7.9.0.js') }}"></script>
+<script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='Content/Scripts/dataExport.js') }}"></script>
 {% endblock %}

@@ -1,3 +1,25 @@
+document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('click', function (e) {
+        const addBtn = e.target.closest('.btn-add-list');
+        if (addBtn) {
+            const studyId = addBtn.dataset.studyId;
+            addList(studyId);
+            return;
+        }
+
+        const sendBtn = e.target.closest('.btn-send-list');
+        if (sendBtn) {
+            sendList();
+            return;
+        }
+
+        const removeBtn = e.target.closest('.btn-remove-row');
+        if (removeBtn) {
+            removeRow(removeBtn);
+        }
+    });
+});
+
 function sendList() {
     const rows = document.querySelectorAll("#caseTableBody tr");
     const list = [];

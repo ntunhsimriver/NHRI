@@ -1,4 +1,32 @@
+document.addEventListener('DOMContentLoaded', function () {
 
+    document.addEventListener('click', function (e) {
+
+        // Step1 → Step2
+        const stepBtn = e.target.closest('.step-btn');
+        if (stepBtn) {
+            const type = stepBtn.dataset.type;
+            goToStep2(type);
+            return;
+        }
+
+        // 上一步
+        const backBtn = e.target.closest('.btn-step-back');
+        if (backBtn) {
+            goToStep1();
+            return;
+        }
+
+        // 上傳
+        const uploadBtn = e.target.closest('.btn-upload');
+        if (uploadBtn) {
+            handleUpload();
+            return;
+        }
+
+    });
+
+});
 function goToStep3(filename) {
     // 1. 隱藏步驟 2，顯示步驟 3
     document.getElementById('step-2-content').classList.add('hidden');

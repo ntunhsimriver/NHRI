@@ -11,3 +11,8 @@
     margin-top: 0.5rem;
     font-weight: 500;
 }
+
+#Modal_addDevice_body{
+    max-height: 90vh; 
+    overflow: hidden;
+}
