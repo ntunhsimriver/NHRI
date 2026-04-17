@@ -74,7 +74,10 @@ def api_login():
         session['fhir_practitioner_id'] = fhir_practitioner_id
         session['role'] = role.value
         print(f"[LOGIN] 成功登入：{username}")
-        return jsonify({'success': True, 'redirect': '/selectproject'})
+        if role.value == "SUPER_ADMIN":
+            return jsonify({'success': True, 'redirect': '/settings'})
+        else:
+            return jsonify({'success': True, 'redirect': '/selectproject'})
     else:
         print(f"[LOGIN] 登入失敗：{username}")
         return jsonify({'success': False, 'message': '帳號或密碼錯誤'})

@@ -18,7 +18,7 @@
 
   <!-- 導覽選單 -->
   <ul class="sidenav-inner py-1">
-
+    {% if role != 'SUPER_ADMIN'  %}
     <li class="sidenav-item {% if request.path == url_for('pages.index_page') %}active{% endif %}">
       <a href="{{ url_for('pages.index_page') }}" class="sidenav-link">
         <i class="sidenav-icon feather icon-grid"></i>
@@ -54,7 +54,7 @@
       </a>
     </li>
 
-    {% if role != 'ASSISTANT'  %}
+    {% elif role != 'ASSISTANT'  %}
     <li class="sidenav-item {% if request.path == url_for('pages.projectManage') %}active{% endif %}">
       <a href="{{ url_for('pages.projectManage') }}" class="sidenav-link">
         <i class="sidenav-icon feather icon-briefcase"></i>

@@ -54,14 +54,17 @@
 
 
                     <div class="flex h-16 items-center justify-between border-slate-200 z-10">
-                        <h1 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
                             <span class="text-slate-400 font-normal">Project:</span>{{study_id}}
                             <span class="text-sm font-normal text-slate-500 ml-2">({{study_name}})</span>
-                        </h1>
+                        </h2>
                     </div>
                     <div class="flex items-center gap-4 ml-auto">
                         <a href="{{ url_for('pages.selectproject') }}" class="text-sm text-blue-600 hover:underline mr-2">
                         切換計畫</a>
+
+                        <a href="{{ url_for('auth.logout') }}" class="text-sm hover:underline mr-2">
+                        登出</a>
                         <!-- <button class="relative rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
                             <i class="bi bi-bell"></i>
                             <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
@@ -83,7 +86,7 @@
                     </div>
 
                     <!-- Footer -->
-                    <nav class="layout-footer footer bg-white">
+                    <!-- <nav class="layout-footer footer bg-white">
                         <div
                             class="container-fluid d-flex flex-wrap justify-content-between text-center container-p-x pb-3">
                             <div class="pt-3">
@@ -96,7 +99,7 @@
                                 <a href="#" class="footer-link pt-3 ml-4">條款</a>
                             </div>
                         </div>
-                    </nav>
+                    </nav> -->
                 </div>
                 <!-- [ 主要內容區塊 ] End -->
 

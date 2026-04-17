@@ -2,6 +2,7 @@ from flask import Blueprint, current_app, jsonify
 from routes.fhir_api import create_fhir_blueprint
 from mylib.fhir_client import FHIRClient
 from extensions import db
+from sqlalchemy import or_
 from config import BaseConfig as cfg  # 讀 config
 import requests
 from bs4 import BeautifulSoup
@@ -498,7 +499,19 @@ def getAssistant(ProjectId): # 產出助理清單
 
 def get_Project(pi_id):
     getResult = [] # 準備存處理好的資料
-    study = FHIRData_Handle(None, FHIRSearch_Handle(8, [pi_id]), 2, 1)
+    UserInfo = User.query.filter_by(fhir_practitioner_id=pi_id).first()
+    ProjectInfo = Project.query.filter(
+        or_(
+            Project.pi_id == pi_id,
+            Project.Assistant.contains(UserInfo.id)
+        )
+    ).all()
+    print(ProjectInfo)
+    ids = [str(p.fhir_study_id) for p in ProjectInfo if p.fhir_study_id]
+    print(ids)
+    study_id_list = ",".join(ids)
+    print(study_id_list)
+    study = FHIRData_Handle(None, FHIRSearch_Handle(8, [study_id_list]), 2, 1)
 
     # 抓每一個ResearchStudy
     for b in study:
