@@ -50,7 +50,7 @@ def create_app():
         response.headers["Content-Security-Policy"] = (
             f"default-src 'self'; "
             f"script-src 'self' 'nonce-{nonce}'; "
-            f"style-src 'self' 'unsafe-inline'; "   # ← 暫時保留
+            f"style-src 'self'; "   # ← 暫時保留
             f"img-src 'self' data:; "
             f"font-src 'self' data:; "
             f"connect-src 'self'; "

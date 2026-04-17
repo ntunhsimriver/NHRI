@@ -7,6 +7,7 @@
     <title>{% block title %}NHRI - 臨床研究數據平台{% endblock %}</title>
 
     <!-- Empire 核心 CSS -->
+
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/bootstrap-material.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/shreerang-material.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/uikit.css') }}"> 
@@ -17,6 +18,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/ionicons.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/feather.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='Content/font/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/tailwind.generated.css') }}">
     {% block styles %}
 
 
@@ -109,16 +111,16 @@
     <!-- [ Layout wrapper ] End -->
 
     <!-- JS 資源（順序很重要） -->
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/tailwindcss.js') }}"></script>
+    <!-- <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/tailwindcss.js') }}"></script> -->
     <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/chart.js') }}"></script>
     <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/bootstrap.bundle.min.js') }}"></script>
     <!-- <script src="{{ url_for('static', filename='assets/js/jquery-4.0.0.min.js') }}"></script> -->
     <!-- <script src="{{ url_for('static', filename='assets/libs/popper/popper.js') }}"></script> -->
     <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/bootstrap.js') }}"></script>
 
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/layout-helpers.js') }}"></script>
+    <!-- <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/layout-helpers.js') }}"></script> -->
     <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/sidenav.js') }}"></script>
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/material-ripple.js') }}"></script>
+    <!-- <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/material-ripple.js') }}"></script> -->
 
 
     <!-- 初始化 Empire layout + 額外保險的伸縮事件 -->

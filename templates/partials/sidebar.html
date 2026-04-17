@@ -1,5 +1,5 @@
 {% block styles %}
-
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/tailwind.generated.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='Content/css/sidebar.css') }}">
 
 {% endblock %}
@@ -73,6 +73,6 @@
 </div>
 
 {% block scripts %}
-<script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/tailwindcss.js') }}"></script>
+<!-- <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/tailwindcss.js') }}"></script> -->
 <script src="{{ url_for('static', filename='Content/Scripts/sidebar.js') }}"></script>
 {% endblock %}
