@@ -23,3 +23,15 @@ document.querySelectorAll('.btn-back').forEach(btn => {
         history.back();
     });
 });
+
+const userMenu = document.getElementById("userMenu");
+  const userAvatar = document.getElementById("userAvatar");
+
+  userAvatar.addEventListener("click", function (e) {
+    e.stopPropagation();
+    userMenu.classList.toggle("active");
+  });
+
+  document.addEventListener("click", function () {
+    userMenu.classList.remove("active");
+  });

@@ -93,3 +93,29 @@ def settings():
     users = User.query.all()
     print(users[0].role.name)
     return render_template('settings.html', users=users, script_path=url_for('static', filename='Content/Scripts/settings.js'))
+
+@bp.route('/change_password')
+def change_password():
+    if 'username' not in session:
+        return redirect(url_for('auth.login_page'))
+    
+    return render_template('change_password.html', script_path=url_for('static', filename='Content/Scripts/change_password.js'))
+
+@bp.route('/api/change_password', methods=['POST'])
+def api_change_password():
+    data = request.get_json()
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+    
+    user = User.query.filter_by(full_name=session['username']).first()
+
+    if user and user.check_password(old_password):
+        new_hashed_password = generate_password_hash(new_password)
+        user.password_hash = new_hashed_password
+        db.session.commit()
+
+
+        return jsonify({'success': True, 'redirect': '/logout'})
+    elif not user.check_password(old_password):
+        return jsonify({'success': False, 'message': '原有密碼輸入錯誤'})
+    
