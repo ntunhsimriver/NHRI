@@ -53,15 +53,16 @@
         <div>設備管理</div>
       </a>
     </li>
+    {%endif%}
 
-    {% elif role != 'ASSISTANT'  %}
+    {% if role != 'ASSISTANT' %}
     <li class="sidenav-item {% if request.path == url_for('pages.projectManage') %}active{% endif %}">
       <a href="{{ url_for('pages.projectManage') }}" class="sidenav-link">
         <i class="sidenav-icon feather icon-briefcase"></i>
         <div>計畫管理</div>
       </a>
     </li>
-
+  
     <li class="sidenav-item {% if request.path == url_for('auth.settings') %}active{% endif %}">
       <a href="{{ url_for('auth.settings') }}" class="sidenav-link">
         <i class="sidenav-icon feather icon-settings"></i>

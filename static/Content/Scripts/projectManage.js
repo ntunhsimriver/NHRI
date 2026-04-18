@@ -4,27 +4,51 @@ var ModaladdProject = document.getElementById('Modal_addProject');
 var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModaladdProject);
 
 
-// ModaladdUser.addEventListener('show.bs.modal', function (event) {
-//     var button = event.relatedTarget; // 取得被點擊的按鈕
-//     var input_data = button.getAttribute('data-bs-value')
-//     var data = JSON.parse(input_data);
+ModaladdProject.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+    var input_data = button.getAttribute('data-bs-value');
 
-//     var modelfull_name = document.getElementById('newUser_name');
-//     if (modelfull_name) modelfull_name.value = data.full_name;
+    var data = {};
+    if (input_data) {
+      data = JSON.parse(input_data);
+    }
 
-//     var modelemail = document.getElementById('newUser_email');
-//     if (modelemail) modelemail.value = data.email;
+    var modalTitle = document.getElementById('Modal_addProject_title');
+    var submitBtn = document.getElementById('Modal_addProject_submit');
+    var Model_id = document.getElementById('new_id');
+    // 有資料 => 更新模式
+    if (data.id || data.name || data.status || data.note || data.dataType) {
+      if (modalTitle) modalTitle.textContent = '更新計劃';
+      if (submitBtn) submitBtn.textContent = '儲存修改';
+      Model_id.readOnly = true;   // 編輯 → 鎖住
 
-//     var modelorg = document.getElementById('newUser_org');
-//     if (modelorg) modelorg.value = data.org;
+    } 
+    // 沒資料 => 新增模式
+    else {
+      if (modalTitle) modalTitle.textContent = '新增計畫';
+      if (submitBtn) submitBtn.textContent = '建立計畫';
+      Model_id.readOnly = false;   // 編輯 → 鎖住
 
-//     var modelpra_id = document.getElementById('newUser_PraId');
-//     if (modelpra_id) modelpra_id.value = data.pra_id;
+    }
 
-//     var modelroleName = document.getElementById('newUser_role');
-//     if (modelroleName) modelroleName.value = data.roleName;
+    
+    if (Model_id) Model_id.value = data.id || '';
 
-// });
+    var Model_name = document.getElementById('new_name');
+    if (Model_name) Model_name.value = data.name || '';
+
+    var Model_status = document.getElementById('new_status');
+    if (Model_status) Model_status.value = data.status || 'active';
+    
+    var Model_note = document.getElementById('new_note');
+    if (Model_note) Model_note.value = data.note || '';
+
+    const types = data.dataType ? data.dataType.split(",").map(t => t.trim()) : [];
+
+    document.querySelectorAll('input[name="new_dataType"]').forEach(cb => {
+      cb.checked = types.includes(cb.value);
+    });
+});
 
 
 // 當 Modal 關閉時自動重置表單
@@ -41,8 +65,8 @@ const msg = document.getElementById('message');
 
 form.addEventListener('submit', async function (e) {
     e.preventDefault();
-    
-    const ProjectId = document.getElementById('new_id').value;
+    var idInput = document.getElementById('new_id');
+    const ProjectId = idInput.value;
     const ProjectName = document.getElementById('new_name').value;
     const ProjectStatus = document.getElementById('new_status').value;
     const ProjectNote = document.getElementById('new_note').value;
@@ -51,14 +75,19 @@ form.addEventListener('submit', async function (e) {
 
 	const dataType = Array.from(checkboxes).map(cb => cb.value).join(',');
 
+    var modalTitle = document.getElementById('Modal_addProject_title').innerText;
+    
+    
+    var type = idInput.readOnly ? "update" : "new";
 
+    alert(type);
     // 清除前一次樣式
     msg.classList.remove('error-message', 'success-message');
 
     const response = await fetch('/api/addProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ProjectId, ProjectName, ProjectStatus, ProjectNote, dataType })
+        body: JSON.stringify({ ProjectId, ProjectName, ProjectStatus, ProjectNote, dataType, type })
     });
 
     const result = await response.json();

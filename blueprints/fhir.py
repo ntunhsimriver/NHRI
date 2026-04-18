@@ -1071,10 +1071,11 @@ def getQA(pat_id):
 def addProject_FHIR(data, pra_id):
 
     ProjectId = data.get('ProjectId')
+    type = data.get('type')
     # 1. 先查看看有沒有重複的編號
     existing_project = Project.query.filter_by(irb_number=ProjectId).first()
     
-    if existing_project:
+    if existing_project and type =="new":
         # 這裡你可以選擇回傳錯誤，或是更新它
         return {"success": False, "message": f"IRB編號 {ProjectId} 已存在"}
 
@@ -1092,11 +1093,21 @@ def addProject_FHIR(data, pra_id):
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)    
     # print(Response.text)
     if Response.ok:
-        # 確定進fhir server再進資料庫
-        new_projecy = Project(irb_number = ProjectId, name = ProjectName, pi_id = pra_id, fhir_study_id = fhir_study_id, status = ProjectStatus, dataType = dataType)
-        db.session.add(new_projecy)
-        db.session.commit()
-        return {'success': True, 'message': '已新增成功'}
+        if type =="new":
+            # 確定進fhir server再進資料庫
+            new_projecy = Project(irb_number = ProjectId, name = ProjectName, pi_id = pra_id, fhir_study_id = fhir_study_id, status = ProjectStatus, dataType = dataType)
+            db.session.add(new_projecy)
+            db.session.commit()
+            return {'success': True, 'message': '已新增成功'}
+        else:
+
+            existing_project.name = ProjectName
+            existing_project.status = ProjectStatus
+            existing_project.dataType = dataType
+
+            db.session.commit()
+            return {'success': True, 'message': '已更新成功'}
+        
     else:
         # print(result)
         return {"success": False, "message": result.text}
