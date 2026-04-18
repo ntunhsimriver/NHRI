@@ -69,12 +69,12 @@ function goToStep2(type) {
         infoElement.innerText = "上傳的FHIR檔案將以POST方式上傳至FHIR server，若需以PUT上傳請用transaction打包。";
         fileInput.accept = ".json"; // FHIR 只收 JSON
     } 
-    else if (type === 'Excel') {
-        hintElement.innerText = ".csv,.xlsx";
+    else if (type === 'Watch') {
+        hintElement.innerText = ".csv";
         infoElement.innerText = "格式範例";
         fileInput.accept = ".csv,.xlsx"; // 其他來源收表格檔
     }
-    else if (type === 'Watch') {
+    else if (type === 'Asus') {
         document.getElementById('fhir_project').classList.remove('hidden');
         hintElement.innerText = ".json";
         infoElement.innerText = "請直接上傳華碩手表api的回傳檔案，並直接由系統上傳FHIR Server。";
@@ -115,7 +115,7 @@ function handleUpload() {
     const file = fileInput.files[0];
 
     const select = document.getElementById("fhir_project");
-    if (fileType === "Watch" && !select.value) {
+    if (fileType === "Asus" && !select.value) {
         alert("手錶資料必須選擇上傳的資料為哪一類型資料!");
         return;
     }

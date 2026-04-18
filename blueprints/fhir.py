@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, jsonify, session
 from routes.fhir_api import create_fhir_blueprint
 from mylib.fhir_client import FHIRClient
 from extensions import db
@@ -1104,6 +1104,9 @@ def addProject_FHIR(data, pra_id):
             existing_project.name = ProjectName
             existing_project.status = ProjectStatus
             existing_project.dataType = dataType
+
+            session['study_name'] = ProjectName
+            session['study_status'] = ProjectStatus
 
             db.session.commit()
             return {'success': True, 'message': '已更新成功'}

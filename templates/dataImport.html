@@ -47,15 +47,15 @@
           <span class="text-xs text-slate-400">JSON 格式</span>
         </button>
 
-        <button data-type="Excel" class="step-btn flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-md">
+        <button data-type="Watch" class="step-btn flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-md">
           <div class="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 p-3 text-emerald-600">
             <i class="bi bi-activity text-2xl"></i>
           </div>
-          <span class="font-medium text-slate-700">問卷 Excel</span>
-          <span class="text-xs text-slate-400">CSV / XLSX 格式</span>
+          <span class="font-medium text-slate-700">麗臺手錶</span>
+          <span class="text-xs text-slate-400">CSV 格式</span>
         </button>
 
-        <button  data-type="Watch" class="step-btn flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-purple-500 hover:bg-purple-50 hover:shadow-md">
+        <button  data-type="Asus" class="step-btn flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-6 transition-all hover:border-purple-500 hover:bg-purple-50 hover:shadow-md">
           <div class="flex h-14 w-14 items-center justify-center rounded-full bg-purple-100 p-3 text-purple-600">
             <i class="bi bi-watch text-2xl"></i>
           </div>
@@ -78,10 +78,11 @@
         <option value="historic_data_origin">DataWithTimePeriod</option>
         <option value="sleep_data">SleepDataWithTimePeriod</option>
       </select>
+
       <label 
         for="file-upload" 
         id="drop-zone"
-        class="flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 transition-all hover:border-blue-400 hover:bg-blue-50 group"
+        class="flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 transition-all hover:border-blue-400 hover:bg-blue-50 group w-full"
       >
         <input type="file" id="file-upload" name="file" class="hidden" accept=".json,.csv,.xlsx" />
         

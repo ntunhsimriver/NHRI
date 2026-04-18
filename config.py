@@ -82,6 +82,7 @@ class BaseConfig:
     POLL_INTERVAL=20     # $export 輪詢間隔秒
     PROXY_CHUNK_SIZE = int(os.getenv("PROXY_CHUNK_SIZE", "8192"))
     BASE_DIR_STAC = BASE_DIR / "static"
+    BASE_DATA_DIR = BASE_DIR / "static" / "data/"
     PATIENT_ID_SALT = "NHRI123"
     # # ===== Aggregate Table 路徑設定 =====
     # DATA_NDJSON_DIR = BASE_DIR / "static" / "data" / "data_ndjson"

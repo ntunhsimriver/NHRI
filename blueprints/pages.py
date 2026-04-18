@@ -43,6 +43,7 @@ def selectproject():
 
     session.pop('study_id', None)
     session.pop('study_name', None)
+    session.pop('study_status', None)
     try:
         data = fhir.get_Project(session['fhir_practitioner_id'])
         return render_template('selectproject.html', data=data, script_path=url_for('static', filename='Content/Scripts/selectproject.js'))
@@ -81,11 +82,12 @@ def index_page():
 
     return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, CountAllData=CountAllData, getCountDataList=getCountDataList, script_path=url_for('static', filename='Content/Scripts/index.js'))
 
-@bp.route('/set_study_session/<study_id>/<study_name>') # 這個是為了先把study ID寄進去session裡面，這樣後續要抓資料比較好抓，不用再透過PI
-def set_study_session(study_id, study_name):
+@bp.route('/set_study_session/<study_id>/<study_name>/<study_status>') # 這個是為了先把study ID寄進去session裡面，這樣後續要抓資料比較好抓，不用再透過PI
+def set_study_session(study_id, study_name, study_status):
     # 將 ID 存入 session
     session['study_id'] = study_id
     session['study_name'] = study_name
+    session['study_status'] = study_status
     # 跳轉到目標頁面 (此時網址就不會帶有 ID)
     return redirect(url_for('pages.index_page'))
 
@@ -183,6 +185,9 @@ def api_patObs14days(pat_id):
 
 @bp.route('/api/addPatient', methods=['POST'])
 def api_addPatient():
+    print(session['study_status'] )
+    if session['study_status'] == "withdrawn":
+        return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
     data = request.get_json()
 
     res = fhir.addPatient_FHIR(data, session['study_id'])
@@ -238,6 +243,9 @@ def deviceManage():
 
 @bp.route('/api/addDevice', methods=['POST'])
 def api_addDevice():
+    if session['study_status'] == "withdrawn":
+        return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
+
     data = request.get_json()
     res = fhir.addDevice_FHIR(data, session['study_id'])
     if res[0]:
@@ -266,6 +274,8 @@ def api_addProject():
 
 @bp.route('/api/addMember', methods=['POST'])
 def api_addMember():
+    if session['study_status'] == "withdrawn":
+        return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
     data = request.get_json()
     member_result = data['item_member']
     getMember_proid = data['item_proid']
@@ -278,6 +288,8 @@ def api_addMember():
 
 @bp.route('/api/uploadFHIR', methods=['POST'])
 def api_uploadFHIR():
+    if session['study_status'] == "withdrawn":
+        return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
     file = request.files.get('file')
     file_type = request.form.get('fileType')  # 這樣拿
     pat_id = request.form.get('patid')  # 這樣拿
@@ -320,7 +332,13 @@ def api_uploadFHIR():
                 return jsonify({"success": True, "message": file.filename})
             else:
                 return jsonify({"success": False, "message": result.text})
-        elif file_type == 'Excel':
+        elif file_type == 'Watch':
+            url = f"{cfg.BASE_URL}/api/trans_watch/Watch?study_id={study_id}"
+            print(save_path)
+            res = requests.post(url, json={
+                "filename": save_path
+            })
+
             return jsonify({"success": True, "message": file.filename})
         elif file_type == 'Consent':
             result = fhir.upload_Consent(study_id, pat_id, new_filename) # 直接把檔案轉成 Python 字典
@@ -328,10 +346,10 @@ def api_uploadFHIR():
                 return jsonify({"success": True, "message": "已收到同意書: " + file.filename})
             else:
                 return jsonify({"success": False, "message": result.text})
-        elif file_type == 'Watch':
+        elif file_type == 'Asus':
             data = json.load(file)
             fhir_project = request.form.get('fhir_project')  # 這樣拿
-            url = f"{cfg.BASE_URL}/api/trans_watch/{fhir_project}"
+            url = f"{cfg.BASE_URL}/api/trans_watch/{fhir_project}?study_id={study_id}"
 
             res = requests.post(url, json=data)
 

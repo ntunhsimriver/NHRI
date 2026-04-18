@@ -76,11 +76,9 @@ form.addEventListener('submit', async function (e) {
 	const dataType = Array.from(checkboxes).map(cb => cb.value).join(',');
 
     var modalTitle = document.getElementById('Modal_addProject_title').innerText;
-    
+
     
     var type = idInput.readOnly ? "update" : "new";
-
-    alert(type);
     // 清除前一次樣式
     msg.classList.remove('error-message', 'success-message');
 
