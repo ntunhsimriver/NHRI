@@ -87,8 +87,6 @@ def api_login():
 def settings():
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
-    elif 'study_id' not in session:
-        return redirect(url_for('pages.selectproject'))
 
     users = User.query.all()
     print(users[0].role.name)
