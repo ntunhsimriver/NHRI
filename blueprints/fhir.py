@@ -506,24 +506,22 @@ def get_Project(pi_id):
             Project.Assistant.contains(UserInfo.id)
         )
     ).all()
+    print("????????????")
     print(ProjectInfo)
     ids = [str(p.fhir_study_id) for p in ProjectInfo if p.fhir_study_id]
-    print(ids)
-    study_id_list = ",".join(ids)
-    print(study_id_list)
-    study = FHIRData_Handle(None, FHIRSearch_Handle(8, [study_id_list]), 2, 1)
 
     # 抓每一個ResearchStudy
-    for b in study:
-        Assistant = getAssistant(b.ProjectId) # 這邊先去產助理的清單
+    for study_id in ids:
+        study = FHIRData_Handle(None, study_id, 2, 1)[0]
+        Assistant = getAssistant(study.ProjectId) # 這邊先去產助理的清單
 
         # 從ResearchStudy裡面抓PI的名字(怕之後會跟db裡面的不一樣，所以先再抓一次)
-        getPIName = FHIRData_Handle(None, b.PI, 3, 1)[0].name
+        getPIName = FHIRData_Handle(None, study.PI, 3, 1)[0].name
         # 這邊直接count這個study底下有多少ResearchSubject(因為他一個裡面只能放一個人，所以就直接等於count人)
-        getSubjectCount = FHIRData_Handle(None, FHIRSearch_Handle(9, [ b.ProjectId]), 1, 1)[0].SummaryCount
+        getSubjectCount = FHIRData_Handle(None, FHIRSearch_Handle(9, [ study.ProjectId]), 1, 1)[0].SummaryCount
 
         getResult.append({
-            "study_info": b,  # 這裡存的是整個study的資料，他是物件
+            "study_info": study,  # 這裡存的是整個study的資料，他是物件
             "pi_name": getPIName,    # 這裡存的是PI名字，他是字串
             "SubjectCount": getSubjectCount,    # 這裡存的是這個study底下有多少人，他是字串
             "Assistant": Assistant,    # 這裡存這個專案底下的助理有誰

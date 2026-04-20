@@ -103,9 +103,16 @@
 
         <label class="block text-sm font-medium text-slate-700" for="newUser_role">角色權限</label>
         <select id="newUser_role" class="mt-1 block w-full rounded-md !border !border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" required>
+          {% if role == 'SUPER_ADMIN'  %}
           <option value="PI">PI (計畫主持人)</option>
           <option value="ASSISTANT">PI 助理</option>
           <option value="SUPER_ADMIN">系統管理員 (Super Admin)</option>
+          {% elif role == 'PI'  %}
+          <option value="PI">PI (計畫主持人)</option>
+          <option value="ASSISTANT">PI 助理</option>
+          {% else  %}
+          <option value="ASSISTANT">PI 助理</option>
+          {% endif %}
         </select>
 
       </div>
