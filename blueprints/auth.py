@@ -17,6 +17,10 @@ def login_page():
 @bp.route('/logout')
 def logout():
     session.pop('username', None)
+    session.pop('fhir_practitioner_id', None)
+    session.pop('study_id', None)
+    session.pop('study_name', None)
+    session.pop('study_status', None)
     return redirect(url_for('auth.login_page'))
 
 @bp.route('/register', methods=['POST'])
@@ -61,6 +65,7 @@ def register():
 
 @bp.route('/api/login', methods=['POST'])
 def api_login():
+    
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
@@ -85,11 +90,11 @@ def api_login():
 
 @bp.route('/settings')
 def settings():
+    if session['role'] == "ASSISTANT":
+        return render_template('error_page.html', message=f"錯誤原因：無此權限"), 403
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
-
     users = User.query.all()
-    print(users[0].role.name)
     return render_template('settings.html', users=users, script_path=url_for('static', filename='Content/Scripts/settings.js'))
 
 @bp.route('/change_password')

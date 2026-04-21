@@ -1,79 +1,99 @@
 <!DOCTYPE html>
 <html lang="zh-Hant" class="material-style layout-fixed">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}NHRI - 臨床研究數據平台{% endblock %}</title>
-
-    <!-- Empire 核心 CSS -->
-     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/bootstrap-material.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/shreerang-material.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/uikit.css') }}"> 
-
-    <!-- 你原本的其他樣式（如有衝突可逐步關閉測試） -->
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='Content/css/selectproject.css') }}"> 
-    <!-- Icon Fonts -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/ionicons.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/feather.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='Content/font/bootstrap-icons.css') }}">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/tailwind.generated.css') }}">
     {% block styles %}
-
-
+    <style nonce="{{ g.nonce }}">
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top, rgba(59,130,246,0.10), transparent 35%),
+                linear-gradient(to bottom right, #f8fafc, #eef2ff);
+        }
+    </style>
     {% endblock %}
 </head>
 
-<body>
+<body class="min-h-screen text-slate-800">
 
     <!-- Pre-loader -->
     <div class="page-loader">
         <div class="bg-primary"></div>
     </div>
 
-    <section>
+    <main class="flex min-h-screen items-center justify-center px-4 py-10">
+        <div class="w-full max-w-2xl">
+            
+            <!-- Logo / 系統名稱 -->
+            <div class="mb-6 text-center">
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.65 18h16.7a1 1 0 00.86-1.5l-7.5-13a1 1 0 00-1.72 0z" />
+                    </svg>
+                </div>
+                <p class="text-sm font-medium tracking-wide text-blue-700">NHRI 臨床研究數據平台</p>
+            </div>
 
-    <h1>無法連線至伺服器</h1>
-    <p>很抱歉，系統暫時無法處理您的請求。{{ message }}</p>
-    
-    <div class="debug-info">
-        <strong>錯誤詳情：</strong><br>
-        {{ error_message or "Connection Refused (WinError 10061)" }}
-    </div>
-    </section>
-    
+            <!-- Card -->
+            <section class="overflow-hidden rounded-3xl bg-white/90 shadow-xl backdrop-blur">
+                
+                <!-- Header -->
+                <div class="border-b border-slate-100 bg-gradient-to-r from-red-50 to-white px-8 py-7">
+                    <div class="flex items-start gap-4">
+                        <div class="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.65 18h16.7a1 1 0 00.86-1.5l-7.5-13a1 1 0 00-1.72 0z" />
+                            </svg>
+                        </div>
 
-    <!-- JS 資源（順序很重要） -->
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/tailwindcss.js') }}"></script>
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/jquery-4.0.0.min.js') }}"></script>
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/libs/popper/popper.js') }}"></script>
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/bootstrap.js') }}"></script>
+                        <div>
+                            <h1 class="text-2xl font-bold text-slate-900">無法連線至伺服器</h1>
+                            <p class="mt-2 text-sm leading-6 text-slate-600">
+                                很抱歉，系統目前暫時無法處理您的請求。
+                                {% if message %}
+                                    {{ message }}
+                                {% else %}
+                                    請稍後再試，或聯絡系統管理員協助確認。
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/layout-helpers.js') }}"></script>
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/sidenav.js') }}"></script>
-    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/material-ripple.js') }}"></script>
+                <!-- Body -->
+                <div class="px-8 py-7">
+                    <div class="grid gap-6">
 
 
-    <!-- 初始化 Empire layout + 額外保險的伸縮事件 -->
-    <script nonce="{{ g.nonce }}" >
-        document.addEventListener("DOMContentLoaded", function () {
-            if (window.layoutHelpers) {
-                window.layoutHelpers.init();
-            }
+                        <!-- Actions -->
+                        <div class="flex flex-col gap-3 sm:flex-row sm:justify-between">
+                            <a
+                               class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                                返回上一頁
+                            </a>
 
-            // 額外保險：任何 .layout-sidenav-toggle 被點擊時，切換側欄收合/展開
-            document.querySelectorAll('.layout-sidenav-toggle').forEach(function (el) {
-                el.addEventListener('click', function () {
-                    if (window.layoutHelpers && typeof window.layoutHelpers.toggleCollapsed === 'function') {
-                        window.layoutHelpers.toggleCollapsed();
-                    }
-                });
-            });
-        });
+                            <a href="{{ url_for('pages.index_page') }}"
+                               class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700">
+                                回到首頁
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <p class="mt-6 text-center text-xs text-slate-400">
+                若問題持續發生，請提供錯誤畫面與時間給系統管理員協助排查。
+            </p>
+        </div>
+    </main>
+
+    <script nonce="{{ g.nonce }}">
     </script>
 
     {% block scripts %}{% endblock %}
 </body>
-
 </html>

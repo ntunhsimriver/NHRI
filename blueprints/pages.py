@@ -38,6 +38,8 @@ def root():
 
 @bp.route('/selectproject')
 def selectproject():
+    if session['role'] == "SUPER_ADMIN":
+        return render_template('error_page.html', message=f"錯誤原因：無此權限"), 403
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
 
@@ -257,6 +259,8 @@ def api_addDevice():
 
 @bp.route('/projectManage')
 def projectManage():
+    if session['role'] == "ASSISTANT":
+        return render_template('error_page.html', message=f"錯誤原因：無此權限"), 403
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
     data = fhir.get_Project(session['fhir_practitioner_id'])    
