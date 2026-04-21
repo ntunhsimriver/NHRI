@@ -15,18 +15,6 @@ document.querySelectorAll('.btn-back').forEach(btn => {
     });
 });
 
-document.addEventListener('click', function (e) {
-    const btn = e.target.closest('.file-trigger');
-    if (!btn) return;
-
-    const targetId = btn.dataset.target;
-    const input = document.getElementById(targetId);
-
-    if (input) {
-        input.click();
-    }
-});
-
 
 const modalAddPatient = document.getElementById('Modal_addPatient');
 const msg = document.getElementById('message');
@@ -54,6 +42,32 @@ document.addEventListener("DOMContentLoaded", () => {
     // 限制日期
     endInput.min = startInput.value;
     startInput.max = endInput.value;
+
+    // 點按鈕時，打開對應的 file input
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.file-trigger');
+        if (!btn) return;
+
+        const targetId = btn.dataset.target;
+        const fileType = btn.dataset.type;
+        const input = document.getElementById(targetId);
+
+        if (input) {
+            input.dataset.type = fileType; // 把按鈕的 data-type 存到 input
+            input.click();
+        }
+    });
+
+    // 只綁一次 change
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', function (event) {
+            const fileType = this.dataset.type;
+            handleFileSelect(event, fileType);
+
+            // 讓同一個檔案再次選取時也能觸發 change
+            this.value = '';
+        });
+    });
 });
 
 modalAddPatient.addEventListener('show.bs.modal', async function (event) {
@@ -462,7 +476,7 @@ if (ModalConsent) {
 // 同意書上傳的按鈕
 function handleFileSelect(event, fileType) {
     const file = event.target.files[0]; // 取得第一個檔案
-    const patid = document.querySelector('h2').innerText.trim(); // 抓pat id
+    const patid = document.getElementById('pat_id_hidden').value; // 抓pat id
     if (file) {
         console.log("選取的檔案名稱:", file.name);
         console.log("檔案大小:", (file.size / 1024).toFixed(2), "KB");

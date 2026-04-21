@@ -139,7 +139,7 @@
 
       <div class="ml-auto flex gap-2">
         <input type="file" id="fileInput_FHIR" hidden accept=".json">
-        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 file-trigger" data-target="fileInput_FHIR"
+        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 file-trigger" data-target="fileInput_FHIR" data-type="FHIR_pat"
           type="button" id="fileInput_FHIR_btn" >
           <i class="bi bi-upload"></i>
           上傳FHIR資料
@@ -457,7 +457,7 @@
             <!-- 隱藏的上傳口 -->
             <input type="file" id="fileInput_QA" hidden accept=".json">
             <button  type="button" id="fileInput_QA_btn" 
-              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput_QA">
+              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput_QA" data-type="QA">
               <i class="bi bi-upload"></i> 
               上傳新文件
             </button>
@@ -531,7 +531,7 @@
             <!-- 隱藏的上傳口 -->
             <input type="file" id="fileInput"  hidden  accept=".pdf, image/*">
             <button  type="button" id="fileInput_Consent_btn" 
-=              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput">
+=              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput" data-type="Consent">
               <i class="bi bi-upload"></i> 
               上傳新文件
             </button>
