@@ -641,11 +641,11 @@ def getObs14days(PatID, DeviceID, start, end):
 
     # 這邊先抓出所有內容
     if PatID:
-        print(str([PatID, target_codes, start, end, '1000']))
-        print(FHIRSearch_Handle(16, [PatID, target_codes, start, end, '1000']))
-        rows = FHIRData_Handle(None, FHIRSearch_Handle(16, [PatID, target_codes, start, end, '1000']), 1, 1)
+        print(str([PatID, target_codes, start, end, '100000']))
+        print(FHIRSearch_Handle(16, [PatID, target_codes, start, end, '100000']))
+        rows = FHIRData_Handle(None, FHIRSearch_Handle(16, [PatID, target_codes, start, end, '100000']), 1, 1)
     elif DeviceID:
-        rows = FHIRData_Handle(None, FHIRSearch_Handle(55, [DeviceID, target_codes, start, end, '1000']), 1, 1)
+        rows = FHIRData_Handle(None, FHIRSearch_Handle(55, [DeviceID, target_codes, start, end, '100000']), 1, 1)
     # 先把收到的日期轉成date格式
     start_date = datetime.strptime(start, "%Y-%m-%d").date()
     end_date = datetime.strptime(end, "%Y-%m-%d").date()

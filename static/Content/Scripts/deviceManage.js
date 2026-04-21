@@ -9,6 +9,20 @@ ModaladdDevice.addEventListener('show.bs.modal', function (event) {
     var input_data = button.getAttribute('data-bs-value')
     var data = JSON.parse(input_data);
 
+    var modalTitle = document.getElementById('Modal_addDevice_title');
+    var Model_id = document.getElementById('DeviceId');
+    if (data.id) {
+      if (modalTitle) modalTitle.textContent = '更新設備';
+      Model_id.readOnly = true;   // 編輯 → 鎖住
+
+    } 
+    // 沒資料 => 新增模式
+    else {
+      if (modalTitle) modalTitle.textContent = '新增設備';
+      Model_id.readOnly = false;   // 編輯 → 鎖住
+
+    }
+
     // 1. 處理設備型號 (Select)
     var modelEl = document.getElementById('DeviceModel');
     if (modelEl) modelEl.value = data.model;
@@ -24,6 +38,8 @@ ModaladdDevice.addEventListener('show.bs.modal', function (event) {
     // 4. 處理個案 (如果有資料的話)
     var patEl = document.getElementById('PatId');
     if (patEl) patEl.value = data.pat_id || ""; // 防止出現 "null" 字樣
+
+
 
 });
 
