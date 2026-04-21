@@ -70,14 +70,10 @@
 
                         <!-- Actions -->
                         <div class="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                            <a
-                               class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                                返回上一頁
-                            </a>
 
-                            <a href="{{ url_for('pages.index_page') }}"
+                            <a href="{{ url_for('auth.logout') }}"
                                class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700">
-                                回到首頁
+                                離開
                             </a>
                         </div>
                     </div>

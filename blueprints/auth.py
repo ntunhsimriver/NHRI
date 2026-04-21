@@ -5,6 +5,7 @@ from models.user import User
 from werkzeug.security import generate_password_hash
 import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
 from blueprints import fhir
+from datetime import datetime, timedelta
 
 bp = Blueprint("auth", __name__)
 
@@ -65,27 +66,75 @@ def register():
 
 @bp.route('/api/login', methods=['POST'])
 def api_login():
-    
     data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+    email = (data.get('email') or '').strip()
+    password = data.get('password') or ''
+
+    now = datetime.now()
+
+    # 先檢查是否已被鎖定
+    lock_until = session.get('lock_until')
+    if lock_until:
+        try:
+            lock_until_dt = datetime.fromisoformat(lock_until)
+            if lock_until_dt > now:
+                return jsonify({
+                    'success': False,
+                    'message': '登入失敗過多，請30分鐘後再試'
+                })
+            else:
+                # 已過鎖定時間，清掉
+                session.pop('lock_until', None)
+                session['fail_count'] = 0
+        except Exception:
+            session.pop('lock_until', None)
+            session['fail_count'] = 0
+
     user = User.query.filter_by(email=email).first()
-    # 這邊直接抓full_name當username
-    username = user.full_name
-    fhir_practitioner_id = user.fhir_practitioner_id
-    role = user.role
+
+    # 帳號存在且密碼正確
     if user and user.check_password(password):
+        username = user.full_name
+        fhir_practitioner_id = user.fhir_practitioner_id
+        role = user.role
+
         session['username'] = username
         session['fhir_practitioner_id'] = fhir_practitioner_id
         session['role'] = role.value
+
+        # 登入成功，清掉失敗紀錄
+        session.pop('fail_count', None)
+        session.pop('lock_until', None)
+
         print(f"[LOGIN] 成功登入：{username}")
+
         if role.value == "SUPER_ADMIN":
             return jsonify({'success': True, 'redirect': '/settings'})
         else:
             return jsonify({'success': True, 'redirect': '/selectproject'})
-    else:
-        print(f"[LOGIN] 登入失敗：{username}")
-        return jsonify({'success': False, 'message': '帳號或密碼錯誤'})
+
+    # 登入失敗，累加錯誤次數
+    fail_count = session.get('fail_count', 0)
+    fail_count += 1
+    session['fail_count'] = fail_count
+
+    # 錯誤達 5 次，鎖定 30 分鐘
+    if fail_count >= 5:
+        lock_time = now + timedelta(minutes=30)
+        session['lock_until'] = lock_time.isoformat()
+        session['fail_count'] = 0
+
+        print(f"[LOGIN] 登入失敗達5次：{email}")
+        return jsonify({
+            'success': False,
+            'message': '錯誤5次，已鎖定30分鐘'
+        })
+
+    print(f"[LOGIN] 登入失敗：{email}")
+    return jsonify({
+        'success': False,
+        'message': f'帳號或密碼錯誤，還可再嘗試 {5 - fail_count} 次'
+    })
 
 
 @bp.route('/settings')

@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const targetId = button.getAttribute("data-target");
       const input = document.getElementById(targetId);
 
+
       if (!input) return;
 
       if (input.type === "password") {
@@ -30,6 +31,16 @@ form.addEventListener('submit', async function (e) {
     
     const old_password = document.getElementById('old_password').value;
     const new_password = document.getElementById('new_password').value;
+
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/;
+
+    if (!regex.test(new_password)) {
+      // alert("密碼需包含：大小寫英文、數字、符號");
+        msg.textContent = "密碼需包含：大小寫英文、數字、符號";
+        msg.classList.add('error-message');
+        return;
+    }
+
     // 清除前一次樣式
     msg.classList.remove('error-message', 'success-message');
     if (!old_password || !new_password) {
