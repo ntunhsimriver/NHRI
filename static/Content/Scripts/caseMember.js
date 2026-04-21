@@ -153,7 +153,7 @@ function addList(projectId) {
         </td>
 
         <td class="px-6 py-4">
-            <button class="text-slate-400 hover:text-red-600" onclick="removeRow(this)">
+            <button class="text-slate-400 hover:text-red-600 btn-remove-row">
                 <i class="bi bi-trash"></i>
             </button>
         </td>
