@@ -61,11 +61,13 @@
           </td>
           <td class="px-6 py-4">
             <div class="flex flex-wrap gap-1">
-              {% for type in item['study_info'].dataType.split(',') %}
-                <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">
-                  {{ type }}
-                </span>
-              {% endfor %}
+              {% if item['study_info'].dataType %}
+                {% for type in item['study_info'].dataType.split(',') %}
+                  <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-200 text-slate-600">
+                    {{ type }}
+                  </span>
+                {% endfor %}
+              {%endif%}
             </div>
           </td>
           <td class="px-6 py-4">
