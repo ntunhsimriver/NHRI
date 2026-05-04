@@ -67,6 +67,17 @@ form.addEventListener('submit', async function (e) {
     e.preventDefault();
     var idInput = document.getElementById('new_id');
     const ProjectId = idInput.value;
+    const value = ProjectId.trim();
+
+    const regex = /^[A-Za-z0-9-]+$/;
+
+    if (!regex.test(value)) {
+        e.preventDefault();  // 擋送出
+        msg.classList.add('error-message');
+        msg.textContent = 'ID 只能包含英文、數字與 -';
+        idInput.focus();
+        return;
+    }
     const ProjectName = document.getElementById('new_name').value;
     const ProjectStatus = document.getElementById('new_status').value;
     const ProjectNote = document.getElementById('new_note').value;
