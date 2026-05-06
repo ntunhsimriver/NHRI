@@ -707,7 +707,7 @@ def getDevice(study_id):
         device_dict['countData'] = countData
         getResult.append(device_dict)
         
-        # print(device)
+    print(getResult)
     # status_counts = Counter(item.status for item in getFHIR)
     status_counts = Counter(
         label
@@ -715,8 +715,35 @@ def getDevice(study_id):
         for label in ([item.status] + (['foundPat'] if item.pat_id else []))
         if label # 確保 label 不是 None
     )
-    # print(status_counts)
+    print(status_counts)
+    return [getResult, len(getFHIR), status_counts]
 
+def getDeviceCount(study_id):
+
+    ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
+    device_list = ProjectInfo.device_list
+    # print(ProjectInfo.device_list)
+
+
+    getResult = [] # 準備存處理好的資料
+
+    # Device清單強制轉str，這樣就算沒有，_id=None也頂多是找不到而已，不會有錯
+    getFHIR = FHIRData_Handle(None, 'Device?_id=' + str(device_list) + '&_sort=patient&_sort=status&_count=100', 6, 1)
+    for device in getFHIR:
+        device_dict = device.model_dump() if hasattr(device, 'model_dump') else device.dict()
+        countData = FHIRData_Handle(None, 'Observation?device=Device/' + device.id + '&_summary=count', 1, 1)[0].SummaryCount
+        device_dict['countData'] = countData
+        getResult.append(device_dict)
+        
+    print(getResult)
+    # status_counts = Counter(item.status for item in getFHIR)
+    status_counts = Counter(
+        label
+        for item in getFHIR
+        for label in ([item.status] + (['foundPat'] if item.pat_id else []))
+        if label # 確保 label 不是 None
+    )
+    print(list(status_counts))
     return getResult, len(getFHIR), status_counts
 
 def set_nested_value(dic, path, value):

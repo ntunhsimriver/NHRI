@@ -15,6 +15,7 @@ class Project(db.Model):
     Del = db.Column(db.SmallInteger, default=0)
     Assistant = db.Column(db.Text)
     device_list = db.Column(db.Text)
+    device_count = db.Column(db.Text)
 
     # def to_dict(self):
     #     return {
