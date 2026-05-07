@@ -117,41 +117,6 @@ var ModalmemberManage = document.getElementById('Modal_memberManage');
 // 等等要關閉這個彈跳視窗用的
 var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModalmemberManage);
 
-ModalmemberManage.addEventListener('show.bs.modal', function (event) {
-    var button = event.relatedTarget;
-
-    var input_data = button.getAttribute('data-bs-member');
-    var proid_data = button.getAttribute('data-bs-ProID');
-
-    // 解析 JSON（重點）
-    var members = JSON.parse(input_data);
-
-    // 設定 hidden input
-    var proidEl = document.getElementById('item_proid');
-    if (proidEl) proidEl.value = proid_data;
-
-    // 顯示 checkbox 的地方
-    var container = document.getElementById('item_member');
-    container.innerHTML = "";
-
-    // 動態產生 checkbox
-    members.forEach(item => {
-        container.innerHTML += `
-            <div>
-                <label>
-                    <input 
-                        type="checkbox"
-                        name="assistant_ids"
-                        value="${item.id}"
-                        ${item.selected ? "checked" : ""}
-                    >
-                    ${item.full_name} (${item.email})
-                </label>
-            </div>
-        `;
-    });
-
-});
 
 // 先宣告
 const addMemberform = document.getElementById('addMemberForm');
@@ -188,4 +153,84 @@ addMemberform.addEventListener('submit', async function (e) {
         msg.textContent = result.message;
         msg.classList.add('error-message');
     }
+});
+
+var searchInput = document.getElementById('searchInput');
+var container = document.getElementById('item_member');
+
+var allMembers = [];
+var selectedIds = new Set();
+
+function renderMembers(keyword = "") {
+    container.innerHTML = "";
+
+    keyword = keyword.trim().toLowerCase();
+
+    var filteredMembers = allMembers.filter(item => {
+        return (
+            String(item.id).toLowerCase().includes(keyword) ||
+            String(item.full_name).toLowerCase().includes(keyword) ||
+            String(item.email).toLowerCase().includes(keyword)
+        );
+    });
+
+    filteredMembers.forEach(item => {
+        var itemId = String(item.id);
+
+        container.innerHTML += `
+            <div>
+                <label>
+                    <input 
+                        type="checkbox"
+                        name="assistant_ids"
+                        value="${item.id}"
+                        ${selectedIds.has(itemId) ? "checked" : ""}
+                    >
+                    ${item.full_name} (${item.role})
+                </label>
+            </div>
+        `;
+    });
+}
+
+ModalmemberManage.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+
+    var input_data = button.getAttribute('data-bs-member');
+    var proid_data = button.getAttribute('data-bs-ProID');
+
+    var members = JSON.parse(input_data);
+
+    var proidEl = document.getElementById('item_proid');
+    if (proidEl) proidEl.value = proid_data;
+
+    allMembers = members;
+
+    selectedIds = new Set(
+        allMembers
+            .filter(item => item.selected)
+            .map(item => String(item.id))
+    );
+
+    if (searchInput) {
+        searchInput.value = "";
+    }
+
+    renderMembers();
+});
+
+container.addEventListener("change", function (e) {
+    if (e.target.name === "assistant_ids") {
+        var id = String(e.target.value);
+
+        if (e.target.checked) {
+            selectedIds.add(id);
+        } else {
+            selectedIds.delete(id);
+        }
+    }
+});
+
+searchInput.addEventListener("input", function () {
+    renderMembers(this.value);
 });

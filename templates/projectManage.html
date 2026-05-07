@@ -55,7 +55,7 @@
           <td class="px-6 py-4 text-slate-600">
             {% for a in item.Assistant %}
               {% if a.selected %}
-                <span class="tag">{{ a.full_name }}</span>
+                <span class="tag" title="{{ a.full_name }}">{{ a.full_name }}</span>
               {% endif %}
             {% endfor %}
           </td>
@@ -183,6 +183,11 @@
       </div>
 
       <div id="Modal_memberManage_body" class="p-6 space-y-6 Modal_body_class">
+
+        <input type="text" placeholder="搜尋 Hash ID..." 
+          class="w-full rounded-lg !border !border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+          id="searchInput">
+          
         <div id="addMember_message" class="message"></div>
 
         <label class="block text-sm font-medium text-slate-700" for="item_member">請選擇助理</label>

@@ -9,6 +9,12 @@ document.addEventListener('click', function (e) {
     }
 });
 
+document.querySelectorAll('.btn-back').forEach(btn => {
+    btn.addEventListener('click', function () {
+        history.back();
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     const today = new Date();
     const end = today.toISOString().split("T")[0];

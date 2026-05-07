@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block title %}NHRI - 臨床研究數據平台{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/tailwind.generated.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='Content/css/caseManageDetail.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- <section class="welcome">
+  <h2>歡迎來到健康資料平台</h2>
+  <p>探索病人的健康事件與醫療資訊。</p>
+</section> -->
+
+{% if PatInfo %}
+<main class="flex-1 overflow-auto bg-slate-50 p-8">
+  <div class="space-y-6 fade-in h-full flex flex-col">
+    <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
+      <button class="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-100 transition-colors btn-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="m15 18-6-6 6-6"></path></svg>
+      </button>
+      <div>
+        <div class="flex items-center gap-3">
+          <input type="text" class="hidden" name="pat_id" id="pat_id_hidden" value="{{PatInfo.id}}">
+          <h2 class="text-2xl font-bold text-slate-900">{{PatInfo.id}}</h2>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ResearchSubjectStatus}}">{{ResearchSubjectStatus}}</span>
+        </div>
+        <p class="text-sm text-slate-500">{{study_id}} | {{PatInfo.gender}}
+         <!-- | 最後訪視: 2024-01-05 -->
+       </p>
+      </div>
+      <!-- <div class="ml-auto flex gap-2">
+        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">編輯個案</button>
+      </div> -->
+
+      <div class="ml-auto flex gap-2">
+        <input type="file" id="fileInput_FHIR" hidden accept=".json">
+        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 file-trigger" data-target="fileInput_FHIR" data-type="FHIR_pat"
+          type="button" id="fileInput_FHIR_btn" >
+          <i class="bi bi-upload"></i>
+          上傳FHIR資料
+        </button>
+      </div>
+
+
+    </div>
+
+
+    <nav>
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm active" id="nav-Overview-tab" data-bs-toggle="tab" data-bs-target="#nav-Overview" type="button" role="tab" aria-controls="nav-Overview" aria-selected="true">
+          <i class="bi bi-columns-gap"></i>總覽 (Overview)
+        </button>
+
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Vitals-tab" data-bs-toggle="tab" data-bs-target="#nav-Vitals" type="button" role="tab" aria-controls="nav-Vitals" aria-selected="true">
+          <i class="bi bi-heart"></i>檢驗檢查 (Laboratory)
+        </button>
+
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Clinical-tab" data-bs-toggle="tab" data-bs-target="#nav-Clinical" type="button" role="tab" aria-controls="nav-Clinical" aria-selected="true">
+          <i class="bi bi-activity"></i>臨床病歷 (Clinical)
+        </button>
+
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Scales-tab" data-bs-toggle="tab" data-bs-target="#nav-Scales" type="button" role="tab" aria-controls="nav-Scales" aria-selected="true">
+          <i class="bi bi-clipboard2-data"></i>問卷 (Questionnaire)
+        </button>
+
+        <button class="nav-link flex items-center gap-2 px-6 py-3 text-sm" id="nav-Consents-tab" data-bs-toggle="tab" data-bs-target="#nav-Consents" type="button" role="tab" aria-controls="nav-Consents" aria-selected="true">
+          <i class="bi bi-clipboard2-check"></i>同意書 (Consents)
+        </button>
+      </div>
+    </nav>
+
+    <div class="tab-content" id="nav-tabContent">
+      <div class="tab-pane fade show active" id="nav-Overview" role="tabpanel" aria-labelledby="nav-Overview-tab">
+        <div class="grid gap-6 md:grid-cols-1">
+
+          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 class="mb-4 text-lg font-bold text-slate-900">基本資料</h3>
+            <dl class="grid grid-cols-2 gap-x-4 gap-y-6">
+              <div>
+                <dt class="text-xs text-slate-500">出生日期</dt>
+                <dd class="text-sm font-medium text-slate-900">{{PatInfo.birthDate}}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-500">聯絡電話</dt>
+                <dd class="text-sm font-medium text-slate-900">{{PatInfo.phone}}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-500">婚姻狀況</dt>
+                <dd class="text-sm font-medium text-slate-900">{{PatInfo.maritalStatusCode}} ({{PatInfo.maritalStatusDisplay}})</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-500">居住地</dt>
+                <dd class="text-sm font-medium text-slate-900">{{PatInfo.address}}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-500">收案日期</dt>
+                <dd class="text-sm font-medium text-slate-900">{{FirstDate}}</dd>
+              </div>
+            </dl>
+          </div>
+
+          {% for item in getDeviceInfo %}
+          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:bg-slate-100 transition-colors cursor-pointer" data-url="{{ url_for('pages.deviceDetail', pat_id=PatInfo.id, device_id=item.id) }}">
+            <div class="mb-4 flex items-center justify-between">
+              <h3 class="text-lg font-bold text-slate-900">配戴設備狀態</h3>
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">{{item.status}}</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <i class="bi bi-watch text-2xl"></i>
+              </div>
+              <div>
+                <p class="text-lg font-semibold text-slate-900">{{item.model}} (ID: {{item.id}})</p>
+                <!-- <p class="text-sm text-slate-500">最後同步: 2024-05-15 14:30</p> -->
+              </div>
+            </div>
+<!--             <div class="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+              <div>
+                <span class="text-xs text-slate-500">電池電量</span>
+                <p class="font-mono text-lg font-medium text-emerald-600">85%</p>
+              </div>
+              <div>
+                <span class="text-xs text-slate-500">今日步數</span>
+                <p class="font-mono text-lg font-medium text-slate-900">4,520</p>
+              </div>
+            </div> -->
+          </div>
+          {% endfor %}
+        </div>
+
+
+      </div>
+      
+      <div class="tab-pane fade " id="nav-Vitals" role="tabpanel" aria-labelledby="nav-Vitals-tab">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" id="nav-Vitals" role="tabpanel" aria-labelledby="nav-Vitals-tab">
+
+          <div class="mb-4 flex items-center justify-between">
+
+            <!-- 標題 -->
+            <h3 class="text-lg font-bold text-slate-900" id="myChartText">
+              生理趨勢圖 (近14天)
+            </h3>
+
+            <!-- 小型日期篩選 -->
+            <div class="flex items-center gap-1 text-xs">
+              <input type="date" id="startDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <span class="text-slate-400">~</span>
+              <input type="date" id="endDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <button
+                 id="btn-filter"
+                class="ml-1 rounded-md bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700">
+                查詢
+              </button>
+            </div>
+          </div>
+
+          <div id="chart-loading-spinner" class="text-center py-10 hidden">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2 text-slate-500">正在從伺服器抓取量測紀錄...</p>
+          </div>
+          <div width="100%" height="100%">
+              <canvas id="myChart-Vitals"  width="100%" height="50%"></canvas>
+          </div>
+          <!-- <canvas id="myChart-Vitals" width="100%" height="50%"></canvas> -->
+
+          
+        </div>
+
+        <!-- DiagnosticReport Timeline start -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
+          <h3
+            class="mb-6 text-lg font-bold text-slate-900 tw-treatment-list-toggle"
+            data-target="#DiagnosticReportList"
+            data-body="#DiagnosticReportListBody"
+            data-treatment-type="DiagnosticReport"
+            role="button"
+          >
+            檢驗檢查紀錄時間軸 (DiagnosticReport Timeline)
+          </h3>
+
+          <div class="relative hidden pl-4" id="DiagnosticReportList">
+            <div class="timeline-line absolute bottom-0 left-0 top-2 ml-4 w-px bg-slate-200"></div>
+            <div class="space-y-8" id="DiagnosticReportListBody">
+              資料讀取中......
+            </div>
+          </div>
+        </div>
+        <!-- DiagnosticReport Timeline end -->
+      </div>
+        
+      
+      <div class="tab-pane fade" id="nav-Clinical" role="tabpanel" aria-labelledby="nav-Clinical-tab">
+
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3
+              class="mb-6 text-lg font-bold text-slate-900 tw-encounter-list-toggle"
+              data-target="#EncounterList"
+              data-target-study="{{study_id}}"
+              role="button"
+            >
+              看診紀錄時間軸 (Encounter Timeline)
+            </h3>
+
+            <div class="relative pl-4 hidden" id="EncounterList">
+              <div class="timeline-line absolute bottom-0 left-0 top-2 w-px bg-slate-200 ml-4"></div>
+
+              <div class="space-y-8" id="EncounterListBody">
+                資料讀取中......
+              </div>
+            </div>
+          </div>
+
+        <!-- Procedure Timeline start -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
+          <h3
+            class="mb-6 text-lg font-bold text-slate-900 tw-treatment-list-toggle"
+            data-target="#ProcedureList"
+            data-body="#ProcedureListBody"
+            data-treatment-type="Procedure"
+            role="button"
+          >
+            治療紀錄時間軸 (Procedure Timeline)
+          </h3>
+
+          <div class="relative hidden pl-4" id="ProcedureList">
+            <div class="timeline-line absolute bottom-0 left-0 top-2 w-px bg-slate-200 ml-4"></div>
+            <div class="space-y-8" id="ProcedureListBody">
+              資料讀取中......
+            </div>
+          </div>
+        </div>
+        <!-- Procedure Timeline end -->
+
+        <!-- MedicationRequest Timeline start -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
+          <h3
+            class="mb-6 text-lg font-bold text-slate-900 tw-treatment-list-toggle"
+            data-target="#MedicationRequestList"
+            data-body="#MedicationRequestListBody"
+            data-treatment-type="MedicationRequest"
+            role="button"
+          >
+            用藥紀錄時間軸 (MedicationRequest Timeline)
+          </h3>
+
+          <div class="relative hidden pl-4" id="MedicationRequestList">
+            <div class="timeline-line absolute bottom-0 left-0 top-2 w-px bg-slate-200 ml-4"></div>
+            <div class="space-y-8" id="MedicationRequestListBody">
+              資料讀取中......
+            </div>
+          </div>
+        </div>
+        <!-- MedicationRequest Timeline end -->
+      </div>
+
+
+      <div class="tab-pane fade" id="nav-Scales" role="tabpanel" aria-labelledby="nav-Scales-tab">
+        <div class="space-y-4">
+          <div class="flex justify-between ">
+            <h3 class="text-lg font-bold text-slate-900">已填寫問卷</h3>
+            
+
+            <!-- 隱藏的上傳口 -->
+            <input type="file" id="fileInput_QA" hidden accept=".json">
+            <button  type="button" id="fileInput_QA_btn" 
+              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput_QA" data-type="QA">
+              <i class="bi bi-upload"></i> 
+              上傳新文件
+            </button>
+          </div>
+          
+        </div>
+
+        {% if getQAInfo %}
+
+        {% for item in getQAInfo %}
+        <div class="rounded-xl border border-slate-200 bg-white p-6 mt-10 shadow-sm hover:bg-slate-100 transition-colors cursor-pointer">
+          <div class="mb-4 flex items-center justify-between tw-collapse-toggle"data-target="#item-{{item['A_id']}}"
+            role="button">
+            <h3 class="text-lg font-bold text-slate-900">{{item['Q_id']}}</h3>
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item['status']}}">{{item['status']}}</span>
+          </div>
+          <div class="tw-collapse py-6 px-4 hidden" id="item-{{item['A_id']}}">
+            <div class="relative">
+              <div class="absolute left-3 top-0 bottom-0 w-0.5 bg-slate-100"></div>
+
+              <div class="space-y-8"> {% for row in item['QA'] %}
+                <div class="relative pl-10 group transition-all">
+                  
+                  <div class="absolute left-[9px] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-slate-300 group-hover:bg-blue-500 group-hover:scale-125 transition-all shadow-sm"></div>
+
+                  <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-3">
+                      <span class="text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200 uppercase">
+                        #{{ row['linkId'] }}
+                      </span>
+                      <span class="h-px flex-1 bg-slate-50 group-hover:bg-blue-50"></span>
+                    </div>
+
+                    <div>
+                      <h4 class="text-sm font-bold text-slate-800 leading-snug group-hover:text-blue-700 transition-colors">
+                        {{ row['text'] }}
+                      </h4>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mt-1">
+                      {% if row['answers']|length > 0 %}
+                        {% for ans in row['answers'] %}
+                          <div class="flex items-center rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-blue-600 shadow-sm ring-1 ring-inset ring-blue-100 hover:ring-blue-300 transition-all">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400 mr-2"></span>
+                            {{ ans }}
+                          </div>
+                        {% endfor %}
+                      {% else %}
+                        <div class="text-xs text-slate-400 italic bg-slate-50 px-3 py-1.5 rounded-md border border-dashed border-slate-200">
+                          <i class="bi bi-slash-circle mr-1"></i> 未提供資料
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+      </div>
+
+      
+      <div class="tab-pane fade" id="nav-Consents" role="tabpanel" aria-labelledby="nav-Consents-tab">
+        <div class="space-y-4">
+          <div class="flex justify-between">
+            <h3 class="text-lg font-bold text-slate-900">已簽署文件</h3>
+
+            <!-- 隱藏的上傳口 -->
+            <input type="file" id="fileInput"  hidden  accept=".pdf, image/*">
+            <button  type="button" id="fileInput_Consent_btn" 
+=              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput" data-type="Consent">
+              <i class="bi bi-upload"></i> 
+              上傳新文件
+            </button>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            
+            <!-- 迴圈開始 -->
+
+            {% if getConsent %}
+              {% for item in getConsent %}
+              <div class="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+                <div class="mb-3 flex items-start justify-between">
+                  <div class="rounded-lg bg-red-50 p-2 text-red-500 d-flex align-items-center justify-content-center" id="ContentInfo">
+                    <i class="bi bi-file-earmark-medical" id="ContentInfo_i"></i>
+                  </div>
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">
+                  {{item.status}}</span>
+                </div>
+                <h4 class="font-medium text-slate-900">{{item.title}}</h4>
+                <p class="mb-4 text-xs text-slate-500">{{item.url}}</p>
+                <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
+                  <span>簽署日: {{item.dateTime}}</span>
+                  <button class="flex items-center gap-1 font-medium text-blue-600 hover:underline" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#Modal_Consent" 
+                          data-bs-title="{{item.title}}"
+                          data-bs-url="{{item.url}}"> <i class="bi bi-eye"></i> 檢視內容
+                  </button>
+                </div>
+              </div>
+              {% endfor %}
+            {% endif %}
+            <!-- 迴圈結束 -->
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </main>
+
+
+
+  <!-- 這邊放問卷裡面的視窗 -->
+  <div class="modal fade" id="Modal_Consent" tabindex="-1" aria-labelledby="Modal_Consent_Label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-2xl rounded-xl">
+      
+      <div class="modal-header border-b border-slate-100 p-4">
+        <h3 id="Modal_Consent_title" class="text-lg font-bold text-slate-900"></h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div id="Modal_Consent_body" class="modal-body overflow-y-auto p-6 text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+        <iframe id="Consent_PDF_Viewer" src="" width="100%" height="100%" frameborder="0"></iframe>
+      </div>
+
+      <div class="modal-footer border-t border-slate-100 p-3">
+        <button type="button" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors" data-bs-dismiss="modal">關閉</button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ g.nonce }}" >
+  {% if getObs14daysResult %}
+
+  // 傳後端來的數值到js的檔案
+  const SERVER_DATA = {
+      sbp: {{ getObs14daysResult[0] | tojson  }},
+      dbp: {{ getObs14daysResult[1] | tojson  }},
+      hr: {{ getObs14daysResult[2] | tojson  }},
+      labels: {{ getObs14daysResult[3] | tojson }}
+  };
+
+  {% endif %}
+</script>
+<script nonce="{{ g.nonce }}"  src="{{ url_for('static', filename='Content/Scripts/caseManageDetail.js') }}"></script>
+{% endblock %}

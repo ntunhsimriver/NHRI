@@ -78,7 +78,7 @@ def index_page():
     getCountDataList = CountAllData_All[1:]
     # print(CountAllData_All)
 
-    getDevice = fhir.getDevice(session['study_id'])
+    getDevice = fhir.getDeviceCount(session['study_id'])
     data = getDevice[0] # 所有device的內容
     TotalDev = getDevice[1] # 總設備術
     CountDev = getDevice[2] # 個別設備數
@@ -113,8 +113,8 @@ def caseMember(study_id):
     data = ProjectMember.query.filter_by(project_id=study_id, Del=0).all()
     return render_template('caseMember.html', data=data, script_path=url_for('static', filename='Content/Scripts/caseMember.js'))
 
-@bp.route("/caseManage/<case_id>/<ResearchSubjectStatus>")
-def case_detail(case_id, ResearchSubjectStatus):
+@bp.route("/caseManageDetail/<case_id>/<ResearchSubjectStatus>")
+def caseManageDetail(case_id, ResearchSubjectStatus):
     # 這裡的 case_id 就是你要的
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
@@ -126,30 +126,31 @@ def case_detail(case_id, ResearchSubjectStatus):
     getConsent = getPatInfo[2] # 抓同意書內容
     getDeviceInfo = getPatInfo[3] # 抓所有設備的資訊
 
-    # 直接去抓他全部的值
-    # getAllInfoResult = fhir.getAllInfo(case_id)
-    getAllEncounter = fhir.getAllEncounter(case_id)
-    getAllTreatment = fhir.getAllTreatment(case_id, ['Procedure', 'MedicationRequest'])
-    getAllDiaRep = fhir.getAllTreatment(case_id, ['DiagnosticReport'])
-
-    # 這個是畫 生理數據 (Vitals) 的折線圖用的
-
-    today = datetime.datetime.now()
-    fourteen_days_ago_noformat = today - datetime.timedelta(days=14)
-    end = today.strftime("%Y-%m-%d")
-    start = fourteen_days_ago_noformat.strftime("%Y-%m-%d")
-    getObs14daysResult = fhir.getObs14days(case_id, "", start, end)
 
     # 這邊是問卷資料
     getQAInfo = fhir.getQA(case_id)
 
 
-    return render_template("caseManage.html", getObs14daysResult=getObs14daysResult, getAllEncounter=getAllEncounter, getAllTreatment=getAllTreatment, getAllDiaRep=getAllDiaRep, PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, getQAInfo=getQAInfo, script_path=url_for('static', filename='Content/Scripts/caseManage.js'))
+    return render_template("caseManageDetail.html", PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, getQAInfo=getQAInfo, script_path=url_for('static', filename='Content/Scripts/caseManageDetail.js'))
+
 
 # @bp.route("/api/caseManage/<case_id>")
 # def case_encounter(case_id):
 #     result = fhir.getAllEncounter(case_id)
 #     return jsonify(result)
+
+@bp.route("/api/getEncounter_all/<case_id>")
+def api_getEnc_all(case_id):
+    # print(enc_id)
+    getAllEncounter = fhir.getAllEncounter(case_id)
+
+    return jsonify(getAllEncounter) # 使用 jsonify 確保格式正確
+
+@bp.route("/api/getTreatment_all/<case_id>/<Resource>")
+def api_getTreat_all(case_id, Resource):
+    getAllData = fhir.getAllTreatment(case_id, [Resource])
+
+    return jsonify(getAllData) # 使用 jsonify 確保格式正確
 
 @bp.route("/api/getEncounter/<enc_id>")
 def api_getEnc(enc_id):
@@ -183,6 +184,7 @@ def api_patObs14days(pat_id):
     end = request.args.get("end")
 
     getObs14daysResult = fhir.getObs14days(pat_id, "", start, end)
+    print(getObs14daysResult)
 
     return jsonify(getObs14daysResult) # 使用 jsonify 確保格式正確
 

@@ -477,7 +477,9 @@ def getAssistant(ProjectId): # 產出助理清單
 
     print(Assistant_List)
 
-    Assistant_Info_list = User.query.filter_by(role="ASSISTANT").all()
+    Assistant_Info_list = User.query.filter(
+        User.role.in_(["ASSISTANT", "PI"])
+    ).order_by(User.role.asc()).all()
     print(Assistant_Info_list)
 
     for row in Assistant_Info_list:
@@ -486,6 +488,7 @@ def getAssistant(ProjectId): # 產出助理清單
             "id": str(row.id),
             "full_name": row.full_name,   # 建議加
             "email": row.email,   # 建議加
+            "role": row.role.value,   # 建議加
             "selected": str(row.id) in Assistant_List
         }
         result.append(row_data)
@@ -624,69 +627,108 @@ def getAllInfo(PatID): # 還不是新邏輯(但目前也沒有再用了)
     return getResult
 
 
-
-
 def getObs14days(PatID, DeviceID, start, end): 
-    # 初始化資料儲存器 (使用字典以確保日期對齊)
-    data_map = {} 
-    # sorted_dates = []
-    code_mapping = {
-        '8867-4': 'HR',
-        '8480-6': 'SBP',
-        '8462-4': 'DBP'
-    }
-
-    # 2. 組合 API URL (使用 ge 前綴代表 "大於等於") # 因為14天又有兩個資料，怕到時候資料會很多，先取1000筆，到時候再說
     target_codes = "85354-9,8480-6,8462-4,8867-4"
 
-    # 這邊先抓出所有內容
-    if PatID:
-        print(str([PatID, target_codes, start, end, '100000']))
-        print(FHIRSearch_Handle(16, [PatID, target_codes, start, end, '100000']))
-        rows = FHIRData_Handle(None, FHIRSearch_Handle(16, [PatID, target_codes, start, end, '100000']), 1, 1)
-    elif DeviceID:
-        rows = FHIRData_Handle(None, FHIRSearch_Handle(55, [DeviceID, target_codes, start, end, '100000']), 1, 1)
-    # 先把收到的日期轉成date格式
+    code_map = {
+        '8480-6': 'SBP',
+        '8462-4': 'DBP',
+        '8867-4': 'HR'
+    }
+
+    # 日期範圍
     start_date = datetime.strptime(start, "%Y-%m-%d").date()
     end_date = datetime.strptime(end, "%Y-%m-%d").date()
+
     days = (end_date - start_date).days
+
     sorted_dates = [
         (start_date + timedelta(days=i)).isoformat()
         for i in range(days + 1)
     ]
-    storage = {d: {'SBP': [], 'DBP': [], 'HR': []} for d in sorted_dates}
-    code_map = {'8480-6': 'SBP', '8462-4': 'DBP', '8867-4': 'HR'}
-    for row in rows:
-        if row.BundleResource:
-            if 'component' in row.BundleResource:
-                result = FHIRData_Handle(None, row.BundleResource, 8, 0)
+
+    # 每天的資料先準備好
+    storage = {
+        d: {
+            'SBP': [],
+            'DBP': [],
+            'HR': []
+        }
+        for d in sorted_dates
+    }
+
+    # 一天一天抓資料
+    for day in sorted_dates:
+        rows = []
+
+        try:
+            if PatID:
+                print("查詢 PatID:", PatID, "日期:", day)
+
+                search_result = FHIRSearch_Handle(
+                    16,
+                    [PatID, target_codes, day, day, '10']
+                )
+
+                rows = FHIRData_Handle(None, search_result, 1, 1)
+
+            elif DeviceID:
+                print("查詢 DeviceID:", DeviceID, "日期:", day)
+
+                search_result = FHIRSearch_Handle(
+                    55,
+                    [DeviceID, target_codes, day, day, '10']
+                )
+
+                rows = FHIRData_Handle(None, search_result, 1, 1)
+
             else:
-                result = FHIRData_Handle(None, row.BundleResource, 7, 0)
-            for r in result:
-                # 1. 提取日期部分 (取字串前 10 碼: '2026-02-14T08:00:00Z' -> '2026-02-14')
-                row_date = r.effectiveDateTime[:10]
-                if row_date in storage:
-                    category = code_map.get(r.code)
-                    if category:
-                        storage[row_date][category].append(r.value)
+                rows = []
+
+        except Exception as e:
+            print(f"{day} 資料抓取失敗:", e)
+            rows = []
+
+        # 整理當天資料
+        for row in rows:
+            if row.BundleResource:
+                if 'component' in row.BundleResource:
+                    result = FHIRData_Handle(None, row.BundleResource, 8, 0)
+                else:
+                    result = FHIRData_Handle(None, row.BundleResource, 7, 0)
+
+                for r in result:
+                    if not getattr(r, "effectiveDateTime", None):
+                        continue
+
+                    row_date = r.effectiveDateTime[:10]
+
+                    if row_date in storage:
+                        category = code_map.get(r.code)
+
+                        if category:
+                            storage[row_date][category].append(r.value)
+
     final_data = {
         'date': sorted_dates,
         'SBP': [],
         'DBP': [],
         'HR': []
     }
+
+    # 每天算平均
     for d in sorted_dates:
         for cat in ['SBP', 'DBP', 'HR']:
             vals = storage[d][cat]
+
             avg = round(sum(vals) / len(vals), 1) if vals else None
+
             final_data[cat].append(avg)
-    # 3. 轉回對齊的陣列
-    sbp_list = final_data["SBP"] 
+
+    sbp_list = final_data["SBP"]
     dbp_list = final_data["DBP"]
     hr_list = final_data["HR"]
-    # print(datetime.now())
 
-    print(sorted_dates)
     return sbp_list, dbp_list, hr_list, sorted_dates
 
 
@@ -743,7 +785,7 @@ def getDeviceCount(study_id):
         for label in ([item.status] + (['foundPat'] if item.pat_id else []))
         if label # 確保 label 不是 None
     )
-    print(list(status_counts))
+    print(status_counts)
     return getResult, len(getFHIR), status_counts
 
 def set_nested_value(dic, path, value):

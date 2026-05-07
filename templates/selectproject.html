@@ -29,6 +29,7 @@
 
 <body>
 
+
     <!-- Pre-loader -->
     <div class="page-loader">
         <div class="bg-primary"></div>
@@ -36,7 +37,28 @@
 
     <section>
 
+        <div class="user-menu" id="userMenu">
+          <div class="user-profile">
+            <button class="user-avatar" type="button" id="userAvatar">
+              <i class="bi bi-person-fill"></i>
+            </button>
+
+            <div class="user-text">
+              <span class="user-name">{{ username }}</span>
+              <span class="user-role">{{ role }}</span>
+            </div>
+          </div>
+
+          <div class="user-dropdown" id="userDropdown">
+            <a href="{{ url_for('auth.change_password') }}" class="dropdown-item">修改密碼</a>
+            <a href="{{ url_for('auth.logout') }}" class="dropdown-item">登出</a>
+          </div>
+        </div>
+
       <div class="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-6 fade-in">
+
+
+
         <div class="mb-10 text-center">
           <div class="h-16 w-16 leading-none mb-4 inline-flex items-center justify-center rounded-full bg-blue-600 p-4 shadow-lg shadow-blue-500/30">
             <i id="bi-activity-inSP" class="bi bi-activity"></i>
@@ -100,30 +122,13 @@
     <!-- <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/layout-helpers.js') }}"></script> -->
     <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/sidenav.js') }}"></script>
     <!-- <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='assets/js/material-ripple.js') }}"></script> -->
+    <script nonce="{{ g.nonce }}" src="{{ url_for('static', filename='Content/Scripts/selectproject.js') }}"></script>
+
 
 
     <!-- 初始化 Empire layout + 額外保險的伸縮事件 -->
     <script nonce="{{ g.nonce }}">
-        document.addEventListener("DOMContentLoaded", function () {
-            if (window.layoutHelpers) {
-                window.layoutHelpers.init();
-            }
-
-            // 額外保險：任何 .layout-sidenav-toggle 被點擊時，切換側欄收合/展開
-            document.querySelectorAll('.layout-sidenav-toggle').forEach(function (el) {
-                el.addEventListener('click', function () {
-                    if (window.layoutHelpers && typeof window.layoutHelpers.toggleCollapsed === 'function') {
-                        window.layoutHelpers.toggleCollapsed();
-                    }
-                });
-            });
-        });
-
-        document.querySelectorAll('.project-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                window.location.href = this.dataset.url;
-            });
-        });
+        
     </script>
 
     {% block scripts %}{% endblock %}

@@ -1,4 +1,9 @@
 .tag {
+  max-width: 120px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis; 
+
   display: inline-block;
   padding: 4px 10px;
   margin: 2px;
@@ -7,4 +12,3 @@
   color: #0369a1;
   font-size: 12px;
 }
-
