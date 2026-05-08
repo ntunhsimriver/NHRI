@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 import uuid
 from extensions import db
-from models.user import User
+from models.user import User, UserRole
 from werkzeug.security import generate_password_hash
 import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
 from blueprints import fhir
@@ -143,7 +143,20 @@ def settings():
         return render_template('error_page.html', message=f"錯誤原因：無此權限"), 403
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
-    users = User.query.all()
+
+    rolename = session['role']
+    if rolename == "SUPER_ADMIN":
+        users = User.query.all()
+
+    elif rolename == "PI":
+        users = User.query.filter(
+            User.role.in_([UserRole.PI, UserRole.ASSISTANT])
+        ).all()
+
+    else:
+        users = User.query.filter(
+            User.role == UserRole.ASSISTANT
+        ).all()
     return render_template('settings.html', users=users, script_path=url_for('static', filename='Content/Scripts/settings.js'))
 
 @bp.route('/change_password')

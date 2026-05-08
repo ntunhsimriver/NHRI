@@ -24,12 +24,14 @@ bp = Blueprint("pages", __name__)
 def inject_user():
     # study_id = session.get('study_id')
     # ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
-
+    fhir_practitioner_id=session.get('fhir_practitioner_id')
+    getProjectID = fhir.get_ProjectID(fhir_practitioner_id)
     return dict(username=session.get('username'), 
-        fhir_practitioner_id=session.get('fhir_practitioner_id'),
+        fhir_practitioner_id=fhir_practitioner_id,
         role=session.get('role'),
         study_id=session.get('study_id'), 
         study_name=session.get('study_name'),
+        project_all_id=getProjectID,
         )
 
 @bp.route('/')

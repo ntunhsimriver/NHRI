@@ -36,19 +36,19 @@
   <div class="grid gap-4 md:grid-cols-4">
     <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <span class="text-xs text-slate-500">總設備數</span>
-      <p class="text-2xl font-bold text-slate-900">{{TotalDev}}</p>
+      <p class="text-2xl font-bold text-slate-900">{{TotalDev if TotalDev else 0}}</p>
     </div>
     <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <span class="text-xs text-slate-500">已綁定個案數 (In Use)</span>
-      <p class="text-2xl font-bold text-blue-600">{{CountDev['foundPat']}}</p>
+      <p class="text-2xl font-bold text-blue-600">{{CountDev['foundPat'] if CountDev['foundPat'] else 0}}</p>
     </div>
     <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <span class="text-xs text-slate-500">庫存可用 (Active)</span>
-      <p class="text-2xl font-bold text-emerald-600">{{CountDev['active']}}</p>
+      <p class="text-2xl font-bold text-emerald-600">{{CountDev['active'] if CountDev['active'] else 0}}</p>
     </div>
     <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <span class="text-xs text-slate-500">異常/維修</span>
-      <p class="text-2xl font-bold text-red-500">{{CountDev['entered-in-error']}}</p>
+      <p class="text-2xl font-bold text-red-500">{{CountDev['entered-in-error'] if CountDev['entered-in-error'] else 0}}</p>
     </div>
   </div>
 

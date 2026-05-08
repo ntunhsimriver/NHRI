@@ -188,3 +188,46 @@ function addList(projectId) {
         newIdInput.value = "ERROR";
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // const statusSelect = document.getElementById('statusSelect');
+    const searchInput = document.getElementById('searchInput');
+    const caseRows = document.querySelectorAll('.case-row');
+
+    function filterRows() {
+        // const selectedStatus = statusSelect.value;
+        const searchText = searchInput.value.toLowerCase();
+
+        caseRows.forEach(row => {
+
+            // const rowStatus = row.getAttribute('data-status');
+            const hashId_oldID = row.getAttribute('data-hash-oldID').toLowerCase();
+            const hashId_newID = row.getAttribute('data-hash-newID').toLowerCase();
+
+            // const matchStatus =
+            //     selectedStatus === 'all' || rowStatus === selectedStatus;
+            
+            const matchSearch =
+                hashId_oldID.includes(searchText) ||
+                hashId_newID.includes(searchText);
+
+            if (matchSearch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+
+        });
+    }
+
+    //  if (statusSelect) {
+    //     statusSelect.addEventListener('change', filterRows);
+    // }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterRows);
+    }
+
+
+});

@@ -56,7 +56,7 @@
           <tbody class="divide-y divide-slate-100" id="caseTableBody">
 
             {% for item in data %}
-            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row">
+            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row" data-hash-oldID="{{ item.old_patient_id }}" data-hash-newID="{{ item.new_patient_id }}">
               <td class="px-6 py-4 font-mono font-medium text-blue-600 group-hover:underline">{{ item.project_id }}</td>
               <td class="px-6 py-4 text-slate-600">
                 <input

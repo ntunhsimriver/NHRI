@@ -15,6 +15,7 @@
 
 <section>
   <div class="space-y-6 fade-in">
+
     <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
       <div>
         <h2 class="text-2xl font-bold text-slate-900">系統管理</h2>
@@ -26,6 +27,24 @@
         <i class="bi bi-plus"></i> 新增使用者
       </button>
     </div>
+
+    <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div class="relative flex-1">
+        <i class="bi bi-search absolute left-3 top-2 h-4 w-4 text-slate-400"></i>
+      <input type="text" placeholder="搜尋姓名或Email..." 
+        class="w-full rounded-lg !border !border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+        id="searchInput">
+      </div>
+      <!-- <div class="flex gap-2">
+      <select class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 outline-none" id="statusSelect">
+        <option value="all">所有狀態</option>
+        <option value="on-study">On-study</option>
+        <option value="active">Active</option>
+        <option value="withdrawn">Withdrawn</option>
+      </select>
+      </div> -->
+    </div>
+
     <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <div class="border-b border-slate-200 px-6 py-4">
         <h3 class="font-semibold text-slate-900">帳號列表 (User Management)</h3>
@@ -46,7 +65,7 @@
           
           <!-- 迴圈開始 -->
           {% for item in users %}
-          <tr class="hover:bg-slate-50">
+          <tr class="hover:bg-slate-50 case-row" data-user-name="{{item.full_name}}" data-user-email="{{item.email}}">
             <td class="px-6 py-4 font-medium text-slate-900">{{item.full_name}}</td>
             <td class="px-6 py-4 text-slate-600">{{item.email}}</td>
             <td class="px-6 py-4">
@@ -119,7 +138,7 @@
 
       <div class="modal-footer border-t border-slate-100 p-3">
         <button type="button" class="mr-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" data-bs-dismiss="modal">取消</button>
-        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">建立帳號</button>
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">送出</button>
       </div>
       
     </form>

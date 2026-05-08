@@ -527,6 +527,41 @@ def getAssistant(ProjectId): # 產出助理清單
     print(result)
     return result
 
+def get_ProjectID(pi_id):
+    UserInfo = User.query.filter_by(fhir_practitioner_id=pi_id).first()
+
+    filters = [
+        Project.pi_id == pi_id
+    ]
+
+    if UserInfo is not None and UserInfo.id is not None:
+        filters.append(
+            Project.Assistant.contains(str(UserInfo.id))
+        )
+
+    ProjectInfo = Project.query.filter(
+        or_(*filters)
+    ).all()
+
+    result = []
+    seen = set()
+
+    for p in ProjectInfo:
+        if not p.irb_number:
+            continue
+
+        if p.irb_number in seen:
+            continue
+
+        seen.add(p.irb_number)
+
+        result.append({
+            "study_id": str(p.irb_number),
+            "study_name": p.name if hasattr(p, "name") else "",
+            "study_status": p.status
+        })
+
+    return result
 
 def get_Project(pi_id):
     getResult = [] # 準備存處理好的資料

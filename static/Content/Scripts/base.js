@@ -27,3 +27,18 @@ const userMenu = document.getElementById("userMenu");
   document.addEventListener("click", function () {
     userMenu.classList.remove("active");
   });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const projectSelect = document.getElementById("projectSelect");
+
+    if (projectSelect) {
+        projectSelect.addEventListener("change", function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const url = selectedOption.getAttribute("data-url");
+
+            if (url) {
+                window.location.href = url;
+            }
+        });
+    }
+});

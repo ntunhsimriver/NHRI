@@ -8,6 +8,9 @@ ModaladdUser.addEventListener('show.bs.modal', function (event) {
     var button = event.relatedTarget; // 取得被點擊的按鈕
     var input_data = button.getAttribute('data-bs-value')
     var data = JSON.parse(input_data);
+    if (input_data){
+        document.getElementById('Modal_addUser_title').textContent = '修改使用者';
+    };
 
     var modelfull_name = document.getElementById('newUser_name');
     if (modelfull_name) modelfull_name.value = data.full_name;
@@ -73,4 +76,39 @@ form.addEventListener('submit', async function (e) {
         msg.textContent = result.message;
         msg.classList.add('error-message');
     }
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    const statusSelect = document.getElementById('statusSelect');
+    const searchInput = document.getElementById('searchInput');
+    const caseRows = document.querySelectorAll('.case-row');
+
+    function filterRows() {
+        const searchText = searchInput.value.toLowerCase();
+
+        caseRows.forEach(row => {
+            const name = row.getAttribute('data-user-name').toLowerCase();
+            const email = row.getAttribute('data-user-email').toLowerCase();
+
+            const matchSearch =
+                name.includes(searchText)|| 
+                email.includes(searchText);
+
+            if (matchSearch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+
+        });
+    }
+
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterRows);
+    }
+
+
 });

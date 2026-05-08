@@ -6,15 +6,12 @@
 
 /* PI (計畫主持人)：藍色系 */
 .type-PI {
-    background-color: #dbeafe; /* 淺藍底 */
-    color: #1d4ed8;           /* 深藍字 */
+    background-color: rgb(255 237 213); /* orange-100 */
+    color: rgb(234 88 12);              /* orange-600 */
 }
 
 /* PI 助理 (研究助理)：藍色系 */
 .type-ASSISTANT {
-    /*background-color: #d1fae5; /* 圖片中的淺綠背景 (Mint) */
-    /*color: #065f46;           /* 對比鮮明的深綠文字 */
-    /*先把PI也改成藍色的*/
     background-color: #dbeafe; /* 淺藍底 */
     color: #1d4ed8;           /* 深藍字 */
 }

@@ -37,3 +37,30 @@ const userMenu = document.getElementById("userMenu");
   document.addEventListener("click", function () {
     userMenu.classList.remove("active");
   });
+
+  document.addEventListener('DOMContentLoaded', function() {
+
+    const searchInput = document.getElementById('searchInput');
+    const caseRows = document.querySelectorAll('.case-row');
+
+    function filterRows() {
+        const searchText = searchInput.value.toLowerCase().trim();
+
+        caseRows.forEach(row => {
+
+            const proid = (row.getAttribute('data-proid') || '').toLowerCase();
+            const proname = (row.getAttribute('data-name') || '').toLowerCase();
+
+            const matchSearch =
+                proid.includes(searchText) ||
+                proname.includes(searchText);
+
+            row.style.display = matchSearch ? '' : 'none';
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterRows);
+    }
+
+});

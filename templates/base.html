@@ -54,10 +54,31 @@
 
                     {% if role != 'SUPER_ADMIN'  %}
                     <div class="flex h-16 items-center justify-between border-slate-200 z-10">
-                        <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                            <span class="text-slate-400 font-normal">Project:</span>{{study_id}}
-                            <span class="text-sm font-normal text-slate-500 ml-2">({{study_name}})</span>
-                        </h2>
+                      <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <span class="text-slate-400 font-normal">Project:</span>
+                      </h2>
+
+                      <h4>
+                        <select
+                          id="projectSelect"
+                          class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm text-slate-700"
+                        >
+                          {% for project in project_all_id %}
+                            <option
+                              value="{{ project.study_id }}"
+                              data-url="{{ url_for(
+                                'pages.set_study_session',
+                                study_id=project.study_id,
+                                study_name=project.study_name,
+                                study_status=project.study_status
+                              ) }}"
+                              {% if project.study_id == study_id %}selected{% endif %}
+                            >
+                              {{ project.study_id }} - {{ project.study_name }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                      </h4>
                     </div>
                     {% endif %}
                     <div class="flex items-center gap-4 ml-auto">
