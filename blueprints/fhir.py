@@ -415,26 +415,6 @@ def countAllData(study_id):
         print(TotlaData, resource_types, CountDataList)
         return TotlaData, resource_types, CountDataList
 
-# def countAllData(study_id):
-
-
-#     today = datetime.now().strftime("%Y-%m-%d")
-#     TotlaData = 0
-#     CountDataList = []
-
-#     # getAllSubject = FHIRData_Handle(None, FHIRSearch_Handle(10, [study_id]), 1, 1)
-#     # print(getAllSubject[0].BundleResource)
-#     # for s in getAllSubject:
-#     #     subject_id = FHIRData_Handle(None, s.BundleResource, 1, 0)[0].id
-    
-#     # 先改成 單純把他的資料量都滾出來，之後想要加邏輯再說
-#     for type in resource_types:
-#         # print(read_FHIR_api(Resource, params=None))
-#         CountData = FHIRData_Handle(None, type + "?_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
-#         CountDataList.append(CountData)
-#         TotlaData += int(CountData)
-
-#     return TotlaData, resource_types, CountDataList
 
 def get_IndexProject(study_id):
     getSubjectCount = FHIRData_Handle(None, FHIRSearch_Handle(9, [study_id]), 1, 1)[0].SummaryCount
@@ -762,6 +742,8 @@ def getDeviceCount_toSQL(study_id, new_device_id=None):
         for label in ([item.status] + (['foundPat'] if item.pat_id else []))
         if label # 確保 label 不是 None
     )
+    status_counts["foundPat"] = status_counts.get("foundPat", 0)
+
     ProjectInfo.device_list = json.dumps(result, ensure_ascii=False)
     ProjectInfo.device_count = json.dumps(status_counts, ensure_ascii=False)
 
@@ -891,20 +873,33 @@ def update_device_history(device_id, patient_id, note=None):
     db.session.commit()
 
     return True
+def run_getDeviceCount_toSQL(app, study_id, device_id):
+    with app.app_context():
+        try:
+            print("背景開始執行 getDeviceCount_toSQL")
+            getDeviceCount_toSQL(study_id, device_id)
+            print("背景執行 getDeviceCount_toSQL 完成")
 
-from threading import Thread
+        except Exception as e:
+            db.session.rollback()
+            print("背景執行 getDeviceCount_toSQL 失敗:", e)
 
+        finally:
+            db.session.remove()
 def addDevice_FHIR(data, study_id):
     pat_id = data['pat_id']
     
     result = FHIR_listMapping(data, 6)
-    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
+    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)
 
-    # 背景執行，不等待結果
-    Thread(
-        target=getDeviceCount_toSQL,
-        args=(study_id, data['id'])
-    ).start()
+    app = current_app._get_current_object()
+
+    thread = Thread(
+        target=run_getDeviceCount_toSQL,
+        args=(app, study_id, data['id'])
+    )
+    thread.daemon = True
+    thread.start()
 
     update_device_history(
         device_id=data['id'],

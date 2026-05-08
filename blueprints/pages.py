@@ -269,6 +269,25 @@ def api_addDevice():
     else:
         return jsonify({'success': False, 'message': res[1]})
 
+@bp.route('/api/update-device-count', methods=['POST'])
+def update_device_count_api():
+    data = request.get_json()
+    print(data)
+    study_id = data.get("study_id")
+
+    if not study_id:
+        return jsonify({
+            "success": False,
+            "message": "缺少 study_id"
+        }), 400
+
+    result = fhir.getDeviceCount_toSQL(study_id)
+
+    return jsonify({
+        "success": True,
+        "message": "已開始背景更新"
+    })
+
 
 @bp.route('/projectManage')
 def projectManage():

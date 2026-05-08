@@ -86,3 +86,39 @@ form.addEventListener('submit', async function (e) {
         msg.classList.add('error-message');
     }
 });
+
+document.getElementById("updateDeviceCountBtn").addEventListener("click", async function () {
+  const btn = this;
+  var input_data = btn.getAttribute('data-bs-study')
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> 更新中...';
+
+  try {
+    const response = await fetch("/api/update-device-count", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        study_id: input_data
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("設備資料量已更新完成!!");
+      setTimeout(() => {
+            location.reload();
+        }, 0);
+    } else {
+      alert("更新失敗：" + result.message);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("呼叫 API 失敗");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-gear"></i> 更新資料量';
+  }
+});
