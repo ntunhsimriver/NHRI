@@ -16,7 +16,21 @@ class Project(db.Model):
     Assistant = db.Column(db.Text)
     device_list = db.Column(db.Text)
     device_count = db.Column(db.Text)
-
+    resource_count = db.Column(db.Text, default=lambda: json.dumps([
+            0,
+            [
+                "Encounter",
+                "Observation",
+                "MedicationRequest",
+                "Procedure",
+                "Condition",
+                "DiagnosticReport",
+                "Consent",
+                "Device"
+            ],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ], ensure_ascii=False)
+    )
 
 class ProjectMember(db.Model):
     __tablename__ = "project_member"
@@ -26,4 +40,4 @@ class ProjectMember(db.Model):
     new_patient_id = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     Del = db.Column(db.SmallInteger, nullable=True)   # NULL = 還活著
-    data_count = db.Column(db.Integer, nullable=True)   # 資料量計算
+    data_count = db.Column(db.Integer, default=0)   # 資料量計算

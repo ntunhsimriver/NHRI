@@ -8,10 +8,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- <section class="welcome">
-  <h2>歡迎來到健康資料平台</h2>
-  <p>探索病人的健康事件與醫療資訊。</p>
-</section> -->
 {% if data %}
 
     <div class="space-y-6 fade-in">
@@ -21,8 +17,13 @@
           <p class="text-sm text-slate-500">管理所有受試者、同意書狀態與設備配發</p>
         </div>
         <div class="flex gap-3">
-          <button class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30" data-url="/caseMember/{{ study_id }}">
+          <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30" data-url="/caseMember/{{ study_id }}">
             <i class="bi bi-list-ul"></i> 管理清單
+          </button>
+
+          <button id="updateDataCountBtn"
+            class="flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 transition-colors shadow-sm shadow-green-500/30" data-bs-study="{{study_id}}">
+            <i class="bi bi-arrow-clockwise"></i> 更新資料完整度數據
           </button>
 
         </div>

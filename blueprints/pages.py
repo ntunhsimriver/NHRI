@@ -73,7 +73,13 @@ def index_page():
     getMonthProjectInfo = getProjectInfo_All[1]
     # print(getProjectInfo_All)
 
-    CountAllData_All = fhir.countAllData(session['study_id'])
+    # CountAllData_All = fhir.countAllData(session['study_id'])
+    # CountAllData = CountAllData_All[0]
+    # getCountDataList = CountAllData_All[1:]
+
+    CountAllData_All_rawdata = Project.query.filter_by(irb_number=session['study_id']).first().resource_count
+    CountAllData_All = json.loads(CountAllData_All_rawdata)
+
     CountAllData = CountAllData_All[0]
     getCountDataList = CountAllData_All[1:]
     # print(CountAllData_All)
@@ -270,7 +276,7 @@ def api_addDevice():
         return jsonify({'success': False, 'message': res[1]})
 
 @bp.route('/api/update-device-count', methods=['POST'])
-def update_device_count_api():
+def api_update_device_count():
     data = request.get_json()
     print(data)
     study_id = data.get("study_id")
@@ -288,6 +294,43 @@ def update_device_count_api():
         "message": "已開始背景更新"
     })
 
+@bp.route('/api/update-data-count', methods=['POST'])
+def api_update_data_count():
+    data = request.get_json()
+    print(data)
+    study_id = data.get("study_id")
+
+    if not study_id:
+        return jsonify({
+            "success": False,
+            "message": "缺少 study_id"
+        }), 400
+
+    result = fhir.getDataCount_toSQL(study_id)
+
+    return jsonify({
+        "success": True,
+        "message": "已開始背景更新"
+    })
+
+@bp.route('/api/update-resource-count', methods=['POST'])
+def api_update_resource_count():
+    data = request.get_json()
+    print(data)
+    study_id = data.get("study_id")
+
+    if not study_id:
+        return jsonify({
+            "success": False,
+            "message": "缺少 study_id"
+        }), 400
+
+    result = fhir.countAllData(study_id)
+
+    return jsonify({
+        "success": True,
+        "message": "已開始背景更新"
+    })
 
 @bp.route('/projectManage')
 def projectManage():

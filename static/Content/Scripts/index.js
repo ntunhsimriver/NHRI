@@ -173,3 +173,44 @@ function CountDataChart() {
     });
 }
 CountDataChart();
+
+
+document.querySelectorAll(".btn-update-resource-count").forEach(button => {
+    button.addEventListener("click", async function () {
+        const study_id = this.getAttribute("data-bs-study");
+
+        this.disabled = true;
+        this.innerHTML = '<i class="bi bi-arrow-repeat text-sm"></i>';
+
+        try {
+            const response = await fetch("/api/update-resource-count", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    study_id: study_id
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("已更新完成!!");
+                setTimeout(() => {
+                    location.reload();
+                }, 0);
+            } else {
+                alert("更新失敗：" + result.message);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("呼叫 API 失敗");
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-arrow-clockwise text-sm"></i>';
+        }
+    });
+});
+
+

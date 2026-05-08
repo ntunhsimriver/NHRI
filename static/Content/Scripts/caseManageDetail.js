@@ -14,7 +14,7 @@ document.querySelectorAll('.case-row').forEach(row => {
 });
 document.querySelectorAll('.btn-back').forEach(btn => {
     btn.addEventListener('click', function () {
-        history.back();
+        window.location.href = '/caseManage';
     });
 });
 

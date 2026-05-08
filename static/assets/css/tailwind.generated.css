@@ -1514,6 +1514,9 @@
   .bg-gray-500 {
     background-color: var(--color-gray-500);
   }
+  .bg-green-500 {
+    background-color: var(--color-green-500);
+  }
   .bg-green-600 {
     background-color: var(--color-green-600);
   }

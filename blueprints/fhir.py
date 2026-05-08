@@ -328,6 +328,41 @@ def FHIR_listMapping(data, CatId): # 放要進去的值的json, 從資料庫裡�
             FHIR_mappingJson(result, s.fhirpath, data[s.name])
     return result
 
+def get_CompleteCount(pat_id):
+    completeness = 0
+    for resource_type in resource_types:
+        url = f"{resource_type}?patient={pat_id}&_count=1"
+        
+        getCountBundle = FHIRData_Handle(None, read_FHIR_api(url), 1, 0)[0]
+        if getCountBundle.BundleResource is not None:
+            completeness += 1
+    CompleteCount = int(round(completeness / len(resource_types) * 100, 0))
+
+    return CompleteCount
+
+def getDataCount_toSQL(study_id):
+    study = FHIRData_Handle(None, FHIRSearch_Handle(10, [study_id]), 5, 1)
+    for s in study:
+        completeness = 0
+        for resource_type in resource_types:
+            url = f"{resource_type}?patient={s.pat_id}&_count=1"
+            
+            getCountBundle = FHIRData_Handle(None, read_FHIR_api(url), 1, 0)[0]
+            if getCountBundle.BundleResource is not None:
+                completeness += 1
+        CompleteCount = int(round(completeness / len(resource_types) * 100, 0))
+        print(s.pat_id)
+        ProjectMemberInfo = ProjectMember.query.filter_by(
+            new_patient_id=s.pat_id,
+            Del=0
+        ).first()
+        if ProjectMemberInfo is None:
+            continue
+
+        ProjectMemberInfo.data_count = CompleteCount
+        db.session.commit()
+    return
+
 def get_AllPatient(study_id): 
     getResult = [] # 準備存處理好的Patient資料
 
@@ -338,14 +373,16 @@ def get_AllPatient(study_id):
         DeviceInfo = FHIRData_Handle(None, FHIRSearch_Handle(42, [s.pat_id]), 6, 1)
 
         # 算資料完整度
-        completeness = 0
-        for resource_type in resource_types:
-            url = f"{resource_type}?patient={s.pat_id}&_count=1"
-            
-            getCountBundle = FHIRData_Handle(None, read_FHIR_api(url), 1, 0)[0]
-            if getCountBundle.BundleResource is not None:
-                completeness += 1
-        CompleteCount = int(round(completeness / len(resource_types) * 100, 0))
+        ProjectMemberInfo = ProjectMember.query.filter_by(
+            new_patient_id=s.pat_id,
+            Del=0
+        ).first()
+
+        if ProjectMemberInfo is None:
+            CompleteCount = 0
+        else:
+            CompleteCount = ProjectMemberInfo.data_count
+        
         # print(CompleteCount)
         getResult.append({
                 "startDate": s.start,
@@ -374,6 +411,12 @@ def get_Patient(PatID, study_id): # 同意書可以一起讀
 
     return PatInfo, FirstDate, getConsent, DeviceInfo
 
+def safe_int(value):
+    if value is None:
+        return 0
+    if value == "":
+        return 0
+    return int(value)
 # 算一下主頁的資料量
 def countAllData(study_id):
     
@@ -404,7 +447,7 @@ def countAllData(study_id):
                 CountData_pat = FHIRData_Handle(None, type + "?patient=" + pat_str +  " &_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
                 CountData_device = FHIRData_Handle(None, type + "?device=" + device_list_id +  "&_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
                 CountData_all = FHIRData_Handle(None, type + "?device=" + device_list_id + "&patient=" + pat_str + "&_lastUpdated=" + today + "&_summary=count", 1, 1)[0].SummaryCount
-                CountData = int(CountData_pat)+int(CountData_device)-int(CountData_all)
+                CountData = ( safe_int(CountData_pat) + safe_int(CountData_device) - safe_int(CountData_all))
             else:
                 url = type + "?patient=" + pat_str +  "&_lastUpdated=" + today + "&_summary=count"
                 CountData = FHIRData_Handle(None, url, 1, 1)[0].SummaryCount
@@ -412,8 +455,11 @@ def countAllData(study_id):
             print(CountData)
             CountDataList.append(CountData)
             TotlaData += int(CountData)
-        print(TotlaData, resource_types, CountDataList)
-        return TotlaData, resource_types, CountDataList
+        # print([TotlaData, resource_types, CountDataList])
+        resource_count = [TotlaData, resource_types, CountDataList]
+        ProjectInfo.resource_count = json.dumps(resource_count, ensure_ascii=False)
+        db.session.commit()
+        return [TotlaData, resource_types, CountDataList]
 
 
 def get_IndexProject(study_id):
@@ -715,20 +761,55 @@ def getObs14days(PatID, DeviceID, start, end):
 
 def getDeviceCount_toSQL(study_id, new_device_id=None):
     result = []
+
     ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
-    device_data = json.loads(ProjectInfo.device_list)
-    device_ids = [device["device_id"] for device in device_data]
-    if new_device_id is not None:
+
+    if ProjectInfo is None:
+        print("找不到 ProjectInfo:", study_id)
+        return result
+
+    device_data = []
+
+    if ProjectInfo.device_list:
+        try:
+            device_data = json.loads(ProjectInfo.device_list)
+
+            if not isinstance(device_data, list):
+                device_data = []
+
+        except Exception as e:
+            print("device_list 不是 JSON list:", e)
+            device_data = []
+
+    device_ids = [
+        device.get("device_id")
+        for device in device_data
+        if isinstance(device, dict) and device.get("device_id")
+    ]
+
+    if new_device_id and new_device_id not in device_ids:
         device_ids.append(new_device_id)
+
+    # 去除 None、空字串、重複值，並確保全部都是 str
+    device_ids = list(dict.fromkeys(
+        str(device_id).strip()
+        for device_id in device_ids
+        if device_id and str(device_id).strip()
+    ))
+
+    if len(device_ids) == 0:
+        print("沒有 device_id，不更新")
+        return result
+
     device_list = ",".join(device_ids)
 
-    getFHIR = FHIRData_Handle(None, 'Device?_id=' + str(device_list) + '&_sort=patient&_sort=status&_count=100', 6, 1)
+    getFHIR = FHIRData_Handle(
+        None, f"Device?_id={device_list}&_sort=patient&_sort=status&_count=100", 6, 1
+    )
+
     for device in getFHIR:
         countData = FHIRData_Handle(
-            None,
-            'Observation?device=Device/' + device.id + '&_summary=count',
-            1,
-            1
+            None, f"Observation?device=Device/{device.id}&_summary=count", 1, 1
         )[0].SummaryCount
 
         result.append({
@@ -739,24 +820,34 @@ def getDeviceCount_toSQL(study_id, new_device_id=None):
     status_counts = Counter(
         label
         for item in getFHIR
-        for label in ([item.status] + (['foundPat'] if item.pat_id else []))
-        if label # 確保 label 不是 None
+        for label in ([item.status] + (["foundPat"] if item.pat_id else []))
+        if label
     )
+
     status_counts["foundPat"] = status_counts.get("foundPat", 0)
 
-    ProjectInfo.device_list = json.dumps(result, ensure_ascii=False)
-    ProjectInfo.device_count = json.dumps(status_counts, ensure_ascii=False)
+    if len(result) > 0:
+        ProjectInfo.device_list = json.dumps(result, ensure_ascii=False)
+        ProjectInfo.device_count = json.dumps(dict(status_counts), ensure_ascii=False)
 
-    db.session.commit()
+        db.session.commit()
+        print("device_list / device_count 更新完成")
+    else:
+        print("FHIR 沒有查到 device，不更新 DB")
+
     print(result)
     return result
 def getDevice(study_id):
     getResult = [] # 準備存處理好的資料
     ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
-
-    device_data = json.loads(ProjectInfo.device_list)
-    device_ids = [device["device_id"] for device in device_data]
-    device_list = ",".join(device_ids)
+    try:
+        device_data = json.loads(ProjectInfo.device_list)
+        device_ids = [device["device_id"] for device in device_data]
+        device_list = ",".join(device_ids)
+    except:
+        device_data = []
+        device_list = "None"
+    
 
     # Device清單強制轉str，這樣就算沒有，_id=None也頂多是找不到而已，不會有錯
     getFHIR = FHIRData_Handle(None, 'Device?_id=' + str(device_list) + '&_sort=patient&_sort=status&_count=100', 6, 1)
@@ -770,7 +861,10 @@ def getDevice(study_id):
         getResult.append(device_dict)
         
     # status_counts = Counter(item.status for item in getFHIR)
-    status_counts = json.loads(ProjectInfo.device_count)
+    try:
+        status_counts = json.loads(ProjectInfo.device_count)
+    except:
+        status_counts = {}
     print(len(getFHIR))
     return [getResult, len(getFHIR), status_counts]
 
@@ -778,11 +872,17 @@ def getDeviceCount(study_id):
     getResult = [] # 準備存處理好的資料
     ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
 
-    device_data = json.loads(ProjectInfo.device_list)
+    try:
+        device_data = json.loads(ProjectInfo.device_list)
+    except:
+        device_data = []
     device_ids = [device["device_id"] for device in device_data]
     device_list = ",".join(device_ids)
+    try:
+        status_counts = json.loads(ProjectInfo.device_count)
+    except:
+        status_counts = {}
     
-    status_counts = json.loads(ProjectInfo.device_count)
 
     return [len(device_ids), status_counts]
 
@@ -821,7 +921,7 @@ def update_device_history(device_id, patient_id, note=None):
     ).first()
 
     # 情境 3：原本有人，現在要解綁
-    if patient_id is "":
+    if patient_id == "":
         print("情境 3")
         if old_history:
             old_history.end_datetime = now_time
@@ -885,8 +985,9 @@ def addDevice_FHIR(data, study_id):
     pat_id = data['pat_id']
     
     result = FHIR_listMapping(data, 6)
+    print()
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)
-
+    print(Response.json())
     app = current_app._get_current_object()
 
     thread = Thread(
