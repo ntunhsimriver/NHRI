@@ -754,13 +754,10 @@ def getDevice(study_id):
     getResult = [] # 準備存處理好的資料
     ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
 
-    if '{' in ProjectInfo.device_list:
-        device_data = json.loads(ProjectInfo.device_list)
-        device_ids = [device["device_id"] for device in device_data]
-        device_list = ",".join(device_ids)
-    else:
-        device_list = ProjectInfo.device_list
-        getDeviceCount_toSQL(study_id)
+    device_data = json.loads(ProjectInfo.device_list)
+    device_ids = [device["device_id"] for device in device_data]
+    device_list = ",".join(device_ids)
+
     # Device清單強制轉str，這樣就算沒有，_id=None也頂多是找不到而已，不會有錯
     getFHIR = FHIRData_Handle(None, 'Device?_id=' + str(device_list) + '&_sort=patient&_sort=status&_count=100', 6, 1)
     for device in getFHIR:
@@ -780,13 +777,11 @@ def getDevice(study_id):
 def getDeviceCount(study_id):
     getResult = [] # 準備存處理好的資料
     ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
-    if '{' in ProjectInfo.device_list:
-        device_data = json.loads(ProjectInfo.device_list)
-        device_ids = [device["device_id"] for device in device_data]
-        device_list = ",".join(device_ids)
-    else:
-        device_list = ProjectInfo.device_list
-        getDeviceCount_toSQL(study_id)
+
+    device_data = json.loads(ProjectInfo.device_list)
+    device_ids = [device["device_id"] for device in device_data]
+    device_list = ",".join(device_ids)
+    
     status_counts = json.loads(ProjectInfo.device_count)
 
     return [len(device_ids), status_counts]

@@ -21,28 +21,10 @@
           <p class="text-sm text-slate-500">管理所有受試者、同意書狀態與設備配發</p>
         </div>
         <div class="flex gap-3">
-          <button class="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30" data-url="/caseMember/{{ study_id }}">
+          <button class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30" data-url="/caseMember/{{ study_id }}">
             <i class="bi bi-list-ul"></i> 管理清單
           </button>
 
-          <!-- <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30"
-            data-bs-toggle="modal" 
-            data-bs-for="new" 
-            data-bs-target="#Modal_addPatient">
-            <i class="bi bi-plus"></i> 新增個案
-          </button>
-
-          <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            data-bs-toggle="modal" 
-            data-bs-for="connect" 
-            data-bs-target="#Modal_addPatient">
-
-            <i class="bi bi-link-45deg"></i> 收案個案
-          </button> -->
-
-          <!-- <button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-            <i class="bi bi-activity" ></i> 批次匯入
-          </button> -->
         </div>
       </div>
       <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -142,26 +124,12 @@
         <!-- actions -->
         <div class="mt-8 flex flex-wrap justify-center gap-3">
 
-          <!-- 新增個案 -->
-          <button
-            class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30"
-            data-bs-toggle="modal" 
-            data-bs-for="new" 
-            data-bs-target="#Modal_addPatient">
-            <i class="bi bi-plus"></i> 新增個案
+          <!-- 管理清單 -->
+          <button class="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30" data-url="/caseMember/{{ study_id }}">
+            <i class="bi bi-list-ul"></i> 管理清單
           </button>
 
-          <!-- 關聯個案 -->
-          <button class="flex items-center gap-2 rounded-lg !border !border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:!bg-slate-50"
-            data-bs-toggle="modal" 
-            data-bs-for="connect" 
-            data-bs-target="#Modal_addPatient">
-
-            <i class="bi bi-link-45deg"></i> 收案個案
-          </button>
-
-
-
+          
 
         </div>
 
@@ -173,72 +141,8 @@
 
 {% endif %}
 
-<div class="modal fade" id="Modal_addPatient" tabindex="-1" aria-labelledby="Modal_addPatient_Label" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-md">
-    <form id="registerForm" class="modal-content border-0 shadow-2xl rounded-xl">
-      
-      <div class="modal-header border-b border-slate-100 p-4">
-        <h3 id="Modal_addPatient_title" class="text-lg font-bold text-slate-900">新增個案</h3>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div id="Modal_addPatient_body" class="p-6 space-y-6" style="max-height: 90vh; overflow: hidden;">
-        <div id="message" class="message"></div>
-
-            <input type="text" class="hidden" id="hidden_addPatient">
-
-            <label class="block text-sm font-medium text-slate-700">Hash ID (去識別化代碼)</label>
-            <input type="text" id="addPatId" placeholder="例如: SUB-XXXXX，會做為 Patient id 匯入FHIR Server" class="mt-1 block w-full rounded-md !border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-
-            <!-- <label class="block text-sm font-medium text-slate-700">身份證字號</label>
-            <input type="text" id="addPatIdenti" placeholder="例如: A123456789" class="mt-1 block w-full rounded-md !border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"> -->
-
-            <div class="grid grid-cols-2 gap-4" id="addPatient_Gender_birth">
-              <div>
-                <label class="block text-sm font-medium text-slate-700">性別</label>
-                <select id="addGender" class="mt-1 block w-full rounded-md !border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                  <option value="" disabled selected>請選擇性別</option>
-                  <option value="male">男</option>
-                  <option value="female">女</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-slate-700">出生日期</label>
-                <input type="date" id="addBirth" class="mt-1 block w-full rounded-md !border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-              </div>
-            </div>
-
-            <label class="block text-sm font-medium text-slate-700">收案日期</label>
-            <input type="date" id="addPeriodStart" class="mt-1 block w-full rounded-md !border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-
-
-      </div>
-
-      <div class="modal-footer border-t border-slate-100 p-3">
-        <button type="button" class="mr-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" data-bs-dismiss="modal">取消</button>
-        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">新增個案</button>
-      </div>
-      
-    </form>
-  </div>
-</div>
-
 {% endblock %}
 
 {% block scripts %}
-<script nonce="{{ g.nonce }}" >
-  {% if getObs14daysResult %}
-
-  // 傳後端來的數值到js的檔案
-  const SERVER_DATA = {
-      sbp: {{ getObs14daysResult[0] | tojson  }},
-      dbp: {{ getObs14daysResult[1] | tojson  }},
-      hr: {{ getObs14daysResult[2] | tojson  }},
-      labels: {{ getObs14daysResult[3] | tojson }}
-  };
-
-  {% endif %}
-</script>
 <script nonce="{{ g.nonce }}"  src="{{ url_for('static', filename='Content/Scripts/caseManage.js') }}"></script>
 {% endblock %}

@@ -17,15 +17,6 @@ class Project(db.Model):
     device_list = db.Column(db.Text)
     device_count = db.Column(db.Text)
 
-    # def to_dict(self):
-    #     return {
-    #         "index": self.index,
-    #         "id": self.id,
-    #         "applicant": self.applicant,
-    #         "project": self.project,
-    #         "createdAt": int(self.created_at.timestamp()*1000),
-    #         "resultCount": self.result_count,
-    #     }
 
 class ProjectMember(db.Model):
     __tablename__ = "project_member"
@@ -35,3 +26,4 @@ class ProjectMember(db.Model):
     new_patient_id = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     Del = db.Column(db.SmallInteger, nullable=True)   # NULL = 還活著
+    data_count = db.Column(db.Integer, nullable=True)   # 資料量計算
