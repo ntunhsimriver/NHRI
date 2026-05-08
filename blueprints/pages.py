@@ -79,9 +79,8 @@ def index_page():
     # print(CountAllData_All)
 
     getDevice = fhir.getDeviceCount(session['study_id'])
-    data = getDevice[0] # 所有device的內容
-    TotalDev = getDevice[1] # 總設備術
-    CountDev = getDevice[2] # 個別設備數
+    TotalDev = getDevice[0] # 總設備術
+    CountDev = getDevice[1] # 個別設備數
     # print(getDevice)
 
     return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, CountAllData=CountAllData, getCountDataList=getCountDataList, script_path=url_for('static', filename='Content/Scripts/index.js'))

@@ -22,6 +22,8 @@ import threading
 import secrets
 import hashlib
 import uuid
+from threading import Thread
+
 
 # 這個是算資料完整度的list
 resource_types = [
@@ -731,62 +733,82 @@ def getObs14days(PatID, DeviceID, start, end):
 
     return sbp_list, dbp_list, hr_list, sorted_dates
 
-
-def getDevice(study_id):
-
+def getDeviceCount_toSQL(study_id, new_device_id=None):
+    result = []
     ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
-    device_list = ProjectInfo.device_list
-    # print(ProjectInfo.device_list)
+    device_data = json.loads(ProjectInfo.device_list)
+    device_ids = [device["device_id"] for device in device_data]
+    if new_device_id is not None:
+        device_ids.append(new_device_id)
+    device_list = ",".join(device_ids)
 
-
-    getResult = [] # 準備存處理好的資料
-
-    # Device清單強制轉str，這樣就算沒有，_id=None也頂多是找不到而已，不會有錯
     getFHIR = FHIRData_Handle(None, 'Device?_id=' + str(device_list) + '&_sort=patient&_sort=status&_count=100', 6, 1)
     for device in getFHIR:
-        device_dict = device.model_dump() if hasattr(device, 'model_dump') else device.dict()
-        countData = FHIRData_Handle(None, 'Observation?device=Device/' + device.id + '&_summary=count', 1, 1)[0].SummaryCount
-        device_dict['countData'] = countData
-        getResult.append(device_dict)
-        
-    print(getResult)
-    # status_counts = Counter(item.status for item in getFHIR)
+        countData = FHIRData_Handle(
+            None,
+            'Observation?device=Device/' + device.id + '&_summary=count',
+            1,
+            1
+        )[0].SummaryCount
+
+        result.append({
+            "device_id": device.id,
+            "count": countData
+        })
+
     status_counts = Counter(
         label
         for item in getFHIR
         for label in ([item.status] + (['foundPat'] if item.pat_id else []))
         if label # 確保 label 不是 None
     )
-    print(status_counts)
+    ProjectInfo.device_list = json.dumps(result, ensure_ascii=False)
+    ProjectInfo.device_count = json.dumps(status_counts, ensure_ascii=False)
+
+    db.session.commit()
+    print(result)
+    return result
+def getDevice(study_id):
+    getResult = [] # 準備存處理好的資料
+    ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
+
+    if '{' in ProjectInfo.device_list:
+        device_data = json.loads(ProjectInfo.device_list)
+        device_ids = [device["device_id"] for device in device_data]
+        device_list = ",".join(device_ids)
+    else:
+        device_list = ProjectInfo.device_list
+        getDeviceCount_toSQL(study_id)
+    # Device清單強制轉str，這樣就算沒有，_id=None也頂多是找不到而已，不會有錯
+    getFHIR = FHIRData_Handle(None, 'Device?_id=' + str(device_list) + '&_sort=patient&_sort=status&_count=100', 6, 1)
+    for device in getFHIR:
+        device_dict = device.model_dump() if hasattr(device, 'model_dump') else device.dict()
+        countData = next(
+            (device["count"] for device in device_data if device["device_id"] == device_dict['id']),
+            0
+        )
+        device_dict['countData'] = countData
+        getResult.append(device_dict)
+        
+    # status_counts = Counter(item.status for item in getFHIR)
+    status_counts = json.loads(ProjectInfo.device_count)
+    print(len(getFHIR))
     return [getResult, len(getFHIR), status_counts]
 
 def getDeviceCount(study_id):
-
-    ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
-    device_list = ProjectInfo.device_list
-    # print(ProjectInfo.device_list)
-
-
     getResult = [] # 準備存處理好的資料
+    ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
+    if '{' in ProjectInfo.device_list:
+        device_data = json.loads(ProjectInfo.device_list)
+        device_ids = [device["device_id"] for device in device_data]
+        device_list = ",".join(device_ids)
+    else:
+        device_list = ProjectInfo.device_list
+        getDeviceCount_toSQL(study_id)
+    status_counts = json.loads(ProjectInfo.device_count)
 
-    # Device清單強制轉str，這樣就算沒有，_id=None也頂多是找不到而已，不會有錯
-    getFHIR = FHIRData_Handle(None, 'Device?_id=' + str(device_list) + '&_sort=patient&_sort=status&_count=100', 6, 1)
-    for device in getFHIR:
-        device_dict = device.model_dump() if hasattr(device, 'model_dump') else device.dict()
-        countData = FHIRData_Handle(None, 'Observation?device=Device/' + device.id + '&_summary=count', 1, 1)[0].SummaryCount
-        device_dict['countData'] = countData
-        getResult.append(device_dict)
-        
-    print(getResult)
-    # status_counts = Counter(item.status for item in getFHIR)
-    status_counts = Counter(
-        label
-        for item in getFHIR
-        for label in ([item.status] + (['foundPat'] if item.pat_id else []))
-        if label # 確保 label 不是 None
-    )
-    print(status_counts)
-    return getResult, len(getFHIR), status_counts
+    return [len(device_ids), status_counts]
+
 
 def set_nested_value(dic, path, value):
     """
@@ -801,10 +823,6 @@ def set_nested_value(dic, path, value):
             # 這裡邏輯較複雜，通常建議用現成工具如 dpath 或 glom
             pass 
     # ... (簡化版邏輯)
-
-from datetime import datetime
-
-from datetime import datetime
 
 def update_device_history(device_id, patient_id, note=None):
     """
@@ -874,30 +892,25 @@ def update_device_history(device_id, patient_id, note=None):
 
     return True
 
-def addDevice_FHIR(data, study_id):
+from threading import Thread
 
+def addDevice_FHIR(data, study_id):
     pat_id = data['pat_id']
     
     result = FHIR_listMapping(data, 6)
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)  
 
-    ProjectInfo = Project.query.filter_by(irb_number=study_id).first()      
-    current_list = ProjectInfo.device_list or ""
+    # 背景執行，不等待結果
+    Thread(
+        target=getDeviceCount_toSQL,
+        args=(study_id, data['id'])
+    ).start()
 
-    device_ids = [d for d in current_list.split(",") if d]
-    device_ids.append(data['id'])
-    device_ids = list(dict.fromkeys(device_ids))
-
-    ProjectInfo.device_list = ",".join(device_ids)
-    # 如果有綁病人，就順便記錄歷史
-    
     update_device_history(
         device_id=data['id'],
         patient_id=pat_id,
         note=""
     )
-
-    db.session.commit()
 
     return True, Response
 
