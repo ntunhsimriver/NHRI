@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request, send_file
 from blueprints import fhir 
 from blueprints import api_watch 
+import mylib.fhir_check as fhir_check
 from config import BaseConfig as cfg  # 讀 config
 import requests
 import json
@@ -16,6 +17,26 @@ from pathlib import Path
 # import shutil
 import pyminizip
 import tempfile
+
+def flask_response_to_data(res):
+    try:
+        return res.get_json()
+    except Exception:
+        return res.get_data(as_text=True) if hasattr(res, "get_data") else str(res)
+
+
+def get_stats_from_response(response_data):
+    if not isinstance(response_data, dict):
+        return None
+
+    if "stats" in response_data:
+        return response_data["stats"]
+
+    if isinstance(response_data.get("response"), dict):
+        return response_data["response"].get("stats")
+
+    return None
+
 
 
 bp = Blueprint("pages", __name__)
@@ -375,6 +396,7 @@ def api_uploadFHIR():
     file_type = request.form.get('fileType')  # 這樣拿
     pat_id = request.form.get('patid')  # 這樣拿
     study_id = session['study_id']
+    print(file_type)
     if file:
         # 1. 定義上傳路徑
         subfilename = file.filename.split('.')[-1]
@@ -396,48 +418,131 @@ def api_uploadFHIR():
         # 指針歸0
         file.seek(0)
         # data = json.load(file)
-
+        
         if file_type == 'FHIR':
-            data = json.load(file)
-            result = fhir.upload_FHIR_mappingID(study_id, data) # 直接把檔案轉成 Python 字典
-            
+            try:
+                data = json.load(file)
+            except Exception:
+                return jsonify({
+                    "success": False,
+                    "message": "JSON 格式錯誤，無法讀取檔案"
+                }), 400
+
+            try:
+                result, stats = fhir_check.upload_FHIR_mappingID(study_id, data)
+            except Exception as e:
+                return jsonify({
+                    "success": False,
+                    "message": f"非FHIR格式資料或處理失敗：{str(e)}"
+                }), 400
+
+            try:
+                fhir_response = result.json()
+            except Exception:
+                fhir_response = result.text if hasattr(result, "text") else str(result)
+
             if result.ok:
-                return jsonify({"success": True, "message": file.filename})
-            else:
-                return jsonify({"success": False, "message": result.text})
+                return jsonify({
+                    "success": True,
+                    "message": f"已收到檔案: {file.filename}",
+                    "status_code": result.status_code,
+                    "response": fhir_response,
+                    "stats": stats
+                }), result.status_code
+
+            return jsonify({
+                "success": False,
+                "message": fhir_response,
+                "status_code": result.status_code,
+                "stats": stats
+            }), result.status_code
         elif file_type == 'FHIR_pat':
             data = json.load(file)
-            result = fhir.upload_FHIR_changeID(pat_id, data) # 直接把檔案轉成 Python 字典
+            result = fhir_check.upload_FHIR_changeID(pat_id, data) # 直接把檔案轉成 Python 字典
             
             if result.ok:
                 return jsonify({"success": True, "message": file.filename})
             else:
                 return jsonify({"success": False, "message": result.text})
-        elif file_type == 'Watch':
-            url = f"{cfg.BASE_URL}/api/trans_watch/Watch?study_id={study_id}"
-            print(save_path)
-            res = requests.post(url, json={
-                "filename": save_path
-            })
-
-            return jsonify({"success": True, "message": file.filename})
+        
         elif file_type == 'Consent':
             result = fhir.upload_Consent(study_id, pat_id, new_filename) # 直接把檔案轉成 Python 字典
             if result.ok:
                 return jsonify({"success": True, "message": "已收到同意書: " + file.filename})
             else:
                 return jsonify({"success": False, "message": result.text})
+        
+        elif file_type == 'Watch':
+            res, res_status = api_watch.api_trans_watch(
+                'Watch',
+                study_id,
+                save_path
+            )
+
+            response_data = flask_response_to_data(res)
+            stats = get_stats_from_response(response_data)
+
+            if res_status in [200, 201]:
+                return jsonify({
+                    "success": True,
+                    "message": f"已收到檔案: {file.filename}",
+                    "status_code": res_status,
+                    "response": response_data,
+                    "stats": stats
+                })
+
+            return jsonify({
+                "success": False,
+                "message": response_data,
+                "status_code": res_status
+            }), res_status
+
+
         elif file_type == 'Asus':
-            data = json.load(file)
-            fhir_project = request.form.get('fhir_project')  # 這樣拿
-            url = f"{cfg.BASE_URL}/api/trans_watch/{fhir_project}?study_id={study_id}"
+            try:
+                data = json.load(file)
+            except Exception as e:
+                return jsonify({
+                    "success": False,
+                    "message": f"JSON 讀取失敗：{str(e)}"
+                }), 400
 
-            res = requests.post(url, json=data)
+            fhir_project = request.form.get('fhir_project')
 
-            return jsonify({"success": True, "message": res.status_code})
+            if not fhir_project:
+                return jsonify({
+                    "success": False,
+                    "message": "缺少 fhir_project"
+                }), 400
+
+            res, res_status = api_watch.api_trans_watch(
+                fhir_project,
+                study_id,
+                save_path,
+                data
+            )
+
+            response_data = flask_response_to_data(res)
+            stats = get_stats_from_response(response_data)
+
+            if res_status in [200, 201]:
+                return jsonify({
+                    "success": True,
+                    "message": f"已收到檔案: {file.filename}",
+                    "status_code": res_status,
+                    "response": response_data,
+                    "stats": stats
+                })
+
+            return jsonify({
+                "success": False,
+                "message": response_data,
+                "status_code": res_status
+            }), res_status
+
         elif file_type == 'Questionnaire':
             data = json.load(file)
-            result = fhir.upload_FHIR_changeID(pat_id, data)
+            result = fhir_check.upload_FHIR_changeID(pat_id, data)
             if result.ok:
                 return jsonify({"success": True, "message": "已收到問卷: " + file.filename})
             else:
@@ -572,7 +677,7 @@ def api_test():
     study_id = 'IRB-2026-001'
     data = request.get_json()
     # result = fhir.check_export_folder(data)
-    result = fhir.upload_FHIR_mappingID(study_id, data)
+    result, stats = fhir_check.upload_FHIR_mappingID(study_id, data)
 
     return jsonify(result)
 

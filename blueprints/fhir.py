@@ -922,19 +922,19 @@ def getDeviceCount(study_id):
     return [len(device_ids), status_counts]
 
 
-def set_nested_value(dic, path, value):
-    """
-    根據 'identifier[0].value' 這種路徑自動建立嵌套字典
-    """
-    if not value: return
+# def set_nested_value(dic, path, value):
+#     """
+#     根據 'identifier[0].value' 這種路徑自動建立嵌套字典
+#     """
+#     if not value: return
     
-    keys = path.replace('[', '.').replace(']', '').split('.')
-    for key in keys[:-1]:
-        if key.isdigit(): # 處理陣列索引
-            idx = int(key)
-            # 這裡邏輯較複雜，通常建議用現成工具如 dpath 或 glom
-            pass 
-    # ... (簡化版邏輯)
+#     keys = path.replace('[', '.').replace(']', '').split('.')
+#     for key in keys[:-1]:
+#         if key.isdigit(): # 處理陣列索引
+#             idx = int(key)
+#             # 這裡邏輯較複雜，通常建議用現成工具如 dpath 或 glom
+#             pass 
+#     # ... (簡化版邏輯)
 
 def update_device_history(device_id, patient_id, note=None):
     """
@@ -1056,163 +1056,6 @@ def upload_FHIR(data):
     # print(res.text)
     return res
 
-# 這個是補subject用的，(進來的json, 我的fhir路徑 如subject.reference, 要填進去的值 如Patient/test)
-def set_nested_value(data, path, value):
-    """
-    支援路徑中包含 [*] 的自動填充
-    範例：path = 'subject[*].reference'
-    """
-    parts = path.split('.')
-    
-    current = data
-    for i, key in enumerate(parts):
-        # 檢查是否包含 [*]
-        if '[*]' in key:
-            real_key = key.replace('[*]', '')
-            # 確保該鍵值存在且是列表
-            if real_key not in current or not isinstance(current[real_key], list):
-                current[real_key] = [{}] # 至少建立一個空物件
-            
-            # 剩餘的路徑遞迴處理
-            remaining_path = ".".join(parts[i+1:])
-            for item in current[real_key]:
-                set_nested_value(item, remaining_path, value)
-            return data # 陣列處理完畢，直接返回
-            
-        # 處理最後一層
-        if i == len(parts) - 1:
-            current[key] = value
-        else:
-            # 處理中間層
-            current = current.setdefault(key, {})
-            
-    return data
-
-def findReference(data):
-    resourceType = data['resourceType']
-
-    if resourceType == 'Patient':
-        return  'Patient'
-    else:
-        query = FHIR.resourceInfo.query.filter(
-            FHIR.resourceInfo.ResourceType == resourceType,
-            # FHIR.resourceInfo.Type.like('%Reference(%Patient%'),
-            FHIR.resourceInfo.MainPatient == '1'
-
-        )
-
-        resource_info = query.first()
-        # if not results:
-        #     resource_info = None
-        # elif len(results) == 1:
-        #     resource_info = results[0]
-        # else:
-        #     resource_info = next(
-        #         (r for r in results if r.MainPatient == 1),
-        #         results[0] 
-        #     )
-        # print(resource_info)
-        if resource_info is None:
-            return  None
-        else:
-            # print(resource_info)
-            Type = resource_info.Type
-            Name = resource_info.Name
-            Card = resource_info.Card
-            if '*' in Card: # 有*字表示，他是多層
-                Name = Name + '[*]'
-
-            # print(Type)
-
-            if 'Reference' in Type:
-                PathResult = Name + '.reference'
-            elif 'canonical' in Type:
-                PathResult = Name
-            return PathResult
-
-def upload_FHIR_mappingID(study_id, data):
-    ProjectMemberInfo = ProjectMember.query.filter_by(
-        project_id=study_id,
-        Del=0
-    ).all()
-
-    # 🔥 1. 先做你原本的 replace（處理 reference）
-    json_str = json.dumps(data)
-
-    for row in ProjectMemberInfo:
-        json_str = json_str.replace(row.old_patient_id, row.new_patient_id)
-
-    data = json.loads(json_str)
-
-    # 🔥 2. 再專門處理 Patient.id
-    for entry in data.get("entry", []):
-        resource = entry.get("resource", {})
-
-        if resource.get("resourceType") == "Patient":
-            old_id = resource.get("id")
-            if not old_id:
-                continue
-
-            old_ref = f"Patient/{old_id}"
-
-            for row in ProjectMemberInfo:
-                if row.old_patient_id == old_ref:
-                    # 👉 只取 uuid 部分（去掉 Patient/）
-                    new_id = row.new_patient_id.split("/", 1)[-1]
-                    resource["id"] = new_id
-                    break
-    res = upload_FHIR(data)
-    with open("input_result.json", "w", encoding='utf-8') as json_file:
-        json.dump(data, json_file)  
-    return res
-
-def upload_FHIR_changeID(pat_id, data):
-    just_id = pat_id
-    pat_id = f"Patient/{pat_id}" # 先拼一下Patient得id格式
-    BundleInfo = FHIRData_Handle(None, data, 1, 0)
-    resourceType = BundleInfo[0].resourceType # 用第一層看一下這個resources是不是bundle
-    
-    if resourceType != 'Bundle':
-        PathResult = findReference(data)
-        if PathResult == 'Patient':
-            print(PathResult)
-            data['id'] = just_id
-            result = data
-        elif PathResult is not None:
-            result = set_nested_value(data, PathResult, pat_id)
-        else:
-            result = data
-
-    elif resourceType == 'Bundle':
-        for i, row in enumerate(BundleInfo):
-            PathResult = findReference(row.BundleResource)
-            if PathResult == 'Patient':
-                entry = data["entry"][i]
-
-                # request.url
-                req = entry.get("request")
-                if isinstance(req, dict) and "url" in req:
-                    req["url"] = pat_id
-
-                # resource.id
-                res = entry.get("resource")
-                if isinstance(res, dict) and "id" in res:
-                    res["id"] = just_id
-
-                # fullUrl
-                full = entry.get("fullUrl")
-                if isinstance(full, str) and "Patient" in full:
-                    entry["fullUrl"] = full.split("Patient")[0] + pat_id
-            elif PathResult is not None:
-                data["entry"][i]["resource"] = set_nested_value(row.BundleResource, PathResult, pat_id)
-            
-        result = data
-    with open("input_result.json", "w", encoding='utf-8') as json_file:
-        json.dump(result, json_file)  
-    # print(result)
-    res = upload_FHIR(result)
-    print(res.text)
-    return res
 def merge_to_simple_json(q_data, r_data):
     # 1. 建立題目字典 (Key 轉小寫以利對照)
     q_map = {item['linkId'].lower(): item for item in q_data.get('item', [])}

@@ -27,20 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
-function goToStep3(filename) {
-    // 1. 隱藏步驟 2，顯示步驟 3
-    document.getElementById('step-2-content').classList.add('hidden');
-    document.getElementById('step-3-content').classList.remove('hidden');
 
-    // 2. 更新上方進度條 (讓 3 號圈圈變藍色)
-    const circle3 = document.getElementById('step-circle-3');
-    circle3.classList.remove('bg-slate-200', 'text-slate-500');
-    circle3.classList.add('bg-blue-600', 'text-white');
-    
-    // 3. 更新 2 號與 3 號之間的連接線
-    document.getElementById('step-line-2').classList.remove('bg-slate-200');
-    document.getElementById('step-line-2').classList.add('bg-blue-600');
-}
 
 function goToStep2(type) {
     // 1. 切換內容顯示
@@ -108,6 +95,28 @@ function goToStep1() {
 }
 
 
+function formatErrorMessage(response, xhr) {
+    const msg = response.message || response.error || xhr.responseText;
+
+    if (typeof msg === "object") {
+        return JSON.stringify(msg, null, 2);
+    }
+
+    return msg;
+}
+function showUploadSpinner() {
+    const spinner = document.getElementById("uploadSpinner");
+    if (spinner) {
+        spinner.classList.remove("d-none");
+    }
+}
+
+function hideUploadSpinner() {
+    const spinner = document.getElementById("uploadSpinner");
+    if (spinner) {
+        spinner.classList.add("d-none");
+    }
+}
 function handleUpload() {
     const fileInput = document.getElementById('file-upload');
     const fileType = document.getElementById('type-hidden').value;
@@ -133,25 +142,40 @@ function handleUpload() {
 
     // 3. 建立傳統的 AJAX 請求 (XMLHttpRequest)
     const xhr = new XMLHttpRequest();
-
+    showUploadSpinner();
 
     // 設定請求目標
     xhr.open('POST', '/api/uploadFHIR', true);
 
+    
+
     // 監聽回傳結果
     xhr.onload = function () {
+        
+
+        let response = {};
+
+        try {
+            response = JSON.parse(xhr.responseText);
+        } catch (e) {
+            response = {};
+        }
+        
+        console.log("後端回傳 response =", response);
+        console.log("stats =", response.stats);
+        hideUploadSpinner();
         if (xhr.status === 200) {
-            // 解析 Flask 回傳的 JSON
-            const response = JSON.parse(xhr.responseText);
             if (response.success) {
-                console.log("上傳成功:", response.message);
-                // 順利上傳後，執行切換到步驟 3 的函式
-                goToStep3(); 
+                const stats = response.stats || response.response?.stats || null;
+                goToStep3(stats);
             } else {
-                alert("伺服器錯誤: " + response.message);
+                alert("伺服器錯誤: " + formatErrorMessage(response, xhr));
             }
         } else {
-            alert("連線失敗，狀態碼: " + xhr.status);
+            alert(
+                "連線失敗，狀態碼: " + xhr.status + "\n" +
+                "錯誤訊息: " + formatErrorMessage(response, xhr)
+            );
         }
     };
 
@@ -239,4 +263,139 @@ function updateFileName(name) {
     statusText.classList.add('text-blue-600', 'font-bold');
 }
 
-// 上傳檔案的那個框框 到這裡
+function goToStep3(stats = null) {
+    // 1. 隱藏步驟 2，顯示步驟 3
+    document.getElementById('step-2-content').classList.add('hidden');
+    document.getElementById('step-3-content').classList.remove('hidden');
+
+    // 2. 更新上方進度條
+    const circle3 = document.getElementById('step-circle-3');
+    circle3.classList.remove('bg-slate-200', 'text-slate-500');
+    circle3.classList.add('bg-blue-600', 'text-white');
+
+    // 3. 更新 2 號與 3 號之間的連接線
+    const line2 = document.getElementById('step-line-2');
+    line2.classList.remove('bg-slate-200');
+    line2.classList.add('bg-blue-600');
+
+    // 4. 顯示 FHIR 驗證結果
+    if (stats) {
+        renderStep3FHIRResult(stats);
+    }
+}
+
+function renderStep3FHIRResult(stats) {
+    const resourceCount = stats.resource_count || {};
+    const obsSummary = stats.observation_reference_summary_after || {};
+    const obsLogs = stats.observation_reference_logs_after || [];
+
+    const missingReference =
+        (obsSummary.observation_missing_patient || 0) +
+        (obsSummary.observation_missing_device || 0);
+
+    document.getElementById("step3_total_resources").textContent =
+        stats.total_resources || 0;
+
+    document.getElementById("step3_observation_count").textContent =
+        resourceCount.Observation || 0;
+
+    document.getElementById("step3_obs_both_count").textContent =
+        obsSummary.observation_with_both_patient_and_device || 0;
+
+    document.getElementById("step3_missing_reference_count").textContent =
+        missingReference;
+
+    document.getElementById("step3_total_observation").textContent =
+        obsSummary.total_observation || 0;
+
+    document.getElementById("step3_obs_with_patient").textContent =
+        obsSummary.observation_with_patient || 0;
+
+    document.getElementById("step3_obs_with_device").textContent =
+        obsSummary.observation_with_device || 0;
+
+    document.getElementById("step3_obs_missing_patient").textContent =
+        obsSummary.observation_missing_patient || 0;
+
+    document.getElementById("step3_obs_missing_device").textContent =
+        obsSummary.observation_missing_device || 0;
+
+    renderStep3ResourceCount(resourceCount);
+    renderStep3ObservationTable(obsLogs);
+}
+
+function renderStep3ResourceCount(resourceCount) {
+    const container = document.getElementById("step3_resource_count_list");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    Object.entries(resourceCount).forEach(([resourceType, count]) => {
+        container.innerHTML += `
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div class="text-xs text-slate-500">${resourceType}</div>
+                <div class="text-xl font-bold text-slate-800">${count}</div>
+            </div>
+        `;
+    });
+
+    if (Object.keys(resourceCount).length === 0) {
+        container.innerHTML = `<div class="text-sm text-slate-500">沒有 Resource 統計資料</div>`;
+    }
+}
+
+function renderStep3ObservationTable(obsLogs) {
+    const tbody = document.getElementById("step3_observation_table");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    obsLogs.forEach((item, index) => {
+        const hasPatient = item.has_patient_reference;
+        const hasDevice = item.has_device_reference;
+
+        const patientBadge = hasPatient
+            ? `<span class="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">有</span>`
+            : `<span class="inline-flex rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700">未綁定</span>`;
+
+        const deviceBadge = hasDevice
+            ? `<span class="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">有</span>`
+            : `<span class="inline-flex rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700">未綁定</span>`;
+
+        const statusBadge = hasPatient && hasDevice
+            ? `<span class="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">完整</span>`
+            : `<span class="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">需檢查</span>`;
+
+        tbody.innerHTML += `
+            <tr class="hover:bg-slate-50 step3-obs-row"
+                data-search="${[
+                    item.observation_id || "",
+                    item.patient_reference || "",
+                    item.device_reference || ""
+                ].join(" ").toLowerCase()}"
+            >
+                <td class="px-4 py-3 text-slate-500">${index + 1}</td>
+                <td class="px-4 py-3 font-mono text-xs text-slate-700">${item.observation_id || "-"}</td>
+                <td class="px-4 py-3">
+                    <div>${patientBadge}</div>
+                    <div class="mt-1 font-mono text-xs text-slate-500">${item.patient_reference || "-"}</div>
+                </td>
+                <td class="px-4 py-3">
+                    <div>${deviceBadge}</div>
+                    <div class="mt-1 font-mono text-xs text-slate-500">${item.device_reference || "-"}</div>
+                </td>
+                <td class="px-4 py-3">${statusBadge}</td>
+            </tr>
+        `;
+    });
+
+    if (obsLogs.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-4 py-6 text-center text-slate-500">
+                    沒有 Observation 明細資料
+                </td>
+            </tr>
+        `;
+    }
+}
