@@ -89,7 +89,7 @@ document.getElementById("updateDataCountBtn").addEventListener("click", async fu
     const result = await response.json();
 
     if (result.success) {
-      alert("設備資料量已更新完成!!");
+      alert("資料量已更新完成!!");
       setTimeout(() => {
             location.reload();
         }, 0);
