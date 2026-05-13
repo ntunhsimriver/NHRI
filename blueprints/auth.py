@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 import uuid
 from extensions import db
-from models.user import User, UserRole
+from models.user import User, UserRole, UserSession, LoginFailLog
 from werkzeug.security import generate_password_hash
 import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
 from blueprints import fhir
 from datetime import datetime, timedelta
+from config import BaseConfig as cfg
+import secrets
 
 bp = Blueprint("auth", __name__)
 
@@ -15,14 +17,28 @@ def login_page():
         return redirect(url_for('pages.index_page'))
     return render_template('login.html')
 
-@bp.route('/logout')
+@bp.route('/logout', methods=['POST'])
 def logout():
-    session.pop('username', None)
-    session.pop('fhir_practitioner_id', None)
-    session.pop('study_id', None)
-    session.pop('study_name', None)
-    session.pop('study_status', None)
-    return redirect(url_for('auth.login_page'))
+    token = request.cookies.get('session_token')
+
+    if token:
+        user_session = UserSession.query.filter_by(
+            session_token=token,
+            is_active=True
+        ).first()
+
+        if user_session:
+            user_session.is_active = False
+            db.session.commit()
+
+    response = jsonify({
+        'success': True,
+        'message': '已登出'
+    })
+
+    response.delete_cookie('session_token')
+
+    return response
 
 @bp.route('/register', methods=['POST'])
 def register():
@@ -40,7 +56,7 @@ def register():
     if data.get('password'):
         password = data.get('password')
     else:
-        password = "Password123!"  # 管理員新增時給預設密碼
+        password = cfg.USER_DEFAULT_PASSWORD  # 管理員新增時給預設密碼
 
     # 如果使用者註冊時有指定fhir_practitioner_id就直接抓，沒有就直接帶入uuid
     if data.get('fhir_practitioner_id'):
@@ -65,9 +81,13 @@ def register():
         user.role = role
         user.fhir_practitioner_id = fhir_practitioner_id
 
-        # 如果編輯時有輸入密碼，才更新密碼
-        if data.get('password'):
-            user.password_hash = generate_password_hash(password)
+        # 權限/狀態被修改後，讓這個帳號目前所有登入 session 失效
+        UserSession.query.filter_by(
+            user_id=user.id,
+            is_active=True
+        ).update({
+            'is_active': False
+        })
 
         db.session.commit()
 
@@ -112,64 +132,135 @@ def api_login():
     password = data.get('password') or ''
 
     now = datetime.now()
+    ip = request.remote_addr
 
-    # 先檢查是否已被鎖定
-    lock_until = session.get('lock_until')
-    if lock_until:
-        try:
-            lock_until_dt = datetime.fromisoformat(lock_until)
-            if lock_until_dt > now:
-                return jsonify({
-                    'success': False,
-                    'message': '登入失敗過多，請30分鐘後再試'
-                })
-            else:
-                # 已過鎖定時間，清掉
-                session.pop('lock_until', None)
-                session['fail_count'] = 0
-        except Exception:
-            session.pop('lock_until', None)
-            session['fail_count'] = 0
+    # 先檢查是否已被鎖定：改成查 DB，不用 session
+    fail_log = LoginFailLog.query.filter_by(
+        email=email,
+        ip=ip
+    ).first()
+
+    if fail_log and fail_log.lock_until:
+        if fail_log.lock_until > now:
+            return jsonify({
+                'success': False,
+                'message': '登入失敗過多，請30分鐘後再試'
+            })
+        else:
+            # 已過鎖定時間，清掉
+            fail_log.lock_until = None
+            fail_log.fail_count = 0
+            db.session.commit()
 
     user = User.query.filter_by(email=email).first()
-    print(user.status)
-    if user.status == "False":
+
+    # 帳號不存在
+    if not user:
+        return login_failed(email, now)
+
+    # 停權判斷
+    if user.status is False or user.status == "False":
         return jsonify({
-                'success': False,
-                'message': '您的帳號已停權，請聯絡管理員恢復!!!'
-            })
+            'success': False,
+            'message': '您的帳號已停權，請聯絡管理員恢復!!!'
+        })
 
     # 帳號存在且密碼正確
-    if user and user.check_password(password):
+    if user.check_password(password):
         username = user.full_name
-        fhir_practitioner_id = user.fhir_practitioner_id
         role = user.role
+        fhir_practitioner_id = user.fhir_practitioner_id
 
+        # 保留原本給其他頁面用的 session
         session['username'] = username
         session['fhir_practitioner_id'] = fhir_practitioner_id
         session['role'] = role.value
 
-        # 登入成功，清掉失敗紀錄
-        session.pop('fail_count', None)
-        session.pop('lock_until', None)
+
+        # 同帳號登入時，讓其他裝置失效
+        UserSession.query.filter_by(
+            user_id=user.id,
+            is_active=True
+        ).update({
+            'is_active': False
+        })
+
+        # 建立新的 session token
+        token = secrets.token_urlsafe(64)
+
+        new_session = UserSession(
+            id=secrets.token_hex(32),
+            user_id=user.id,
+            session_token=token,
+            last_activity=now,
+            is_active=True,
+            permission_version=getattr(user, 'permission_version', 1)
+        )
+
+        db.session.add(new_session)
+
+        # 登入成功，清掉 DB 裡的失敗紀錄
+        fail_log = LoginFailLog.query.filter_by(
+            email=email,
+            ip=ip
+        ).first()
+
+        if fail_log:
+            db.session.delete(fail_log)
+
+        db.session.commit()
 
         print(f"[LOGIN] 成功登入：{username}")
 
         if role.value == "SUPER_ADMIN":
-            return jsonify({'success': True, 'redirect': '/settings'})
+            redirect_url = '/settings'
         else:
-            return jsonify({'success': True, 'redirect': '/selectproject'})
+            redirect_url = '/selectproject'
 
-    # 登入失敗，累加錯誤次數
-    fail_count = session.get('fail_count', 0)
-    fail_count += 1
-    session['fail_count'] = fail_count
+        response = jsonify({
+            'success': True,
+            'redirect': redirect_url
+        })
+
+        response.set_cookie(
+            'session_token',
+            token,
+            max_age=60 * 30,
+            httponly=True,
+            secure=False,   # 正式 HTTPS 改 True
+            samesite='Lax'
+        )
+
+        return response
+
+    return login_failed(email, now)
+
+def login_failed(email, now):
+    ip = request.remote_addr
+
+    fail_log = LoginFailLog.query.filter_by(
+        email=email,
+        ip=ip
+    ).first()
+
+    if not fail_log:
+        fail_log = LoginFailLog(
+            email=email,
+            ip=ip,
+            fail_count=1,
+            last_failed_at=now
+        )
+        db.session.add(fail_log)
+    else:
+        fail_log.fail_count += 1
+        fail_log.last_failed_at = now
 
     # 錯誤達 5 次，鎖定 30 分鐘
-    if fail_count >= 5:
-        lock_time = now + timedelta(minutes=30)
-        session['lock_until'] = lock_time.isoformat()
-        session['fail_count'] = 0
+    if fail_log.fail_count >= 5:
+        fail_log.lock_until = now + timedelta(minutes=30)
+        fail_log.fail_count = 0
+
+        db.session.commit()
 
         print(f"[LOGIN] 登入失敗達5次：{email}")
         return jsonify({
@@ -177,12 +268,15 @@ def api_login():
             'message': '錯誤5次，已鎖定30分鐘'
         })
 
+    remaining = 5 - fail_log.fail_count
+
+    db.session.commit()
+
     print(f"[LOGIN] 登入失敗：{email}")
     return jsonify({
         'success': False,
-        'message': f'帳號或密碼錯誤，還可再嘗試 {5 - fail_count} 次'
+        'message': f'帳號或密碼錯誤，還可再嘗試 {remaining} 次'
     })
-
 
 @bp.route('/settings')
 def settings():
@@ -231,3 +325,72 @@ def api_change_password():
     elif not user.check_password(old_password):
         return jsonify({'success': False, 'message': '原有密碼輸入錯誤'})
     
+@bp.before_app_request
+def check_login_session():
+    public_paths = [
+        '/login',
+        '/api/login',
+        '/logout',
+        '/api/logout',
+        '/register',
+        '/static',
+    ]
+
+    if any(request.path.startswith(path) for path in public_paths):
+        return
+
+    token = request.cookies.get('session_token')
+
+    if not token:
+        session.clear()
+        return redirect(url_for('auth.login_page'))
+
+    user_session = UserSession.query.filter_by(
+        session_token=token,
+        is_active=True
+    ).first()
+
+    if not user_session:
+        session.clear()
+        response = redirect(url_for('auth.login_page'))
+        response.delete_cookie('session_token')
+        return response
+
+    # 超過 30 分鐘無動作，強制登出
+    now = datetime.now()
+
+    if now - user_session.last_activity > timedelta(minutes=30):
+        user_session.is_active = False
+        db.session.commit()
+
+        session.clear()
+
+        response = redirect(url_for('auth.login_page'))
+        response.delete_cookie('session_token')
+        return response
+
+    user = User.query.get(user_session.user_id)
+
+    if not user:
+        user_session.is_active = False
+        db.session.commit()
+
+        session.clear()
+
+        response = redirect(url_for('auth.login_page'))
+        response.delete_cookie('session_token')
+        return response
+
+    if user.status is False or user.status == "False":
+        user_session.is_active = False
+        db.session.commit()
+
+        session.clear()
+
+        response = redirect(url_for('auth.login_page'))
+        response.delete_cookie('session_token')
+        return response
+
+    # 沒超過 30 分鐘，就更新最後活動時間
+    user_session.last_activity = now
+    db.session.commit()

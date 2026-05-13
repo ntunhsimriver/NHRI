@@ -595,99 +595,99 @@ def get_Project(pi_id):
 
     return getResult
 
-def getAllInfo(PatID): # 還不是新邏輯(但目前也沒有再用了)
-    getResult = []
-    # 臨床病歷 (Clinical)那頁，總共需要抓Observation、Condition、MedicationRequest
+# def getAllInfo(PatID): # 還不是新邏輯(但目前也沒有再用了)
+#     getResult = []
+#     # 臨床病歷 (Clinical)那頁，總共需要抓Observation、Condition、MedicationRequest
 
-    # 先抓Observation
-    Response = read_FHIR_api("/Observation" + "?subject=Patient/" + PatID)
+#     # 先抓Observation
+#     Response = read_FHIR_api("/Observation" + "?subject=Patient/" + PatID)
 
-    Bundle_entry = FHIR.FHIR_Bundle(Response)
-    for b in Bundle_entry.entries:
-        # 【關鍵：特別處理】如果這筆資源含有 component 欄位，就跳過不處理
-        if b['resource'].get('component'):
-            continue
+#     Bundle_entry = FHIR.FHIR_Bundle(Response)
+#     for b in Bundle_entry.entries:
+#         # 【關鍵：特別處理】如果這筆資源含有 component 欄位，就跳過不處理
+#         if b['resource'].get('component'):
+#             continue
 
-        Info = FHIR.FHIR_Observation(b['resource'])
+#         Info = FHIR.FHIR_Observation(b['resource'])
 
-        # 抓機構的名字
-        Response = read_FHIR_api(Info.performer)
-        OrgName = FHIR.FHIR_Organization(Response).name
+#         # 抓機構的名字
+#         Response = read_FHIR_api(Info.performer)
+#         OrgName = FHIR.FHIR_Organization(Response).name
 
-        effectiveDateTime_raw_date = Info.effectiveDateTime
-        effectiveDateTime = effectiveDateTime_raw_date[:10] if effectiveDateTime_raw_date else "0000-00-00"
+#         effectiveDateTime_raw_date = Info.effectiveDateTime
+#         effectiveDateTime = effectiveDateTime_raw_date[:10] if effectiveDateTime_raw_date else "0000-00-00"
 
-        getResult.append({
-            "Type": "Lb",
-            "Name": Info.name,
-            "Status": Info.status,
-            "Value": str(Info.value) + ' (' + Info.unit + ')',
-            "Date": effectiveDateTime,  # 因為effectiveDateTime是datetime所以先改一下日期格式
-            "Org": OrgName
-        })
+#         getResult.append({
+#             "Type": "Lb",
+#             "Name": Info.name,
+#             "Status": Info.status,
+#             "Value": str(Info.value) + ' (' + Info.unit + ')',
+#             "Date": effectiveDateTime,  # 因為effectiveDateTime是datetime所以先改一下日期格式
+#             "Org": OrgName
+#         })
 
-    # 再來抓Condition
-    Response = read_FHIR_api("/Condition" + "?subject=Patient/" + PatID)
+#     # 再來抓Condition
+#     Response = read_FHIR_api("/Condition" + "?subject=Patient/" + PatID)
 
-    Bundle_entry = FHIR.FHIR_Bundle(Response)
-    for b in Bundle_entry.entries:
-        Info = FHIR.FHIR_Condition(b['resource'])
+#     Bundle_entry = FHIR.FHIR_Bundle(Response)
+#     for b in Bundle_entry.entries:
+#         Info = FHIR.FHIR_Condition(b['resource'])
 
-        getResult.append({
-            "Type": "Dx",
-            "Name": Info.text,
-            "Status": Info.status,
-            "Value": Info.code,
-            "Date": Info.recordedDate,
-            "Org": "未知醫療機構"
-        })
+#         getResult.append({
+#             "Type": "Dx",
+#             "Name": Info.text,
+#             "Status": Info.status,
+#             "Value": Info.code,
+#             "Date": Info.recordedDate,
+#             "Org": "未知醫療機構"
+#         })
 
 
-    # 再來抓MedicationRequest，藥物的code跟name，有可能會放在medicationReference或是medicationCodeableConcept
-    Response = read_FHIR_api("/MedicationRequest" + "?subject=Patient/" + PatID)
+#     # 再來抓MedicationRequest，藥物的code跟name，有可能會放在medicationReference或是medicationCodeableConcept
+#     Response = read_FHIR_api("/MedicationRequest" + "?subject=Patient/" + PatID)
 
-    Bundle_entry = FHIR.FHIR_Bundle(Response)
-    for b in Bundle_entry.entries:
-        Info = FHIR.FHIR_MedicationRequest(b['resource'])
+#     Bundle_entry = FHIR.FHIR_Bundle(Response)
+#     for b in Bundle_entry.entries:
+#         Info = FHIR.FHIR_MedicationRequest(b['resource'])
 
-        # 抓機構的名字
-        Response = read_FHIR_api(Info.requester)
-        OrgName = FHIR.FHIR_Organization(Response).name
+#         # 抓機構的名字
+#         Response = read_FHIR_api(Info.requester)
+#         OrgName = FHIR.FHIR_Organization(Response).name
 
-        if 'Medication/' in Info.name : 
-            MedId = Info.name
-            Response = read_FHIR_api(Info.name)
-            Info_Med = FHIR.FHIR_Medication(Response)
+#         if 'Medication/' in Info.name : 
+#             MedId = Info.name
+#             Response = read_FHIR_api(Info.name)
+#             Info_Med = FHIR.FHIR_Medication(Response)
 
-            getResult.append({
-                "Type": "Rx",
-                "Name": Info_Med.name,
-                "Status": Info.status,
-                "Value": Info.dosage_text,
-                "Date": Info.authoredOn,
-                "Org": OrgName
-            })
-        else:
-            getResult.append({
-                "Type": "Rx",
-                "Name": Info.name,
-                "Status": Info.status,
-                "Value": Info.dosage_text,
-                "Date": Info.authoredOn,
-                "Org": OrgName
-            })
+#             getResult.append({
+#                 "Type": "Rx",
+#                 "Name": Info_Med.name,
+#                 "Status": Info.status,
+#                 "Value": Info.dosage_text,
+#                 "Date": Info.authoredOn,
+#                 "Org": OrgName
+#             })
+#         else:
+#             getResult.append({
+#                 "Type": "Rx",
+#                 "Name": Info.name,
+#                 "Status": Info.status,
+#                 "Value": Info.dosage_text,
+#                 "Date": Info.authoredOn,
+#                 "Org": OrgName
+#             })
 
-    # 排序
-    getResult = sorted(
-        getResult, 
-        key=lambda x: (
-            x['Date'] in [None, "0000-00-00", "Unknown"], # 空值依然標記為 True (1)
-            x['Date'] if x['Date'] else ""               # 確保日期是字串
-        ),
-        reverse=True # 設定為倒序
-    )
+#     # 排序
+#     getResult = sorted(
+#         getResult, 
+#         key=lambda x: (
+#             x['Date'] in [None, "0000-00-00", "Unknown"], # 空值依然標記為 True (1)
+#             x['Date'] if x['Date'] else ""               # 確保日期是字串
+#         ),
+#         reverse=True # 設定為倒序
+#     )
 
-    return getResult
+#     return getResult
 
 
 def getObs14days(PatID, DeviceID, start, end): 

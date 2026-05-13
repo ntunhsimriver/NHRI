@@ -17,28 +17,7 @@ def create_app():
     # 連config用的
     app.config.from_object(BaseConfig)
 
-
     db.init_app(app)
-    
-    # 註冊 Blueprints
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(pages_bp)
-    app.register_blueprint(api_watch_bp)
-    # app.register_blueprint(api_w_bp)
-    # app.register_blueprint(history_bp)
-    register_fhir(app)
-
-    # 建表（建議只在 DEBUG 或 migrations 中執行）
-    # with app.app_context():
-    #     db.create_all()
-
-    # 優雅關閉
-    def handle_sigterm(signal_number, frame):
-        print("\U0001F50C 收到 SIGTERM，優雅關閉中...")
-        time.sleep(1)
-        print("✅ Flask 已正常關閉")
-        raise SystemExit(0)
-    signal.signal(signal.SIGTERM, handle_sigterm)
 
     @app.before_request
     def generate_nonce():
@@ -46,11 +25,12 @@ def create_app():
 
     @app.after_request
     def add_csp(response):
-        nonce = g.nonce
+        nonce = getattr(g, 'nonce', secrets.token_urlsafe(16))
+
         response.headers["Content-Security-Policy"] = (
             f"default-src 'self'; "
             f"script-src 'self' 'nonce-{nonce}'; "
-            f"style-src 'self'; "   # ← 暫時保留
+            f"style-src 'self'; "
             f"img-src 'self' data:; "
             f"font-src 'self' data:; "
             f"connect-src 'self'; "
@@ -62,23 +42,21 @@ def create_app():
         response.headers["X-Frame-Options"] = "SAMEORIGIN"
         return response
 
-    # CSP 的東西，可以解決弱掃的問題，但JS都會失效
-    # @app.after_request
-    # def set_security_headers(response):
-    #     response.headers['Content-Security-Policy'] = (
-    #         "default-src 'self'; "
-    #         "script-src 'self'; "
-    #         "style-src 'self' 'unsafe-inline'; "
-    #         "img-src 'self' data:; "
-    #         "font-src 'self' data:; "
-    #         "connect-src 'self'; "
-    #         "frame-ancestors 'none'; "
-    #         "form-action 'self'; "
-    #         "object-src 'none';"
-    #     )
-    #     response.headers['X-Frame-Options'] = 'DENY'
-    #     response.headers['X-Content-Type-Options'] = 'nosniff'
-    #     return response
+    # 註冊 Blueprints
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(pages_bp)
+    app.register_blueprint(api_watch_bp)
+    register_fhir(app)
+
+    # 優雅關閉
+    def handle_sigterm(signal_number, frame):
+        print("\U0001F50C 收到 SIGTERM，優雅關閉中...")
+        time.sleep(1)
+        print("✅ Flask 已正常關閉")
+        raise SystemExit(0)
+
+    signal.signal(signal.SIGTERM, handle_sigterm)
+
     return app
 
 app = create_app()
