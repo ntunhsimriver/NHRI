@@ -194,7 +194,7 @@ def upload_FHIR_mappingID(study_id, data):
         "patient_not_found": patient_not_found
     }
 
-    upload_log(result, stats, study_id=study_id)
+    upload_log(data, stats, study_id=study_id)
 
     res = fhir.upload_FHIR(data)
 

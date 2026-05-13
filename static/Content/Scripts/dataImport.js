@@ -264,21 +264,35 @@ function updateFileName(name) {
 }
 
 function goToStep3(stats = null) {
-    // 1. 隱藏步驟 2，顯示步驟 3
-    document.getElementById('step-2-content').classList.add('hidden');
-    document.getElementById('step-3-content').classList.remove('hidden');
+    // 1. 隱藏步驟 1、2，顯示步驟 3
+    document.getElementById('step-1-content')?.classList.add('hidden');
+    document.getElementById('step-2-content')?.classList.add('hidden');
+    document.getElementById('step-3-content')?.classList.remove('hidden');
 
     // 2. 更新上方進度條
+    const circle1 = document.getElementById('step-circle-1');
+    const circle2 = document.getElementById('step-circle-2');
     const circle3 = document.getElementById('step-circle-3');
-    circle3.classList.remove('bg-slate-200', 'text-slate-500');
-    circle3.classList.add('bg-blue-600', 'text-white');
 
-    // 3. 更新 2 號與 3 號之間的連接線
+    const line1 = document.getElementById('step-line-1');
     const line2 = document.getElementById('step-line-2');
-    line2.classList.remove('bg-slate-200');
-    line2.classList.add('bg-blue-600');
 
-    // 4. 顯示 FHIR 驗證結果
+    circle1?.classList.remove('bg-slate-200', 'text-slate-500');
+    circle1?.classList.add('bg-blue-600', 'text-white');
+
+    circle2?.classList.remove('bg-slate-200', 'text-slate-500');
+    circle2?.classList.add('bg-blue-600', 'text-white');
+
+    circle3?.classList.remove('bg-slate-200', 'text-slate-500');
+    circle3?.classList.add('bg-blue-600', 'text-white');
+
+    line1?.classList.remove('bg-slate-200');
+    line1?.classList.add('bg-blue-600');
+
+    line2?.classList.remove('bg-slate-200');
+    line2?.classList.add('bg-blue-600');
+
+    // 3. 顯示 FHIR 驗證結果
     if (stats) {
         renderStep3FHIRResult(stats);
     }
@@ -398,4 +412,145 @@ function renderStep3ObservationTable(obsLogs) {
     //         </tr>
     //     `;
     // }
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const btnReloadUploadLogs = document.getElementById("btnReloadUploadLogs");
+
+    if (btnReloadUploadLogs) {
+        btnReloadUploadLogs.addEventListener("click", function () {
+            const studyId = btnReloadUploadLogs.dataset.bsStudyid;
+            loadUploadLogs(studyId);
+        });
+
+        // 頁面載入時也先讀一次
+        const studyId = btnReloadUploadLogs.dataset.bsStudyid;
+        loadUploadLogs(studyId);
+
+    }
+});
+
+function loadUploadLogs(studyId) {
+    const tbody = document.getElementById("uploadLogTableBody");
+
+    if (!tbody) return;
+
+    if (!studyId) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-4 py-6 text-center text-rose-500">
+                    缺少 study_id，無法讀取上傳紀錄
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5" class="px-4 py-6 text-center text-slate-400">
+                載入中...
+            </td>
+        </tr>
+    `;
+
+    fetch(`/api/fhir_upload_logs/${encodeURIComponent(studyId)}`)
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-6 text-center text-rose-500">
+                            讀取失敗
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const logs = result.data || [];
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-6 text-center text-slate-400">
+                            尚無上傳紀錄
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3 text-slate-700">${log.time}</td>
+                    <td class="px-4 py-3 font-mono text-xs text-slate-500">${log.folder}</td>
+                    <td class="px-4 py-3 text-slate-700">${log.total_resources}</td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            log.has_stats
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-amber-50 text-amber-700"
+                        }">
+                            ${log.status}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <button
+                            type="button"
+                            class="btn-open-upload-log rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                            data-log-folder="${log.folder}"
+                            data-study-id="${studyId}">
+                            查看結果
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        })
+        .catch(err => {
+            console.error(err);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-4 py-6 text-center text-rose-500">
+                        讀取上傳紀錄失敗
+                    </td>
+                </tr>
+            `;
+        });
+}
+
+
+
+document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".btn-open-upload-log");
+
+    if (!btn) return;
+
+    const studyId = btn.dataset.studyId;
+    const logFolder = btn.dataset.logFolder;
+
+    openUploadLog(studyId, logFolder);
+});
+
+function openUploadLog(studyId, logFolder) {
+    if (!studyId || !logFolder) {
+        alert("缺少上傳紀錄資訊");
+        return;
+    }
+
+    fetch(`/api/fhir_upload_logs/${encodeURIComponent(studyId)}/${encodeURIComponent(logFolder)}`)
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success) {
+                alert(result.message || "讀取上傳結果失敗");
+                return;
+            }
+
+            goToStep3(result.stats);
+        })
+        .catch(err => {
+            console.error(err);
+            alert("讀取上傳結果失敗");
+        });
 }

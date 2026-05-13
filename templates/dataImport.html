@@ -194,6 +194,50 @@
 <div id="uploadSpinner" class="upload-spinner-overlay d-none">
   <div class="upload-spinner-circle"></div>
 </div>
+
+
+<!-- 上傳紀錄 -->
+<div class="mt-8 rounded-xl border border-slate-200 bg-white shadow-sm">
+  <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+    <div>
+      <h4 class="font-semibold text-slate-800 mb-0">FHIR 上傳紀錄</h4>
+      <p class="text-xs text-slate-500 mb-0">可查看過去上傳結果與統計資訊</p>
+    </div>
+
+    <button
+      type="button"
+      id="btnReloadUploadLogs"
+      class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+      data-bs-studyid='{{ study_id }}'
+      >
+      <i class="bi bi-arrow-clockwise"></i> 重新整理
+    </button>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+        <tr>
+          <th class="px-4 py-3 font-medium">上傳時間</th>
+          <th class="px-4 py-3 font-medium">資料夾</th>
+          <th class="px-4 py-3 font-medium">總資源數</th>
+          <th class="px-4 py-3 font-medium">狀態</th>
+          <th class="px-4 py-3 font-medium text-center">查看</th>
+        </tr>
+      </thead>
+
+      <tbody id="uploadLogTableBody" class="divide-y divide-slate-100">
+        <tr>
+          <td colspan="5" class="px-4 py-6 text-center text-slate-400">
+            載入中...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
 </section>
 
 

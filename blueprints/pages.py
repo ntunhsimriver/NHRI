@@ -713,3 +713,77 @@ def api_test():
 
     return jsonify(result)
 
+@bp.route("/api/fhir_upload_logs/<study_id>")
+def api_fhir_upload_logs(study_id):
+    base_folder = Path(cfg.FHIRUPLOAD_DIR) / study_id
+
+    if not base_folder.exists():
+        return jsonify({
+            "success": True,
+            "data": []
+        })
+
+    logs = []
+
+    for folder in base_folder.iterdir():
+        if not folder.is_dir():
+            continue
+
+        stats_file = folder / "input_result_stats.json"
+        result_file = folder / "input_result.json"
+
+        total_resources = "-"
+        status = "無統計檔"
+
+        if stats_file.exists():
+            try:
+                with open(stats_file, "r", encoding="utf-8") as f:
+                    stats = json.load(f)
+
+                total_resources = stats.get("total_resources", "-")
+                status = "成功"
+            except Exception:
+                status = "統計檔讀取失敗"
+
+        logs.append({
+            "folder": folder.name,
+            "time": folder.name,
+            "total_resources": total_resources,
+            "status": status,
+            "has_stats": stats_file.exists(),
+            "has_result": result_file.exists()
+        })
+
+    logs.sort(key=lambda x: x["folder"], reverse=True)
+
+    return jsonify({
+        "success": True,
+        "data": logs
+    })
+
+@bp.route("/api/fhir_upload_logs/<study_id>/<log_folder>")
+def api_fhir_upload_log_detail(study_id, log_folder):
+    folder = Path(cfg.FHIRUPLOAD_DIR) / study_id / log_folder
+    stats_file = folder / "input_result_stats.json"
+
+    if not stats_file.exists():
+        return jsonify({
+            "success": False,
+            "message": "找不到上傳統計檔"
+        }), 404
+
+    try:
+        with open(stats_file, "r", encoding="utf-8") as f:
+            stats = json.load(f)
+
+        return jsonify({
+            "success": True,
+            "stats": stats
+        })
+
+    except Exception as e:
+        print("[UPLOAD LOG] 讀取失敗:", e)
+        return jsonify({
+            "success": False,
+            "message": "讀取上傳統計失敗"
+        }), 500
