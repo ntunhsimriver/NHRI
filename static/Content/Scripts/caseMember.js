@@ -27,6 +27,11 @@ function sendList() {
     let hasError = false;
 
     rows.forEach((row, index) => {
+        // 已標記刪除的列，不送出
+        if (row.classList.contains("row-deleted")) {
+            return;
+        }
+
         const tds = row.querySelectorAll("td");
         if (tds.length < 4) return;
 
@@ -35,11 +40,10 @@ function sendList() {
         const newPatientInput = tds[2]?.querySelector("input");
         const createdAt = tds[3]?.innerText.trim() || "";
 
-
         const oldPatientId = oldPatientInput?.value.trim() || "";
         const newPatientId = newPatientInput?.value.trim() || "";
 
-        // 🔥 檢查 old_patient_id 格式
+        // 檢查 old_patient_id 格式
         if (!oldPatientId.startsWith("Patient/") || oldPatientId === "Patient/") {
             hasError = true;
 
@@ -61,11 +65,9 @@ function sendList() {
             old_patient_id: oldPatientId,
             new_patient_id: newPatientId,
             created_at: createdAt
-
         });
     });
 
-    // ❌ 有錯就不要送
     if (hasError) {
         return;
     }
@@ -96,12 +98,36 @@ function sendList() {
     });
 }
 
+
 function removeRow(button) {
     const row = button.closest("tr");
-    if (row) {
-        row.remove();
+
+    if (!row) return;
+
+    row.classList.toggle("row-deleted");
+
+    const icon = button.querySelector("i");
+
+    if (row.classList.contains("row-deleted")) {
+        button.title = "取消刪除";
+        button.classList.remove("hover:text-red-600");
+        button.classList.add("text-red-600");
+
+        if (icon) {
+            icon.className = "bi bi-arrow-counterclockwise";
+        }
+    } else {
+        button.title = "刪除";
+        button.classList.remove("text-red-600");
+        button.classList.add("hover:text-red-600");
+
+        if (icon) {
+            icon.className = "bi bi-trash";
+        }
     }
 }
+
+
 function formatNow() {
     const d = new Date();
 

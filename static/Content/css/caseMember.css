@@ -1,0 +1,16 @@
+.row-deleted {
+    opacity: 0.45;
+    background-color: #f8fafc;
+}
+
+.row-deleted td {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+
+.row-deleted input {
+    text-decoration: line-through;
+    color: #94a3b8;
+    background-color: #f1f5f9;
+    pointer-events: none;
+}
