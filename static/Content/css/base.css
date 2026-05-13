@@ -148,6 +148,11 @@
     color: rgb(6 95 70);               /* green-800 */
 }
 
+.type-follow-up {
+    background-color: rgb(209 250 229); /* green-100 */
+    color: rgb(6 95 70);               /* green-800 */
+}
+
 .type-on-study {
     background-color: rgb(219 234 254); /* blue-100 */
     color: rgb(29 78 216);              /* blue-700 */
@@ -198,12 +203,12 @@
   overflow: hidden;
 }
 
-.type-True {
+.type-true {
     background-color: rgb(209 250 229); /* green-100 */
     color: rgb(6 95 70);               /* green-800 */
 }
 
-.type-False {
+.type-false {
     background-color: rgb(254 226 226); /* red-100 */
     color: rgb(239 68 68);              /* red-500 */
 }

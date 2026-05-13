@@ -1140,7 +1140,7 @@ def addProject_FHIR(data, pra_id):
     fhir_study_id = 'ResearchStudy/' + ProjectId
 
     Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)    
-    # print(Response.text)
+    print(Response.text)
     if Response.ok:
         if type =="new":
             # 確定進fhir server再進資料庫
@@ -1161,7 +1161,8 @@ def addProject_FHIR(data, pra_id):
             return {'success': True, 'message': '已更新成功'}
         
     else:
-        # print(result)
+        print("result")
+        print(result)
         return {"success": False, "message": result.text}
 
 
@@ -1171,16 +1172,13 @@ def addPatient_FHIR(data, study_id):
 
 
     pat_id = data.get('pat_id')
-    # pat_identi = data.get('pat_identi')
 
-    # if pat_identi is not None:
-    #     pat_id = find_patient_id(pat_identi)
     if pat_id != None:
         inputResSub = {
             'pat_id': "Patient/" + pat_id,
             'start': data.get('start'),
             'id': study_id + '-' + pat_id,
-            'status': 'on-study',
+            'status': data.get('status'),
             'studyId': "ResearchStudy/" + study_id
         }
 
@@ -1508,3 +1506,20 @@ def get_latest_export_status(project_id):
     return results
 
 
+def cleanup_all_old_export_folders(days=90):
+    base_folder = Path(cfg.NDJSON_DIR)
+
+    if not base_folder.exists():
+        return 0
+
+    total_deleted = 0
+
+    for project_folder in base_folder.iterdir():
+        if not project_folder.is_dir():
+            continue
+
+        project_id = project_folder.name
+        total_deleted += cleanup_old_export_folders(project_id, days=days)
+
+    print(f"[CLEANUP] 共刪除 {total_deleted} 個超過 {days} 天的匯出資料夾")
+    return total_deleted

@@ -3,11 +3,12 @@ from flask import Flask, render_template, g
 from config import BaseConfig
 from extensions import db
 from flask import send_from_directory
-from blueprints.fhir import register_fhir
+from blueprints.fhir import register_fhir, cleanup_all_old_export_folders
 from blueprints.pages import bp as pages_bp
 from blueprints.auth import bp as auth_bp
 from blueprints.api_watch import bp as api_watch_bp
 import secrets
+from apscheduler.schedulers.background import BackgroundScheduler # 排程用
 
 
 
@@ -47,6 +48,16 @@ def create_app():
     app.register_blueprint(pages_bp)
     app.register_blueprint(api_watch_bp)
     register_fhir(app)
+
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        func=lambda: cleanup_all_old_export_folders(days=90),
+        trigger='cron',
+        hour=3,
+        minute=0
+    )
+    scheduler.start()
+
 
     # 優雅關閉
     def handle_sigterm(signal_number, frame):

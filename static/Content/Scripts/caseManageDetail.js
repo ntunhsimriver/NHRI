@@ -18,10 +18,6 @@ document.querySelectorAll('.btn-back').forEach(btn => {
     });
 });
 
-
-const modalAddPatient = document.getElementById('Modal_addPatient');
-const msg = document.getElementById('message');
-
 const spinner = document.getElementById('chart-loading-spinner');
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -648,4 +644,75 @@ document.addEventListener("click", function (e) {
         </div>
       `;
     });
+});
+
+
+
+// 新增使用者
+var ModalupdatePatient = document.getElementById('Modal_updatePatient');
+// 等等要關閉這個彈跳視窗用的
+var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModalupdatePatient);
+
+ModalupdatePatient.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget; // 取得被點擊的按鈕
+    var input_data = button.getAttribute('data-bs-value')
+    var data = JSON.parse(input_data);
+
+    var modelPatId = document.getElementById('addPatId');
+    if (modelPatId) modelPatId.value = data.PatId;
+
+    var modelPeriodStart = document.getElementById('addPeriodStart');
+    if (modelPeriodStart) modelPeriodStart.value = data.PeriodStart;
+
+    var modelStatus = document.getElementById('addStatus');
+    if (modelStatus) modelStatus.value = data.Status;
+
+});
+
+// 先宣告
+const form = document.getElementById('registerForm');
+const msg = document.getElementById('message');
+
+// 當 Modal 關閉時自動重置表單
+document.getElementById('Modal_updatePatient').addEventListener('hidden.bs.modal', function () {
+    form.reset();
+    msg.textContent = '';
+    msg.className = 'message';
+    if (modalEl.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
+
+});
+
+
+
+form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    
+    const pat_id = document.getElementById('addPatId').value;
+    const start = document.getElementById('addPeriodStart').value;
+    const status = document.getElementById('addStatus').value;
+    const type = 'update'
+
+
+    // 清除前一次樣式
+    msg.classList.remove('error-message', 'success-message');
+
+    const response = await fetch('/api/addPatient', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pat_id, start, type, status })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+        msg.textContent = result.message;
+        msg.classList.add('success-message');
+        setTimeout(() => {
+            location.reload();
+        }, 500);
+    } else {
+        msg.textContent = result.message;
+        msg.classList.add('error-message');
+    }
 });

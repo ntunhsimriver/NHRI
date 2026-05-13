@@ -30,18 +30,30 @@
          <!-- | 最後訪視: 2024-01-05 -->
        </p>
       </div>
-      <!-- <div class="ml-auto flex gap-2">
-        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">編輯個案</button>
-      </div> -->
 
-      <div class="ml-auto flex gap-2">
-        <input type="file" id="fileInput_FHIR" hidden accept=".json">
-        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 file-trigger" data-target="fileInput_FHIR" data-type="FHIR_pat"
-          type="button" id="fileInput_FHIR_btn" >
-          <i class="bi bi-upload"></i>
-          上傳FHIR資料
-        </button>
+      <div class="flex gap-2 ml-auto">
+
+        <div class="ml-auto flex gap-2">
+          
+          <button class="flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 transition-colors shadow-sm shadow-green-500/30"
+            data-bs-toggle="modal" 
+            data-bs-target="#Modal_updatePatient"
+            data-bs-value='{{ {"PatId": PatInfo.id, "PeriodStart": FirstDate, "Status": ResearchSubjectStatus} | tojson }}'>
+            <i class="bi bi-pencil-square"></i>
+            更新收案資訊</button>
+        </div>
+
+        <div class="ml-auto flex gap-2">
+          <input type="file" id="fileInput_FHIR" hidden accept=".json">
+          <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 file-trigger" data-target="fileInput_FHIR" data-type="FHIR_pat"
+            type="button" id="fileInput_FHIR_btn" >
+            <i class="bi bi-upload"></i>
+            上傳FHIR資料
+          </button>
+        </div>
+
       </div>
+      
 
 
     </div>
@@ -386,26 +398,76 @@
 
   <!-- 這邊放問卷裡面的視窗 -->
   <div class="modal fade" id="Modal_Consent" tabindex="-1" aria-labelledby="Modal_Consent_Label" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content border-0 shadow-2xl rounded-xl">
-      
-      <div class="modal-header border-b border-slate-100 p-4">
-        <h3 id="Modal_Consent_title" class="text-lg font-bold text-slate-900"></h3>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-2xl rounded-xl">
+        
+        <div class="modal-header border-b border-slate-100 p-4">
+          <h3 id="Modal_Consent_title" class="text-lg font-bold text-slate-900"></h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
 
-      <div id="Modal_Consent_body" class="modal-body overflow-y-auto p-6 text-sm text-slate-600 leading-relaxed whitespace-pre-line">
-        <iframe id="Consent_PDF_Viewer" src="" width="100%" height="100%" frameborder="0"></iframe>
-      </div>
+        <div id="Modal_Consent_body" class="modal-body overflow-y-auto p-6 text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+          <iframe id="Consent_PDF_Viewer" src="" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
 
-      <div class="modal-footer border-t border-slate-100 p-3">
-        <button type="button" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors" data-bs-dismiss="modal">關閉</button>
+        <div class="modal-footer border-t border-slate-100 p-3">
+          <button type="button" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors" data-bs-dismiss="modal">關閉</button>
+        </div>
+        
       </div>
-      
     </div>
   </div>
-</div>
 
+
+  <!-- 這邊是更新收案日期 -->
+  <div class="modal fade" id="Modal_updatePatient" tabindex="-1" aria-labelledby="Modal_updatePatient_Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+      <form id="registerForm" class="modal-content border-0 shadow-2xl rounded-xl">
+        
+        <div class="modal-header border-b border-slate-100 p-4">
+          <h3 id="Modal_updatePatient_title" class="text-lg font-bold text-slate-900">更新收案資訊</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div id="Modal_updatePatient_body" class="p-6 space-y-6" style="max-height: 90vh; overflow: hidden;">
+          <div id="message" class="message"></div>
+
+              <input type="text" class="hidden" id="hidden_addPatient">
+
+              <label class="block text-sm font-medium text-slate-700">Hash ID (去識別化代碼)</label>
+              <input type="text" id="addPatId" placeholder="例如: SUB-XXXXX，會做為 Patient id 匯入FHIR Server" class="mt-1 block w-full rounded-md !border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" required readonly>
+
+              <label class="block text-sm font-medium text-slate-700">收案日期</label>
+              <input type="date" id="addPeriodStart" class="mt-1 block w-full rounded-md !border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" required>
+
+              <select id="addStatus" class="mt-1 block w-full rounded-md !border !border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" required>
+
+                <option value="on-study">On-study</option>
+                <option value="follow-up">Follow-up</option>
+                <option value="withdrawn">Withdrawn</option>
+                <!-- <option value="candidate">Candidate</option>
+                <option value="eligible">Eligible</option>
+                <option value="ineligible">Ineligible</option>
+                <option value="not-registered">Not Registered</option>
+                <option value="off-study">Off-study</option>
+                <option value="on-study-intervention">On-study-intervention</option>
+                <option value="on-study-observation">On-study-observation</option>
+                <option value="pending-on-study">Pending on-study</option>
+                <option value="potential-candidate">Potential Candidate</option>
+                <option value="screening">Screening</option> -->
+                
+              </select>
+
+        </div>
+
+        <div class="modal-footer border-t border-slate-100 p-3">
+          <button type="button" class="mr-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" data-bs-dismiss="modal">取消</button>
+          <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">送出</button>
+        </div>
+        
+      </form>
+    </div>
+  </div>
 {% endif %}
 
 {% endblock %}

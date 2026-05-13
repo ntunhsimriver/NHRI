@@ -17,7 +17,7 @@ def login_page():
         return redirect(url_for('pages.index_page'))
     return render_template('login.html')
 
-@bp.route('/logout', methods=['POST'])
+@bp.route('/logout')
 def logout():
     token = request.cookies.get('session_token')
 
@@ -38,7 +38,8 @@ def logout():
 
     response.delete_cookie('session_token')
 
-    return response
+    return redirect(url_for('auth.login_page'))
+
 
 @bp.route('/register', methods=['POST'])
 def register():
@@ -121,9 +122,14 @@ def register():
     pra_obj.active = status
 
     result_json = pra_obj.to_fhir()  # 把他拚成json
+    print(fhir_practitioner_id)
+    print(result_json)
     FHIR_response = fhir.put_FHIR_api(fhir_practitioner_id, result_json)
-
-    return jsonify({'success': True, 'message': message})
+    print(FHIR_response.text)
+    if FHIR_response.ok:
+        return jsonify({'success': True, 'message': message})
+    else:
+        return jsonify({'success': False, 'message': "FHIR資源新增失敗"})
 
 @bp.route('/api/login', methods=['POST'])
 def api_login():

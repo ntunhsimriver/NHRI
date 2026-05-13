@@ -225,17 +225,7 @@ def api_addPatient():
     data = request.get_json()
 
     res = fhir.addPatient_FHIR(data, session['study_id'])
-    member = ProjectMember(
-        project_id=session['study_id'],
-        old_patient_id="",
-        new_patient_id="Patient/" + data.get('pat_id'),
-        created_at=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        Del=0
-    )
 
-    db.session.add(member)
-    db.session.commit()
-    print(res)
     if res == None:
         return jsonify({'success': False, 'message': '此身份證字號不存在於FHIR Server'})
     else:
@@ -376,8 +366,8 @@ def api_addProject():
 
 @bp.route('/api/addMember', methods=['POST'])
 def api_addMember():
-    if session['study_status'] == "withdrawn":
-        return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
+    # if session['study_status'] == "withdrawn":
+    #     return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
     data = request.get_json()
     member_result = data['item_member']
     getMember_proid = data['item_proid']

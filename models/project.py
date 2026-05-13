@@ -2,6 +2,7 @@
 import uuid
 from datetime import datetime
 from extensions import db
+import json
 
 class Project(db.Model):
     __tablename__ = "Project_Management"
