@@ -10,6 +10,8 @@ ModaladdUser.addEventListener('show.bs.modal', function (event) {
     var data = JSON.parse(input_data);
     if (input_data){
         document.getElementById('Modal_addUser_title').textContent = '修改使用者';
+    }else{
+        document.getElementById('Modal_addUser_title').textContent = '新增使用者';
     };
 
     var modelfull_name = document.getElementById('newUser_name');
@@ -27,6 +29,9 @@ ModaladdUser.addEventListener('show.bs.modal', function (event) {
     var modelroleName = document.getElementById('newUser_role');
     if (modelroleName) modelroleName.value = data.roleName;
 
+    var modelroleActive = document.getElementById('newUser_active');
+    if (modelroleActive) modelroleActive.value = data.status;
+
 });
 
 
@@ -35,6 +40,10 @@ document.getElementById('Modal_addUser').addEventListener('hidden.bs.modal', fun
     form.reset();
     msg.textContent = '';
     msg.className = 'message';
+    if (modalEl.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
+
 });
 
 
@@ -50,6 +59,12 @@ form.addEventListener('submit', async function (e) {
     const organization = document.getElementById('newUser_org').value;
     const fhir_practitioner_id = document.getElementById('newUser_PraId').value;
     const role = document.getElementById('newUser_role').value;
+    const active = document.getElementById('newUser_active').value;
+
+    const type =
+        document.getElementById('Modal_addUser_title').textContent === '新增使用者'
+        ? 'new'
+        : 'update';
 
     // 清除前一次樣式
     msg.classList.remove('error-message', 'success-message');
@@ -62,7 +77,7 @@ form.addEventListener('submit', async function (e) {
     const response = await fetch('/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name, email, organization, role, fhir_practitioner_id })
+        body: JSON.stringify({ full_name, email, organization, role, active, fhir_practitioner_id, type })
     });
 
     const result = await response.json();

@@ -97,6 +97,7 @@ class FHIR_Practitioner:
             target_name = next((n for n in names if n.get("use") == "official"), 
                                names[0] if names else {})
             self.name = target_name.get("text", "Unknown")
+            self.active = fhir.get("active")
             telecoms = fhir.get("telecom", [])
             self.phone = "無電話資訊"
             for t in telecoms:
@@ -108,7 +109,7 @@ class FHIR_Practitioner:
         fhir_json = {
             "resourceType": "Practitioner",
             "id": self.id,
-            "active": True,
+            "active": self.active,
             "name": [
                 {
                     "use": "official",

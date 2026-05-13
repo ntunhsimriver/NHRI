@@ -29,16 +29,18 @@ def register():
     # 先給他一個預設的uuid
     new_uuid = uuid.uuid4()
     data = request.get_json()
+
     email = data.get('email')
     full_name = data.get('full_name')
     organization = data.get('organization')
     role = data.get('role')
-    status = 'active' # 註冊的人先都給他active
+    status = data.get('active')  # 註冊的人先都給他active
+    type = data.get('type')      # 紀錄這次是按註冊還是按編輯
 
     if data.get('password'):
         password = data.get('password')
     else:
-        password = "Password123!" # 這邊設計如果是從網站來的，是管理員幫忙給他密碼，那就直接用預設的密碼
+        password = "Password123!"  # 管理員新增時給預設密碼
 
     # 如果使用者註冊時有指定fhir_practitioner_id就直接抓，沒有就直接帶入uuid
     if data.get('fhir_practitioner_id'):
@@ -46,23 +48,62 @@ def register():
     else:
         fhir_practitioner_id = "Practitioner/" + str(new_uuid)
 
-    if User.query.filter_by(email=email).first():
+    # 新增時，email 已存在就擋掉
+    if User.query.filter_by(email=email).first() and type == 'new':
         return jsonify({'success': False, 'message': '帳號已存在'})
 
-    hashed_password = generate_password_hash(password)
-    new_user = User(id=new_uuid, password_hash = hashed_password, email = email, status=status, full_name = full_name, organization = organization, role = role, fhir_practitioner_id = fhir_practitioner_id)
-    db.session.add(new_user)
-    db.session.commit()
+    # 編輯時：不要新增 user，要找原本的 user 來改
+    if type == 'update':
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({'success': False, 'message': '找不到使用者'})
+
+        user.status = status
+        user.full_name = full_name
+        user.organization = organization
+        user.role = role
+        user.fhir_practitioner_id = fhir_practitioner_id
+
+        # 如果編輯時有輸入密碼，才更新密碼
+        if data.get('password'):
+            user.password_hash = generate_password_hash(password)
+
+        db.session.commit()
+
+        message = '更新成功'
+        print(f"[REGISTER] 更新帳號：{full_name}")
+
+    else:
+        hashed_password = generate_password_hash(password)
+
+        new_user = User(
+            id=new_uuid,
+            password_hash=hashed_password,
+            email=email,
+            status=status,
+            full_name=full_name,
+            organization=organization,
+            role=role,
+            fhir_practitioner_id=fhir_practitioner_id
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        message = '註冊成功'
+        print(f"[REGISTER] 建立新帳號：{full_name}")
 
     # 這邊拚FHIR json
-    pra_obj = FHIR.FHIR_Practitioner() # 先建立空物件
+    pra_obj = FHIR.FHIR_Practitioner()  # 先建立空物件
     pra_obj.id = fhir_practitioner_id.split("/")[1]
     pra_obj.name = full_name
-    result_json = pra_obj.to_fhir() # 把他拚成json
+    pra_obj.active = status
+
+    result_json = pra_obj.to_fhir()  # 把他拚成json
     FHIR_response = fhir.put_FHIR_api(fhir_practitioner_id, result_json)
-    
-    print(f"[REGISTER] 建立新帳號：{full_name}")
-    return jsonify({'success': True, 'message': '註冊成功'})
+
+    return jsonify({'success': True, 'message': message})
 
 @bp.route('/api/login', methods=['POST'])
 def api_login():
@@ -91,6 +132,12 @@ def api_login():
             session['fail_count'] = 0
 
     user = User.query.filter_by(email=email).first()
+    print(user.status)
+    if user.status == "False":
+        return jsonify({
+                'success': False,
+                'message': '您的帳號已停權，請聯絡管理員恢復!!!'
+            })
 
     # 帳號存在且密碼正確
     if user and user.check_password(password):
