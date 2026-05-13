@@ -116,15 +116,83 @@ function formatNow() {
     return `${yyyy}-${MM}-${dd} ${HH}:${mm}:${ss}`;
 }
 
+function createCaseTable() {
+    const emptyBlock = document.getElementById("emptyCaseBlock");
+
+    if (!emptyBlock) {
+        console.error("找不到 emptyCaseBlock");
+        return;
+    }
+
+    emptyBlock.innerHTML = `
+        <div class="space-y-6 fade-in">
+            
+
+          <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <div>
+              <h2 class="text-2xl font-bold text-slate-900">個案人員清單</h2>
+              <p class="text-sm text-slate-500">因部分醫院來源資料可能會有重複的狀況，因此可由此頁面管理所有受試者對應的Patient id對應。</p>
+            </div>
+            <div class="flex gap-3">
+              <button
+                class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30 btn-add-list"
+                data-study-id="{{ study_id }}">
+                <i class="bi bi-plus"></i> 新增對照
+              </button>
+
+              <button
+                class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 btn-send-list">
+
+                <i class="bi bi-link-45deg"></i> 送出清單
+              </button>
+            </div>
+          </div>
+
+        <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="relative flex-1">
+                    <i class="bi bi-search absolute left-3 top-2 h-4 w-4 text-slate-400"></i>
+                    <input
+                        type="text"
+                        placeholder="搜尋 Hash ID..."
+                        class="w-full rounded-lg !border !border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        id="searchInput">
+                </div>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-3 font-medium">計畫代碼</th>
+                            <th class="px-6 py-3 font-medium">原有ID</th>
+                            <th class="px-6 py-3 font-medium">系統ID</th>
+                            <th class="px-6 py-3 font-medium">創立日期</th>
+                            <th class="px-3 py-3 font-medium">刪除</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100" id="caseTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
 function addList(projectId) {
-    const tbody = document.getElementById("caseTableBody");
+    let tbody = document.getElementById("caseTableBody");
+
+    // 如果沒有 table，代表目前是第一筆資料，要先建立 table
+    if (!tbody) {
+        createCaseTable();
+        tbody = document.getElementById("caseTableBody");
+    }
+
     if (!tbody) {
         console.error("找不到 table body");
         return;
     }
 
     const newRow = document.createElement("tr");
-    newRow.className = "hover:bg-slate-50 transition-colors group";
+    newRow.className = "hover:bg-slate-50 transition-colors group cursor-pointer case-row";
 
     const now = formatNow();
 
@@ -161,10 +229,8 @@ function addList(projectId) {
 
     tbody.appendChild(newRow);
 
-    // 👉 找到剛新增那一列的 new_id input
     const newIdInput = newRow.querySelector(".new-id-input");
 
-    // 👉 呼叫 API 取得 new ID
     fetch(`/api/getNewID`, {
         method: "POST",
         headers: {

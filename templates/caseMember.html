@@ -85,6 +85,32 @@
       </div>
     </div>
 
+{% else %}
+
+<div id="emptyCaseBlock">
+  <div class="fade-in">
+    <div class="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+        <i class="bi bi-people text-2xl"></i>
+      </div>
+
+      <h3 class="text-lg font-semibold text-slate-800">目前尚無個案對照資料</h3>
+
+      <p class="mt-2 text-sm text-slate-500">
+        尚未建立任何原有 ID 與系統 ID 的對應資料。你可以點擊「新增對照」開始建立第一筆資料。
+      </p>
+
+      <div class="mt-6">
+        <button
+          class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30 btn-add-list"
+          data-study-id="{{ study_id }}">
+          <i class="bi bi-plus"></i> 新增第一筆對照
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endif %}
 {% endblock %}
 

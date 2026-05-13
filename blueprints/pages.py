@@ -638,7 +638,8 @@ def save_all_project_member():
                   "pat_id": new_patient_id.replace("Patient/", ""),
                   "gender": "unknown",
                   "start": datetime.datetime.now().strftime("%Y-%m-%d"),
-                  "type": "new"
+                  "type": "new",
+                  "status": "on-study"
                 }
 
                 addPatientResult = fhir.addPatient_FHIR(data_addPatient, project_id)

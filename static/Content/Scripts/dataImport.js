@@ -389,13 +389,13 @@ function renderStep3ObservationTable(obsLogs) {
         `;
     });
 
-    if (obsLogs.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" class="px-4 py-6 text-center text-slate-500">
-                    沒有 Observation 明細資料
-                </td>
-            </tr>
-        `;
-    }
+    // if (obsLogs.length === 0) {
+    //     tbody.innerHTML = `
+    //         <tr>
+    //             <td colspan="5" class="px-4 py-6 text-center text-slate-500">
+    //                 沒有 Observation 明細資料
+    //             </td>
+    //         </tr>
+    //     `;
+    // }
 }
