@@ -716,3 +716,19 @@ form.addEventListener('submit', async function (e) {
         msg.classList.add('error-message');
     }
 });
+
+document.addEventListener("click", function (event) {
+    const toggle = event.target.closest(".tw-collapse-toggle");
+
+    if (!toggle) return;
+
+    const targetSelector = toggle.getAttribute("data-target");
+    const target = document.querySelector(targetSelector);
+
+    if (!target) {
+        console.error("找不到 collapse target:", targetSelector);
+        return;
+    }
+
+    target.classList.toggle("hidden");
+});

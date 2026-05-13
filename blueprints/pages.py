@@ -448,12 +448,20 @@ def api_uploadFHIR():
             }), result.status_code
         elif file_type == 'FHIR_pat':
             data = json.load(file)
-            result = fhir_check.upload_FHIR_changeID(pat_id, data) # 直接把檔案轉成 Python 字典
-            
+            result, stats = fhir_check.upload_FHIR_changeID(pat_id, data)
+
             if result.ok:
-                return jsonify({"success": True, "message": file.filename})
+                return jsonify({
+                    "success": True,
+                    "message": file.filename,
+                    "stats": stats
+                })
             else:
-                return jsonify({"success": False, "message": result.text})
+                return jsonify({
+                    "success": False,
+                    "message": result.text,
+                    "stats": stats
+                })
         
         elif file_type == 'Consent':
             result = fhir.upload_Consent(study_id, pat_id, new_filename) # 直接把檔案轉成 Python 字典
@@ -611,19 +619,26 @@ def save_all_project_member():
     if not rows:
         return jsonify({"error": "沒有資料"}), 400
 
-    # 👉 取 project_id（假設全部同一個）
     project_id = rows[0].get("project_id")
 
     if not project_id:
         return jsonify({"error": "缺少 project_id"}), 400
 
     try:
-        # 🔥 1. 先全部標記為刪除
-        ProjectMember.query.filter_by(project_id=project_id).update({
-            "Del": 1
-        })
+        # 1. 取出目前 DB 裡這個 project 還有效的資料
+        existing_members = ProjectMember.query.filter_by(
+            project_id=project_id,
+            Del=0
+        ).all()
 
-        # 🔥 2. 再重新新增
+        existing_map = {
+            (m.old_patient_id, m.new_patient_id): m
+            for m in existing_members
+        }
+
+        # 2. 整理前端送來的資料
+        incoming_map = {}
+
         for item in rows:
             old_patient_id = item.get("old_patient_id")
             new_patient_id = item.get("new_patient_id")
@@ -631,19 +646,45 @@ def save_all_project_member():
 
             if not old_patient_id or not new_patient_id:
                 continue
+
+            key = (old_patient_id, new_patient_id)
+
+            incoming_map[key] = {
+                "old_patient_id": old_patient_id,
+                "new_patient_id": new_patient_id,
+                "created_at": created_at
+            }
+
+        # 3. DB 有，但前端沒有 => 標記刪除
+        for key, member in existing_map.items():
+            if key not in incoming_map:
+                member.Del = 1
+
+        # 4. 前端有，但 DB 沒有 => 新增
+        for key, item in incoming_map.items():
+            if key in existing_map:
+                # 一模一樣已存在，不需要重建
+                continue
+
+            old_patient_id = item["old_patient_id"]
+            new_patient_id = item["new_patient_id"]
+            created_at = item["created_at"]
+
+            # 如果 Patient 不存在，才新增 FHIR Patient
             PatInfo = fhir.read_FHIR_api(new_patient_id)
-            print(PatInfo['resourceType'])
-            if PatInfo['resourceType'] != 'Patient':
+
+            if PatInfo.get("resourceType") != "Patient":
                 data_addPatient = {
-                  "pat_id": new_patient_id.replace("Patient/", ""),
-                  "gender": "unknown",
-                  "start": datetime.datetime.now().strftime("%Y-%m-%d"),
-                  "type": "new",
-                  "status": "on-study"
+                    "pat_id": new_patient_id.replace("Patient/", ""),
+                    "gender": "unknown",
+                    "start": datetime.datetime.now().strftime("%Y-%m-%d"),
+                    "type": "new",
+                    "status": "on-study"
                 }
 
                 addPatientResult = fhir.addPatient_FHIR(data_addPatient, project_id)
                 print(addPatientResult)
+
             member = ProjectMember(
                 project_id=project_id,
                 old_patient_id=old_patient_id,

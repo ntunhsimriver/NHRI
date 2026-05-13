@@ -2,6 +2,11 @@ import json
 from collections import Counter
 from models.project import Project, ProjectMember
 from blueprints import fhir 
+import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
+from pathlib import Path
+from datetime import datetime
+from config import BaseConfig as cfg  # 讀 config
+
 
 def find_references(obj, target_type, path=""):
     refs = []
@@ -189,11 +194,7 @@ def upload_FHIR_mappingID(study_id, data):
         "patient_not_found": patient_not_found
     }
 
-    with open("input_result.json", "w", encoding="utf-8") as json_file:
-        json.dump(data, json_file, ensure_ascii=False, indent=2)
-
-    with open("input_result_stats.json", "w", encoding="utf-8") as json_file:
-        json.dump(stats, json_file, ensure_ascii=False, indent=2)
+    upload_log(result, stats, study_id=study_id)
 
     res = fhir.upload_FHIR(data)
 
@@ -275,48 +276,199 @@ def set_nested_value(data, path, value):
          
 def upload_FHIR_changeID(pat_id, data):
     just_id = pat_id
-    pat_id = f"Patient/{pat_id}" # 先拼一下Patient得id格式
+    pat_ref = f"Patient/{pat_id}"
+
+    resource_counter = Counter()
+
+    # 統計 ResourceType
+    if data.get("resourceType") == "Bundle":
+        for entry in data.get("entry", []):
+            resource = entry.get("resource", {})
+            res_type = resource.get("resourceType")
+            if res_type:
+                resource_counter[res_type] += 1
+    else:
+        res_type = data.get("resourceType")
+        if res_type:
+            resource_counter[res_type] += 1
+
     BundleInfo = fhir.FHIRData_Handle(None, data, 1, 0)
-    resourceType = BundleInfo[0].resourceType # 用第一層看一下這個resources是不是bundle
-    
+    resourceType = BundleInfo[0].resourceType
+
+    change_logs = []
+    patient_id_change_count = 0
+    reference_change_count = 0
+
     if resourceType != 'Bundle':
         PathResult = findReference(data)
+
         if PathResult == 'Patient':
-            print(PathResult)
+            old_id = data.get("id")
+            old_ref = f"Patient/{old_id}" if old_id else None
+
             data['id'] = just_id
             result = data
+
+            patient_id_change_count += 1
+
+            change_logs.append({
+                "mode": "single_resource",
+                "resourceType": data.get("resourceType"),
+                "field": "id",
+                "old_value": old_id,
+                "new_value": just_id,
+                "old_reference": old_ref,
+                "new_reference": pat_ref,
+                "action": "Patient.id 已替換"
+            })
+
         elif PathResult is not None:
-            result = set_nested_value(data, PathResult, pat_id)
+            old_value = get_nested_value(data, PathResult)
+
+            result = set_nested_value(data, PathResult, pat_ref)
+
+            reference_change_count += 1
+
+            change_logs.append({
+                "mode": "single_resource",
+                "resourceType": data.get("resourceType"),
+                "field_path": PathResult,
+                "old_value": old_value,
+                "new_value": pat_ref,
+                "action": "Patient reference 已替換"
+            })
+
         else:
             result = data
 
+            change_logs.append({
+                "mode": "single_resource",
+                "resourceType": data.get("resourceType"),
+                "action": "找不到 Patient reference，未替換"
+            })
+
     elif resourceType == 'Bundle':
         for i, row in enumerate(BundleInfo):
-            PathResult = findReference(row.BundleResource)
-            if PathResult == 'Patient':
-                entry = data["entry"][i]
+            entry = data["entry"][i]
+            resource = entry.get("resource", {})
 
-                # request.url
+            PathResult = findReference(row.BundleResource)
+
+            if PathResult == 'Patient':
+                old_resource_id = resource.get("id")
+                old_request_url = None
+                old_fullUrl = entry.get("fullUrl")
+
                 req = entry.get("request")
                 if isinstance(req, dict) and "url" in req:
-                    req["url"] = pat_id
+                    old_request_url = req.get("url")
+                    req["url"] = pat_ref
 
-                # resource.id
-                res = entry.get("resource")
-                if isinstance(res, dict) and "id" in res:
-                    res["id"] = just_id
+                if isinstance(resource, dict) and "id" in resource:
+                    resource["id"] = just_id
 
-                # fullUrl
-                full = entry.get("fullUrl")
-                if isinstance(full, str) and "Patient" in full:
-                    entry["fullUrl"] = full.split("Patient")[0] + pat_id
+                if isinstance(old_fullUrl, str) and "Patient" in old_fullUrl:
+                    entry["fullUrl"] = old_fullUrl.split("Patient")[0] + pat_ref
+
+                patient_id_change_count += 1
+
+                change_logs.append({
+                    "mode": "bundle",
+                    "entry_index": i,
+                    "resourceType": resource.get("resourceType"),
+                    "old_resource_id": old_resource_id,
+                    "new_resource_id": just_id,
+                    "old_request_url": old_request_url,
+                    "new_request_url": pat_ref,
+                    "old_fullUrl": old_fullUrl,
+                    "new_fullUrl": entry.get("fullUrl"),
+                    "action": "Bundle 中 Patient.id / request.url / fullUrl 已替換"
+                })
+
             elif PathResult is not None:
-                data["entry"][i]["resource"] = set_nested_value(row.BundleResource, PathResult, pat_id)
-            
+                old_value = get_nested_value(row.BundleResource, PathResult)
+
+                data["entry"][i]["resource"] = set_nested_value(
+                    row.BundleResource,
+                    PathResult,
+                    pat_ref
+                )
+
+                reference_change_count += 1
+
+                change_logs.append({
+                    "mode": "bundle",
+                    "entry_index": i,
+                    "resourceType": resource.get("resourceType"),
+                    "field_path": PathResult,
+                    "old_value": old_value,
+                    "new_value": pat_ref,
+                    "action": "Bundle 中 Patient reference 已替換"
+                })
+
+            else:
+                change_logs.append({
+                    "mode": "bundle",
+                    "entry_index": i,
+                    "resourceType": resource.get("resourceType"),
+                    "action": "找不到 Patient reference，未替換"
+                })
+
         result = data
-    with open("input_result.json", "w", encoding='utf-8') as json_file:
-        json.dump(result, json_file)  
-    # print(result)
-    res = upload_FHIR(result)
+
+    stats = {
+        "target_patient_id": just_id,
+        "target_patient_reference": pat_ref,
+        "is_bundle": resourceType == "Bundle",
+        "total_resources": sum(resource_counter.values()),
+        "resource_count": dict(resource_counter),
+        "patient_id_change_count": patient_id_change_count,
+        "reference_change_count": reference_change_count,
+        "total_change_count": patient_id_change_count + reference_change_count,
+        "change_logs": change_logs
+    }
+
+    upload_log(result, stats, pat_id=pat_id)
+
+    res = fhir.upload_FHIR(result)
     print(res.text)
-    return res
+
+    return res, stats
+
+def get_nested_value(data, path):
+    try:
+        current = data
+
+        for key in path:
+            if isinstance(current, list):
+                current = current[int(key)]
+            elif isinstance(current, dict):
+                current = current.get(key)
+            else:
+                return None
+
+        return current
+
+    except Exception:
+        return None    
+
+
+def upload_log(result, stats, pat_id=None, study_id=None):
+    folder_key = pat_id or study_id
+
+    if not folder_key:
+        raise ValueError("pat_id 和 study_id 至少要有一個")
+
+    # 日期時間格式：20260513_153045
+    now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    folderName = Path(cfg.FHIRUPLOAD_DIR) / folder_key / now_str
+    folderName.mkdir(parents=True, exist_ok=True)
+
+    with open(folderName / "input_result.json", "w", encoding="utf-8") as json_file:
+        json.dump(result, json_file, ensure_ascii=False, indent=2)
+
+    with open(folderName / "input_result_stats.json", "w", encoding="utf-8") as json_file:
+        json.dump(stats, json_file, ensure_ascii=False, indent=2)
+
+    return str(folderName)

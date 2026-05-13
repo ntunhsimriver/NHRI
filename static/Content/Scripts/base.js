@@ -4,7 +4,6 @@ document.addEventListener("click", function(e) {
 
 
   const target = document.querySelector(btn.dataset.target);
-  alert(target);
   if (!target) return;
 
   target.classList.toggle("hidden");

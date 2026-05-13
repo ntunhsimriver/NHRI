@@ -77,6 +77,8 @@ class BaseConfig:
     VERIFY_TLS = os.getenv("VERIFY_TLS", "true").lower() != "false"  # 自簽憑證可設 false
     NDJSON_DIR = Path(os.getenv("NDJSON_DIR", BASE_DIR / "static/data/data_ndjson"))
     NDJSON_DIR.mkdir(parents=True, exist_ok=True)
+    FHIRUPLOAD_DIR = Path(os.getenv("FHIRUPLOAD_DIR", BASE_DIR / "static/data/fhir_upload"))
+    FHIRUPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
     REQUEST_TIMEOUT=30          # requests 逾時秒數
     POLL_INTERVAL=20     # $export 輪詢間隔秒
