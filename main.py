@@ -51,7 +51,7 @@ def create_app():
 
     scheduler = BackgroundScheduler()
     scheduler.add_job(
-        func=lambda: cleanup_all_old_export_folders(days=90),
+        func=lambda: cleanup_all_old_export_folders(days=cfg.CLEAN_FOLDERS_DAYS),
         trigger='cron',
         hour=3,
         minute=0

@@ -127,3 +127,55 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 });
+
+
+document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".delete-user");
+
+    if (!btn) return;
+
+    let data = {};
+
+    try {
+        data = JSON.parse(btn.getAttribute("data-bs-value"));
+    } catch (e) {
+        console.error("data-bs-value 格式錯誤", e);
+        alert("刪除失敗：資料格式錯誤");
+        return;
+    }
+
+    const email = data.email;
+    const fullName = data.full_name || email;
+
+    if (!email) {
+        alert("刪除失敗：缺少 email");
+        return;
+    }
+
+    if (!confirm(`確定要刪除使用者「${fullName}」嗎？`)) {
+        return;
+    }
+
+    fetch("/api/delete_user", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email
+        })
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.success) {
+            alert(result.message || "刪除成功");
+            window.location.reload();
+        } else {
+            alert(result.message || "刪除失敗");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("刪除失敗");
+    });
+});

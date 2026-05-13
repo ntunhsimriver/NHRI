@@ -85,6 +85,7 @@ class BaseConfig:
     BASE_DATA_DIR = BASE_DIR / "static" / "data/"
     PATIENT_ID_SALT = "NHRI123"
     USER_DEFAULT_PASSWORD = "Password123!"
+    CLEAN_FOLDERS_DAYS = 90
     # # ===== Aggregate Table 路徑設定 =====
     # DATA_NDJSON_DIR = BASE_DIR / "static" / "data" / "data_ndjson"
 

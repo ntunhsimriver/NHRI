@@ -31,14 +31,12 @@ def logout():
             user_session.is_active = False
             db.session.commit()
 
-    response = jsonify({
-        'success': True,
-        'message': '已登出'
-    })
+    session.clear()
 
+    response = redirect(url_for('auth.login_page'))
     response.delete_cookie('session_token')
 
-    return redirect(url_for('auth.login_page'))
+    return response
 
 
 @bp.route('/register', methods=['POST'])
@@ -66,12 +64,12 @@ def register():
         fhir_practitioner_id = "Practitioner/" + str(new_uuid)
 
     # 新增時，email 已存在就擋掉
-    if User.query.filter_by(email=email).first() and type == 'new':
+    if User.query.filter_by(email=email, Del=0).first() and type == 'new':
         return jsonify({'success': False, 'message': '帳號已存在'})
 
     # 編輯時：不要新增 user，要找原本的 user 來改
     if type == 'update':
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email, Del=0).first()
 
         if not user:
             return jsonify({'success': False, 'message': '找不到使用者'})
@@ -158,7 +156,7 @@ def api_login():
             fail_log.fail_count = 0
             db.session.commit()
 
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=email, Del=0).first()
 
     # 帳號不存在
     if not user:
@@ -286,23 +284,24 @@ def login_failed(email, now):
 
 @bp.route('/settings')
 def settings():
-    if session['role'] == "ASSISTANT":
-        return render_template('error_page.html', message=f"錯誤原因：無此權限"), 403
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
 
+    if session.get('role') == "ASSISTANT":
+        return render_template('error_page.html', message="錯誤原因：無此權限"), 403
+
     rolename = session['role']
     if rolename == "SUPER_ADMIN":
-        users = User.query.all()
+        users = User.query.filter(User.Del==0).all()
 
     elif rolename == "PI":
         users = User.query.filter(
-            User.role.in_([UserRole.PI, UserRole.ASSISTANT])
+            User.role.in_([UserRole.PI, UserRole.ASSISTANT]), User.Del==0
         ).all()
 
     else:
         users = User.query.filter(
-            User.role == UserRole.ASSISTANT
+            User.role == UserRole.ASSISTANT, User.Del==0
         ).all()
     return render_template('settings.html', users=users, script_path=url_for('static', filename='Content/Scripts/settings.js'))
 
@@ -313,23 +312,53 @@ def change_password():
     
     return render_template('change_password.html', script_path=url_for('static', filename='Content/Scripts/change_password.js'))
 
+@bp.route('/api/delete_user', methods=['POST'])
+def api_delete_user():
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({'success': False, 'message': '缺少 email'})
+
+    user = User.query.filter_by(email=email, Del=0).first()
+
+    if not user:
+        return jsonify({'success': False, 'message': '找不到使用者'})
+
+    user.Del = 1
+
+    # 如果這個帳號目前有登入，順便強制登出
+    UserSession.query.filter_by(
+        user_id=user.id,
+        is_active=True
+    ).update({
+        'is_active': False
+    })
+
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': '已刪除成功!'})
+
+
 @bp.route('/api/change_password', methods=['POST'])
 def api_change_password():
     data = request.get_json()
     old_password = data.get('old_password')
     new_password = data.get('new_password')
     
-    user = User.query.filter_by(full_name=session['username']).first()
+    user = User.query.filter_by(full_name=session['username'], Del=0).first()
 
-    if user and user.check_password(old_password):
+    if not user:
+        return jsonify({'success': False, 'message': '找不到使用者'})
+
+    if user.check_password(old_password):
         new_hashed_password = generate_password_hash(new_password)
         user.password_hash = new_hashed_password
         db.session.commit()
 
-
         return jsonify({'success': True, 'redirect': '/logout'})
-    elif not user.check_password(old_password):
-        return jsonify({'success': False, 'message': '原有密碼輸入錯誤'})
+
+    return jsonify({'success': False, 'message': '原有密碼輸入錯誤'})
     
 @bp.before_app_request
 def check_login_session():
@@ -375,7 +404,10 @@ def check_login_session():
         response.delete_cookie('session_token')
         return response
 
-    user = User.query.get(user_session.user_id)
+    user = User.query.filter(
+        User.id == user_session.user_id,
+        User.Del == 0
+    ).first()
 
     if not user:
         user_session.is_active = False

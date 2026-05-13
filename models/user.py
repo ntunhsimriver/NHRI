@@ -21,6 +21,7 @@ class User(db.Model):
     fhir_practitioner_id = db.Column(db.String(64))
     created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    Del = db.Column(db.SmallInteger, default=0)
 
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)

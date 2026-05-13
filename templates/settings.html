@@ -57,7 +57,10 @@
             <th class="px-6 py-3 font-medium">角色權限</th>
             <th class="px-6 py-3 font-medium">是否啟用</th>
             <th class="px-6 py-3 font-medium">最後更新</th>
-            <th class="px-6 py-3 font-medium text-right">操作</th>
+            <th class="px-6 py-3 font-medium">操作</th>
+            {% if role  == 'SUPER_ADMIN' %}
+              <th class="px-6 py-3 font-medium text-right">刪除</th>
+            {% endif %}
           </tr>
         </thead>
 
@@ -84,6 +87,15 @@
                     > 
                 編輯</button>
               </td>
+              {% if role  == 'SUPER_ADMIN' %}
+                <td class="px-6 py-4 text-center">
+                  <button class="text-red-500 hover:text-red-800 font-medium text-xs delete-user"
+                      data-bs-value='{{ {"email": item.email} | tojson }}'
+                      > 
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              {% endif %}
             </tr>
             {% endfor %}
             <!-- 迴圈結束 -->

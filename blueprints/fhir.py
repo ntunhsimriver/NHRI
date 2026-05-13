@@ -23,6 +23,8 @@ import secrets
 import hashlib
 import uuid
 from threading import Thread
+import shutil
+
 
 
 # 這個是算資料完整度的list
@@ -506,7 +508,8 @@ def getAssistant(ProjectId): # 產出助理清單
     print(Assistant_List)
 
     Assistant_Info_list = User.query.filter(
-        User.role.in_(["ASSISTANT", "PI"])
+        User.role.in_(["ASSISTANT", "PI"]),
+        User.Del == 0
     ).order_by(User.role.asc()).all()
     print(Assistant_Info_list)
 
@@ -528,7 +531,7 @@ def getAssistant(ProjectId): # 產出助理清單
     return result
 
 def get_ProjectID(pi_id):
-    UserInfo = User.query.filter_by(fhir_practitioner_id=pi_id).first()
+    UserInfo = User.query.filter_by(fhir_practitioner_id=pi_id, Del=0).first()
 
     filters = [
         Project.pi_id == pi_id
@@ -565,7 +568,7 @@ def get_ProjectID(pi_id):
 
 def get_Project(pi_id):
     getResult = [] # 準備存處理好的資料
-    UserInfo = User.query.filter_by(fhir_practitioner_id=pi_id).first()
+    UserInfo = User.query.filter_by(fhir_practitioner_id=pi_id, Del=0).first()
     ProjectInfo = Project.query.filter(
         or_(
             Project.pi_id == pi_id,
@@ -1505,6 +1508,31 @@ def get_latest_export_status(project_id):
 
     return results
 
+
+def cleanup_old_export_folders(project_id, days=90):
+    base_folder = Path(cfg.NDJSON_DIR) / project_id
+
+    # 專案資料夾不存在就不用處理
+    if not base_folder.exists():
+        return 0
+
+    cutoff_time = datetime.now() - timedelta(days=days)
+    deleted_count = 0
+
+    for sub in base_folder.iterdir():
+        # 只刪資料夾，不刪檔案
+        if not sub.is_dir():
+            continue
+
+        sub_mtime = datetime.fromtimestamp(sub.stat().st_mtime)
+
+        # 超過指定天數就刪除
+        if sub_mtime < cutoff_time:
+            shutil.rmtree(sub)
+            deleted_count += 1
+            print(f"[CLEANUP] 已刪除超過 {days} 天的匯出資料夾：{sub}")
+
+    return deleted_count
 
 def cleanup_all_old_export_folders(days=90):
     base_folder = Path(cfg.NDJSON_DIR)
