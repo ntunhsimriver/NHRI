@@ -94,6 +94,10 @@
       </div>
 
   </div>
+
+  <p class="text-right text-xs text-slate-400">
+    最後更新時間：{{ (CountAllData_All_update_at|string)[:19] if CountAllData_All_update_at else '尚未更新' }}
+  </p>
 </section>
 {% endblock %}
 

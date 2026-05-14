@@ -2,6 +2,7 @@ from extensions import db
 from werkzeug.security import check_password_hash
 import uuid
 import enum
+from sqlalchemy import text
 
 class UserRole(enum.Enum):
     SUPER_ADMIN = "SUPER_ADMIN"
@@ -19,8 +20,8 @@ class User(db.Model):
     organization = db.Column(db.String(100))
     role = db.Column(db.Enum(UserRole, name="user_role_enum"), nullable=False)
     fhir_practitioner_id = db.Column(db.String(64))
-    created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
-    updated_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    created_at = db.Column(db.DateTime, server_default=text("timezone('Asia/Taipei', now())"), nullable=False)
+    updated_at = db.Column(db.DateTime, server_default=text("timezone('Asia/Taipei', now())"), nullable=False)
     Del = db.Column(db.SmallInteger, default=0)
 
     def check_password(self, password: str) -> bool:
@@ -47,7 +48,7 @@ class UserSession(db.Model):
     last_activity = db.Column(db.DateTime, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     permission_version = db.Column(db.Integer, default=1)
-    created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    created_at = db.Column(db.DateTime, server_default=text("timezone('Asia/Taipei', now())"), nullable=False)
 
 class LoginFailLog(db.Model):
     __tablename__ = 'login_fail_logs'
@@ -57,4 +58,4 @@ class LoginFailLog(db.Model):
     ip = db.Column(db.String(64), nullable=True)
     fail_count = db.Column(db.Integer, default=0)
     lock_until = db.Column(db.DateTime, nullable=True)
-    last_failed_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    last_failed_at = db.Column(db.DateTime, server_default=text("timezone('Asia/Taipei', now())"), nullable=False)

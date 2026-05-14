@@ -16,18 +16,30 @@
           <h2 class="text-2xl font-bold text-slate-900">個案管理清單</h2>
           <p class="text-sm text-slate-500">管理所有受試者、同意書狀態與設備配發</p>
         </div>
-        <div class="flex gap-3">
-          <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30" data-url="/caseMember/{{ study_id }}">
-            <i class="bi bi-list-ul"></i> 管理清單
-          </button>
+        <div class="flex flex-col items-end gap-1">
+          <div class="flex items-center gap-2">
+            
 
-          <button id="updateDataCountBtn"
-            class="flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 transition-colors shadow-sm shadow-green-500/30" data-bs-study="{{study_id}}">
-            <i class="bi bi-arrow-clockwise"></i> 更新資料完整度數據
-          </button>
+            <button
+              class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30"
+              data-url="/caseMember/{{ study_id }}">
+              <i class="bi bi-list-ul"></i> 管理清單
+            </button>
 
+            <button
+              id="updateDataCountBtn"
+              class="flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 transition-colors shadow-sm shadow-green-500/30"
+              data-bs-study="{{ study_id }}">
+              <i class="bi bi-arrow-clockwise"></i> 更新資料完整度數據
+            </button>
+          </div>
         </div>
       </div>
+      <p class="text-right text-xs text-slate-400">
+              最後更新時間：
+              {{ (data[0].CompleteCount_updated_at|string)[:19] if data[0].CompleteCount_updated_at else '尚未更新' }}
+      </p>
+
       <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div class="relative flex-1">
           <i class="bi bi-search absolute left-3 top-2 h-4 w-4 text-slate-400"></i>

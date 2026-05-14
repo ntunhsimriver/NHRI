@@ -362,6 +362,7 @@ def getDataCount_toSQL(study_id):
             continue
 
         ProjectMemberInfo.data_count = CompleteCount
+        ProjectMemberInfo.data_count_updated_at = datetime.now()
         db.session.commit()
     return
 
@@ -384,6 +385,7 @@ def get_AllPatient(study_id):
             CompleteCount = 0
         else:
             CompleteCount = ProjectMemberInfo.data_count
+            CompleteCount_updated_at = ProjectMemberInfo.data_count_updated_at
         
         # print(CompleteCount)
         getResult.append({
@@ -391,7 +393,8 @@ def get_AllPatient(study_id):
                 "PatInfo": PatInfo[0],  # 這裡存的是整個study的資料，他是物件
                 "DeviceInfo": DeviceInfo,  # 這裡存這個患者戴的設備
                 "ResearchSubjectStatus": s.status,    # 這裡存的是PI名字，他是字串
-                "CompleteCount": CompleteCount    # 這裡存每個人的資料完整度
+                "CompleteCount": CompleteCount,    # 這裡存每個人的資料完整度
+                "CompleteCount_updated_at": CompleteCount_updated_at,    # 這裡存每個人的資料完整度
             })
 
 
@@ -460,6 +463,7 @@ def countAllData(study_id):
         # print([TotlaData, resource_types, CountDataList])
         resource_count = [TotlaData, resource_types, CountDataList]
         ProjectInfo.resource_count = json.dumps(resource_count, ensure_ascii=False)
+        ProjectInfo.resource_count_updated_at = datetime.now()
         db.session.commit()
         return [TotlaData, resource_types, CountDataList]
 
@@ -866,7 +870,9 @@ def getDeviceCount_toSQL(study_id, new_device_id=None):
 
     if len(result) > 0:
         ProjectInfo.device_list = json.dumps(result, ensure_ascii=False)
+        ProjectInfo.device_list_updated_at = datetime.now()
         ProjectInfo.device_count = json.dumps(dict(status_counts), ensure_ascii=False)
+        ProjectInfo.device_count_updated_at = datetime.now()
 
         db.session.commit()
         print("device_list / device_count 更新完成")
@@ -901,10 +907,11 @@ def getDevice(study_id):
     # status_counts = Counter(item.status for item in getFHIR)
     try:
         status_counts = json.loads(ProjectInfo.device_count)
+        status_counts_updated_at = ProjectInfo.device_count_updated_at
     except:
         status_counts = {}
     print(len(getFHIR))
-    return [getResult, len(getFHIR), status_counts]
+    return [getResult, len(getFHIR), status_counts, status_counts_updated_at]
 
 def getDeviceCount(study_id):
     getResult = [] # 準備存處理好的資料

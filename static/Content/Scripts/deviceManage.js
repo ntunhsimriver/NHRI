@@ -122,3 +122,243 @@ document.getElementById("updateDeviceCountBtn").addEventListener("click", async 
     btn.innerHTML = '<i class="bi bi-gear"></i> 更新資料量';
   }
 });
+
+let currentDeviceList = [];
+let preselectedDeviceIds = new Set();
+
+const modalFhirDevice = document.getElementById("Modal_fhirDevice");
+
+if (modalFhirDevice) {
+    modalFhirDevice.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        const raw = button?.getAttribute("data-device-list");
+
+        currentDeviceList = [];
+        preselectedDeviceIds = new Set();
+
+        if (raw) {
+            try {
+                currentDeviceList = JSON.parse(raw);
+
+                currentDeviceList.forEach(item => {
+                    if (item.id) {
+                        preselectedDeviceIds.add(item.id);
+                    }
+
+                    if (item.device_id) {
+                        preselectedDeviceIds.add(item.device_id);
+                    }
+                });
+
+            } catch (e) {
+                console.error("device list 格式錯誤", e);
+            }
+        }
+
+        loadFhirDevices();
+    });
+}
+
+function renderDeviceList(devices) {
+    const itemDevice = document.getElementById("item_device");
+    const countText = document.getElementById("deviceCountText");
+
+    if (!itemDevice) return;
+
+    if (!devices || devices.length === 0) {
+        itemDevice.innerHTML = `
+            <div class="col-span-full rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-400">
+                目前沒有可選擇的設備
+            </div>
+        `;
+        if (countText) countText.textContent = "共 0 台設備";
+        return;
+    }
+
+    if (countText) countText.textContent = `共 ${devices.length} 台設備`;
+
+    itemDevice.innerHTML = devices.map(device => {
+        const rawId = device.device_id || "";
+        const id = escapeHtml(rawId);
+
+        const isChecked = preselectedDeviceIds.has(rawId);
+        const checked = isChecked ? "checked" : "";
+        const selectedClass = isChecked
+            ? "border-blue-500 bg-blue-50 ring-1 ring-blue-200"
+            : "";
+
+        return `
+            <label class="device-card ${selectedClass} flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs transition-all hover:border-blue-300 hover:bg-blue-50">
+                <input
+                    type="checkbox"
+                    class="device-checkbox h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    value="${id}"
+                    data-device-text="${id}"
+                    ${checked}>
+
+                <span class="truncate font-medium text-slate-700" title="${id}">
+                    ${id}
+                </span>
+            </label>
+        `;
+    }).join("");
+}
+let allFhirDevices = [];
+
+function loadFhirDevices() {
+    const itemDevice = document.getElementById("item_device");
+    const countText = document.getElementById("deviceCountText");
+
+    if (!itemDevice) return;
+
+    itemDevice.innerHTML = `
+        <div class="col-span-full rounded-xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-400">
+            <i class="bi bi-arrow-repeat"></i> 讀取設備中...
+        </div>
+    `;
+
+    if (countText) countText.textContent = "讀取設備中...";
+
+    fetch("/api/fhir/devices")
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success) {
+                itemDevice.innerHTML = `
+                    <div class="col-span-full rounded-xl border border-red-200 bg-red-50 p-8 text-center text-sm text-red-500">
+                        ${result.message || "讀取設備失敗"}
+                    </div>
+                `;
+                if (countText) countText.textContent = "讀取失敗";
+                return;
+            }
+
+            allFhirDevices = result.data || [];
+            renderDeviceList(allFhirDevices);
+        })
+        .catch(err => {
+            console.error(err);
+            itemDevice.innerHTML = `
+                <div class="col-span-full rounded-xl border border-red-200 bg-red-50 p-8 text-center text-sm text-red-500">
+                    讀取設備失敗
+                </div>
+            `;
+            if (countText) countText.textContent = "讀取失敗";
+        });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("deviceSearchInput");
+    const clearBtn = document.getElementById("btnClearDeviceChecked");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const keyword = this.value.trim().toLowerCase();
+
+            const filtered = allFhirDevices.filter(device => {
+                const text = `${device.device_id || ""} ${device.display || ""}`.toLowerCase();
+                return text.includes(keyword);
+            });
+
+            renderDeviceList(filtered);
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener("click", function () {
+            document.querySelectorAll(".device-checkbox:checked").forEach(input => {
+                input.checked = false;
+
+                const card = input.closest(".device-card");
+                if (card) {
+                    card.classList.remove(
+                        "border-blue-500",
+                        "bg-blue-50",
+                        "ring-1",
+                        "ring-blue-200"
+                    );
+                }
+            });
+        });
+    }
+});
+
+document.addEventListener("change", function (event) {
+    if (!event.target.classList.contains("device-checkbox")) return;
+
+    const checkbox = event.target;
+    const deviceId = checkbox.value;
+
+    // 同步記住目前勾選狀態
+    if (checkbox.checked) {
+        preselectedDeviceIds.add(deviceId);
+    } else {
+        preselectedDeviceIds.delete(deviceId);
+    }
+
+    const card = checkbox.closest(".device-card");
+    if (!card) return;
+
+    if (checkbox.checked) {
+        card.classList.add("border-blue-500", "bg-blue-50", "ring-1", "ring-blue-200");
+    } else {
+        card.classList.remove("border-blue-500", "bg-blue-50", "ring-1", "ring-blue-200");
+    }
+});
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+const fhirDeviceForm = document.getElementById("fhirDeviceForm");
+
+if (fhirDeviceForm) {
+    fhirDeviceForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const selectedDevices = Array.from(
+            document.querySelectorAll(".device-checkbox:checked")
+        ).map(input => ({
+            device_id: input.value,
+            count: 0
+        }));
+
+        // if (selectedDevices.length === 0) {
+        //     alert("請至少勾選一台設備");
+        //     return;
+        // }
+
+        fetch("/api/project/save_devices", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                device_list: selectedDevices
+            })
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                alert(result.message || "設備更新成功");
+
+                const modal = bootstrap.Modal.getInstance(
+                    document.getElementById("Modal_fhirDevice")
+                );
+                modal?.hide();
+
+                window.location.reload();
+            } else {
+                alert(result.message || "設備更新失敗");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("設備更新失敗");
+        });
+    });
+}

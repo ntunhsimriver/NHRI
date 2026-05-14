@@ -3,6 +3,8 @@ import uuid
 from datetime import datetime
 from extensions import db
 import json
+from sqlalchemy import text
+
 
 class Project(db.Model):
     __tablename__ = "Project_Management"
@@ -33,12 +35,36 @@ class Project(db.Model):
         ], ensure_ascii=False)
     )
 
+    device_list_updated_at = db.Column(
+        db.DateTime,
+        server_default=text("timezone('Asia/Taipei', now())"),
+        nullable=False
+    )
+
+    device_count_updated_at = db.Column(
+        db.DateTime,
+        server_default=text("timezone('Asia/Taipei', now())"),
+        nullable=False
+    )
+
+    resource_count_updated_at = db.Column(
+        db.DateTime,
+        server_default=text("timezone('Asia/Taipei', now())"),
+        nullable=False
+    )
+
+
 class ProjectMember(db.Model):
     __tablename__ = "project_member"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     project_id = db.Column(db.Text, nullable=False)
     old_patient_id = db.Column(db.Text, nullable=False)
     new_patient_id = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    created_at = db.Column(db.DateTime, server_default=text("timezone('Asia/Taipei', now())"))
     Del = db.Column(db.SmallInteger, nullable=True)   # NULL = 還活著
     data_count = db.Column(db.Integer, default=0)   # 資料量計算
+    data_count_updated_at = db.Column(
+        db.DateTime,
+        server_default=text("timezone('Asia/Taipei', now())"),
+        nullable=False
+    )

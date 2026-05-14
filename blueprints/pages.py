@@ -99,8 +99,9 @@ def index_page():
     # CountAllData_All = fhir.countAllData(session['study_id'])
     # CountAllData = CountAllData_All[0]
     # getCountDataList = CountAllData_All[1:]
-
-    CountAllData_All_rawdata = Project.query.filter_by(irb_number=session['study_id']).first().resource_count
+    ProjectInfo = Project.query.filter_by(irb_number=session['study_id']).first()
+    CountAllData_All_update_at = ProjectInfo.resource_count_updated_at
+    CountAllData_All_rawdata = ProjectInfo.resource_count
     CountAllData_All = json.loads(CountAllData_All_rawdata)
 
     CountAllData = CountAllData_All[0]
@@ -112,7 +113,7 @@ def index_page():
     CountDev = getDevice[1] # 個別設備數
     # print(getDevice)
 
-    return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, CountAllData=CountAllData, getCountDataList=getCountDataList, script_path=url_for('static', filename='Content/Scripts/index.js'))
+    return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, CountAllData=CountAllData, getCountDataList=getCountDataList, CountAllData_All_update_at=CountAllData_All_update_at, script_path=url_for('static', filename='Content/Scripts/index.js'))
 
 @bp.route('/set_study_session/<study_id>/<study_name>/<study_status>') # 這個是為了先把study ID寄進去session裡面，這樣後續要抓資料比較好抓，不用再透過PI
 def set_study_session(study_id, study_name, study_status):
@@ -272,8 +273,9 @@ def deviceManage():
     data = getDevice[0] # 所有device的內容
     TotalDev = getDevice[1] # 總設備術
     CountDev = getDevice[2] # 個別設備數
+    status_counts_updated_at = getDevice[3] # 個別設備數
 
-    return render_template('deviceManage.html', data=data, TotalDev=TotalDev, CountDev=CountDev, script_path=url_for('static', filename='Content/Scripts/deviceManage.js'))
+    return render_template('deviceManage.html', data=data, TotalDev=TotalDev, CountDev=CountDev, status_counts_updated_at=status_counts_updated_at, script_path=url_for('static', filename='Content/Scripts/deviceManage.js'))
 
 @bp.route('/api/addDevice', methods=['POST'])
 def api_addDevice():
@@ -787,3 +789,79 @@ def api_fhir_upload_log_detail(study_id, log_folder):
             "success": False,
             "message": "讀取上傳統計失敗"
         }), 500
+
+
+@bp.route('/api/fhir/devices', methods=['GET'])
+def api_fhir_devices():
+    try:
+        result = fhir.read_FHIR_api("Device?_count=1000")
+
+        devices = []
+
+        for entry in result.get("entry", []):
+            resource = entry.get("resource", {})
+
+            if resource.get("resourceType") != "Device":
+                continue
+
+            device_id = resource.get("id", "")
+
+            display = device_id
+
+            if resource.get("deviceName"):
+                display = resource["deviceName"][0].get("name", device_id)
+
+            elif resource.get("identifier"):
+                display = resource["identifier"][0].get("value", device_id)
+
+            devices.append({
+                "device_id": device_id,
+                "display": display
+            })
+        print(devices)
+        return jsonify({
+            "success": True,
+            "data": devices
+        })
+
+    except Exception as e:
+        print("[FHIR DEVICE] 讀取失敗:", e)
+        return jsonify({
+            "success": False,
+            "message": "讀取 FHIR Device 失敗"
+        }), 500
+
+
+@bp.route('/api/project/save_devices', methods=['POST'])
+def api_save_project_devices():
+    data = request.get_json()
+    device_list = data.get('device_list',[])
+
+    study_id = session.get('study_id')
+
+    if not study_id:
+        return jsonify({
+            'success': False,
+            'message': '缺少 project_id'
+        }), 400
+
+    project = Project.query.filter_by(irb_number=study_id, Del=0).first()
+
+    if not project:
+        return jsonify({
+            'success': False,
+            'message': '找不到專案'
+        }), 404
+
+    if device_list == []:
+        project.device_list = None
+    else:
+        project.device_list = json.dumps(device_list, ensure_ascii=False)
+    # project.device_count = len(device_list)
+
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': '設備更新成功'
+    })
