@@ -7,7 +7,7 @@ class BaseConfig:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "secretData")
     # SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI", "sqlite:///data.db")
     # SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@127.0.0.1:5432/THBCNHRI") # 這邊改成用PosrgreSQL
-    SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@103.124.75.247:5432/THBCNHRI") # 這邊改成用PosrgreSQL
+    SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@103.124.75.247:5432/THBCNHRI2") # 這邊改成用PosrgreSQL
     # SQLALCHEMY_DATABASE_URI = ("postgresql+psycopg2://postgres:1qaz2wsx@localhost:5432/THBCNHRI") # 這邊改成用PosrgreSQL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     

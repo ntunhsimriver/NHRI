@@ -205,19 +205,19 @@ def Watch_leadtek(df):
                     "Sport": [
                         {
                             "value": row["steps"],
-                            "code": "steps"
+                            "code": "55423-8"
                         },
                         {
                             "value": row["distance"],
-                            "code": "distance"
+                            "code": "55430-3"
                         },
                         {
                             "value": row["calories"],
-                            "code": "calories"
+                            "code": "55424-6"
                         },
                         {
                             "value": row["active_time"],
-                            "code": "active_time"
+                            "code": "101691-4"
                         }
                     ]
                 }]
@@ -225,6 +225,8 @@ def Watch_leadtek(df):
         
         result_data.append(data)
     return result_data
+
+STEPS_MAX = 100000
 
 def check_upload_csv(file):
     df = pd.read_csv(file, dtype=str)
@@ -247,12 +249,15 @@ def check_upload_csv(file):
 
     for i, row in df.iterrows():
         row_num = i + 2
+        # 檢查整列是否都是空白
+        if row.isna().all() or row.fillna("").astype(str).str.strip().eq("").all():
+            errors.append(f"第 {row_num} 列：此列為空白列，請先刪除空白列後再上傳")
+            continue
 
         time_value = str(row["量測日期時間"]).strip()
 
         if not is_datetime(time_value, CSV_TIME_FORMAT):
-            print(time_value)
-            errors.append(f"第 {row_num} 列：量測時間格式錯誤，應為 2025/4/7 00:00")
+            errors.append(f"第 {row_num} 列：量測日期時間格式錯誤，應為 2026/4/1 00:05")
 
         if has_steps and pd.notna(row["步數"]) and row["步數"].strip() != "":
             if not check_range(row["步數"], STEPS_MIN, STEPS_MAX):

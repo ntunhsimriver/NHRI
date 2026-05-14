@@ -1141,7 +1141,7 @@ def addProject_FHIR(data, pra_id):
     data['PI'] = pra_id # FHIR也要補一下PI的id
     result = FHIR_listMapping(data, 2)
 
-    # print(result)
+    print(result)
 
     ProjectName = data.get('ProjectName')
     ProjectStatus = data.get('ProjectStatus')
