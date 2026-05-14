@@ -142,7 +142,7 @@ function formatNow() {
     return `${yyyy}-${MM}-${dd} ${HH}:${mm}:${ss}`;
 }
 
-function createCaseTable() {
+function createCaseTable(studyId) {
     const emptyBlock = document.getElementById("emptyCaseBlock");
 
     if (!emptyBlock) {
@@ -162,7 +162,7 @@ function createCaseTable() {
             <div class="flex gap-3">
               <button
                 class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30 btn-add-list"
-                data-study-id="{{ study_id }}">
+                data-study-id="${studyId || ''}">
                 <i class="bi bi-plus"></i> 新增對照
               </button>
 
@@ -208,7 +208,7 @@ function addList(projectId) {
 
     // 如果沒有 table，代表目前是第一筆資料，要先建立 table
     if (!tbody) {
-        createCaseTable();
+        createCaseTable(projectId);
         tbody = document.getElementById("caseTableBody");
     }
 

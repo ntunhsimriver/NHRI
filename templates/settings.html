@@ -59,7 +59,7 @@
             <th class="px-6 py-3 font-medium">最後更新</th>
             <th class="px-6 py-3 font-medium">操作</th>
             {% if role  == 'SUPER_ADMIN' %}
-              <th class="px-6 py-3 font-medium text-right">刪除</th>
+              <th class="px-6 py-3 font-medium text-center">刪除</th>
             {% endif %}
           </tr>
         </thead>
@@ -79,7 +79,7 @@
                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">{{item.status}}</span>
               </td>
               <td class="px-6 py-4 text-slate-500 text-xs">{{item.updated_at}}</td>
-              <td class="px-6 py-4 text-right">
+              <td class="px-6 py-4">
                 <button class="text-blue-600 hover:text-blue-800 font-medium text-xs"
                     data-bs-toggle="modal" 
                     data-bs-target="#Modal_addUser"
