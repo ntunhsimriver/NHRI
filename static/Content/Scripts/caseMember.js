@@ -179,7 +179,7 @@ function createCaseTable(studyId) {
                     <i class="bi bi-search absolute left-3 top-2 h-4 w-4 text-slate-400"></i>
                     <input
                         type="text"
-                        placeholder="搜尋 Hash ID..."
+                        placeholder="搜尋"
                         class="w-full rounded-lg !border !border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                         id="searchInput">
                 </div>
