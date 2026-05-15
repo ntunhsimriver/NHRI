@@ -91,15 +91,15 @@
             <span id="data-status" class="text-sm text-blue-500">數據載入中...</span>
         </div>
 
-        <div class="tw-collapse hidden mt-4" id="collapseVitals">
-            <div id="chart-loading-spinner" class="text-center py-10">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-slate-500">正在從伺服器抓取量測紀錄...</p>
-            </div>
-            <div id="myChart-Vitals-div">
-                <canvas id="myChart-Vitals"></canvas>
-            </div>
+        <!-- <div class="tw-collapse hidden mt-4" id="collapseVitals"> -->
+        <div id="chart-loading-spinner" class="text-center py-10">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-slate-500">正在從伺服器抓取量測紀錄...</p>
         </div>
+        <div id="myChart-Vitals-div"  class="relative h-80 w-full">
+            <canvas id="myChart-Vitals"></canvas>
+        </div>
+        <!-- </div> -->
     </div>
 
   </main>

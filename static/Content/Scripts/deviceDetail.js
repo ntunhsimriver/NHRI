@@ -27,26 +27,35 @@ document.addEventListener('DOMContentLoaded', function () {
     const endInput = document.getElementById("endDate");
     const collapseEl = document.getElementById("collapseVitals");
 
-    startInput.value = start;
-    endInput.value = end;
-    endInput.min = start;
+    if (startInput && endInput) {
+        startInput.value = start;
+        endInput.value = end;
+        endInput.min = start;
 
-    startInput.addEventListener("change", (e) => {
-        endInput.min = e.target.value;
+        startInput.addEventListener("change", (e) => {
+            endInput.min = e.target.value;
 
-        if (endInput.value && endInput.value < e.target.value) {
-            endInput.value = "";
-        }
-    });
+            if (endInput.value && endInput.value < e.target.value) {
+                endInput.value = "";
+            }
+        });
 
-    endInput.addEventListener("change", (e) => {
-        startInput.max = e.target.value;
-    });
+        endInput.addEventListener("change", (e) => {
+            startInput.max = e.target.value;
+        });
+    }
 
     if (!collapseObserverBound && collapseEl) {
         const observer = new MutationObserver(() => {
             if (!collapseEl.classList.contains("hidden")) {
-                setTimeout(drawChart, 100);
+                setTimeout(() => {
+                    document.getElementById("chart-loading-spinner")?.classList.add("hidden");
+                    drawChart();
+
+                    if (vitalsChart) {
+                        vitalsChart.resize();
+                    }
+                }, 150);
             }
         });
 
@@ -80,7 +89,10 @@ function handleFilter() {
     statusText.innerText = "資料載入中...";
     statusText.classList.remove('text-green-500', 'text-red-500');
     statusText.classList.add('text-blue-500');
-    if (spinner) spinner.style.display = 'block';
+    // 顯示 loading
+    if (spinner) {
+        spinner.classList.remove("hidden");
+    }
 
     fetch(`/api/deviceDetailObs14days/${deviceId}?start=${start}&end=${end}`)
         .then(response => response.json())
@@ -97,20 +109,22 @@ function handleFilter() {
             statusText.classList.remove('text-blue-500', 'text-red-500');
             statusText.classList.add('text-green-500');
 
-            if (spinner) spinner.style.display = 'none';
-
-            // 如果已經展開，就直接重畫
-            const collapseEl = document.getElementById("collapseVitals");
-            if (collapseEl && !collapseEl.classList.contains("hidden")) {
-                drawChart();
+            // 隱藏 loading
+            if (spinner) {
+                spinner.classList.add("hidden");
             }
+
+            // 直接畫圖
+            drawChart();
         })
         .catch(err => {
             console.error("資料抓取失敗:", err);
             statusText.innerText = "連線逾時";
             statusText.classList.remove('text-blue-500', 'text-green-500');
             statusText.classList.add('text-red-500');
-            if (spinner) spinner.style.display = 'none';
+            if (spinner) {
+                spinner.classList.add("hidden");
+            }
         });
 }
 
@@ -141,6 +155,7 @@ function drawChart() {
     if (vitalsChart) {
         vitalsChart.destroy();
     }
+    console.log("SERVER_DATA", SERVER_DATA);
 
     const ctx = canvas.getContext('2d');
     vitalsChart = new Chart(ctx, {

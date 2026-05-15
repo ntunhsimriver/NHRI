@@ -383,6 +383,7 @@ def get_AllPatient(study_id):
 
         if ProjectMemberInfo is None:
             CompleteCount = 0
+            CompleteCount_updated_at = None
         else:
             CompleteCount = ProjectMemberInfo.data_count
             CompleteCount_updated_at = ProjectMemberInfo.data_count_updated_at
@@ -910,6 +911,7 @@ def getDevice(study_id):
         status_counts_updated_at = ProjectInfo.device_count_updated_at
     except:
         status_counts = {}
+        status_counts_updated_at = None
     print(len(getFHIR))
     return [getResult, len(getFHIR), status_counts, status_counts_updated_at]
 
