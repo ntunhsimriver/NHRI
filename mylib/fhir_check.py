@@ -472,3 +472,110 @@ def upload_log(result, stats, pat_id=None, study_id=None):
         json.dump(stats, json_file, ensure_ascii=False, indent=2)
 
     return str(folderName)
+
+
+
+def upload_FHIR_mappingID_watch_api(study_id, data):
+    ProjectMemberInfo = ProjectMember.query.filter_by(
+        project_id=study_id,
+        Del=0
+    ).all()
+
+    resource_counter = Counter()
+
+    for entry in data.get("entry", []):
+        resource = entry.get("resource", {})
+        res_type = resource.get("resourceType")
+
+        if res_type:
+            resource_counter[res_type] += 1
+
+    # replace 前：每筆 Observation 檢查 Patient / Device reference
+    observation_reference_summary_before, observation_reference_logs_before = collect_observation_reference_check(data)
+
+    json_str = json.dumps(data, ensure_ascii=False)
+    replace_count = 0
+
+    for row in ProjectMemberInfo:
+        if row.old_patient_id and row.new_patient_id:
+            old_value = row.old_patient_id
+            new_value = row.new_patient_id
+
+            count_before_replace = json_str.count(old_value)
+
+            if count_before_replace > 0:
+                replace_count += count_before_replace
+                json_str = json_str.replace(old_value, new_value)
+
+    data = json.loads(json_str)
+
+    patient_replace_logs = []
+    patient_not_found = []
+
+    # 專門處理 Patient.id
+    for entry in data.get("entry", []):
+        resource = entry.get("resource", {})
+
+        if resource.get("resourceType") != "Patient":
+            continue
+
+        old_id = resource.get("id")
+
+        if not old_id:
+            continue
+
+        old_ref = f"Patient/{old_id}"
+
+        matched_row = None
+
+        for row in ProjectMemberInfo:
+            if row.old_patient_id in [old_id, old_ref]:
+                matched_row = row
+                break
+
+        if matched_row:
+            new_id = matched_row.new_patient_id.split("/", 1)[-1]
+
+            patient_replace_logs.append({
+                "original_id": old_id,
+                "original_reference": old_ref,
+                "new_patient_id": new_id,
+                "new_patient_reference": matched_row.new_patient_id,
+                "action": "Patient.id 已替換"
+            })
+
+            resource["id"] = new_id
+
+        else:
+            patient_not_found.append({
+                "original_id": old_id,
+                "original_reference": old_ref,
+                "action": "找不到對應 ProjectMember，未替換"
+            })
+
+    # replace 後：每筆 Observation 檢查 Patient / Device reference
+    observation_reference_summary_after, observation_reference_logs_after = collect_observation_reference_check(data)
+
+    stats = {
+        "total_resources": sum(resource_counter.values()),
+        "resource_count": dict(resource_counter),
+
+        "reference_replace_count": replace_count,
+
+        "observation_reference_summary_before": observation_reference_summary_before,
+        "observation_reference_logs_before": observation_reference_logs_before,
+
+        "observation_reference_summary_after": observation_reference_summary_after,
+        "observation_reference_logs_after": observation_reference_logs_after,
+
+        "patient_replace_count": len(patient_replace_logs),
+        "patient_not_found_count": len(patient_not_found),
+        "patient_replace_logs": patient_replace_logs,
+        "patient_not_found": patient_not_found
+    }
+
+    upload_log(data, stats, study_id=study_id)
+
+    res = fhir.upload_FHIR(data)
+
+    return res, stats

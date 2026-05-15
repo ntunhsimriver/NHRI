@@ -369,6 +369,7 @@ def check_login_session():
         '/api/logout',
         '/register',
         '/static',
+        '/api/trans_watch',
     ]
 
     if any(request.path.startswith(path) for path in public_paths):

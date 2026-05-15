@@ -443,19 +443,33 @@ def api_trans_watch(datatype, study_id=None, filename=None, data=None):
         
         res_Groundhog = handler_watch(Groundhog_data, Groundhog_datatype)
         CleanJson = clean_duplicate_entries_with_server_check(res_Groundhog)
-        res, stats = fhir_check.upload_FHIR_mappingID(study_id, CleanJson)
+        print(study_id)
+        if study_id == None:
+            res = fhir.upload_FHIR(CleanJson)
+            try:
+                fhir_response = res.json()
+            except Exception:
+                fhir_response = res.text if hasattr(res, "text") else str(res)
 
-        try:
-            fhir_response = res.json()
-        except Exception:
-            fhir_response = res.text if hasattr(res, "text") else str(res)
+            return jsonify({
+                "success": res.status_code in [200, 201],
+                "message": "FHIR 上傳完成",
+                "fhir_response": fhir_response
+            }), res.status_code
+        else:
+            res, stats = fhir_check.upload_FHIR_mappingID(study_id, CleanJson)
 
-        return jsonify({
-            "success": res.status_code in [200, 201],
-            "message": "FHIR 上傳完成",
-            "fhir_response": fhir_response,
-            "stats": stats
-        }), res.status_code
+            try:
+                fhir_response = res.json()
+            except Exception:
+                fhir_response = res.text if hasattr(res, "text") else str(res)
+
+            return jsonify({
+                "success": res.status_code in [200, 201],
+                "message": "FHIR 上傳完成",
+                "fhir_response": fhir_response,
+                "stats": stats
+            }), res.status_code
         
     except Exception as e:
         traceback.print_exc()
