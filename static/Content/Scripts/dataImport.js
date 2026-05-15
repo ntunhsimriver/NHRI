@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('click', function (e) {
 
-        // Step1 → Step2
+        
         const stepBtn = e.target.closest('.step-btn');
         if (stepBtn) {
             const type = stepBtn.dataset.type;
@@ -10,14 +10,14 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // 上一步
+        
         const backBtn = e.target.closest('.btn-step-back');
         if (backBtn) {
             goToStep1();
             return;
         }
 
-        // 上傳
+        
         const uploadBtn = e.target.closest('.btn-upload');
         if (uploadBtn) {
             handleUpload();
@@ -30,51 +30,51 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 function goToStep2(type) {
-    // 1. 切換內容顯示
+    
     document.getElementById('step-1-content').classList.add('hidden');
     document.getElementById('step-2-content').classList.remove('hidden');
 
     document.getElementById('fhir_project').classList.add('hidden');
 
-    // 2. 更新進度條顏色 (把 2 號圓圈變藍色)
+    
     const circle2 = document.getElementById('step-circle-2');
     circle2.classList.remove('bg-slate-200', 'text-slate-500');
     circle2.classList.add('bg-blue-600', 'text-white');
 
-    // 更新 1 號跟 2 號之間的線
+    
     document.getElementById('step-line-1').classList.remove('bg-slate-200');
     document.getElementById('step-line-1').classList.add('bg-blue-600');
 
     console.log("選取的來源類型是:", type);
 
-    document.getElementById('type-hidden').value = type; // 暫存一下type是什麼
-    const hintElement = document.getElementById('format-hint'); // 顯示支援的附檔名有哪些
-    const infoElement = document.getElementById('file-info-text'); // 顯示檔案說明
+    document.getElementById('type-hidden').value = type; 
+    const hintElement = document.getElementById('format-hint'); 
+    const infoElement = document.getElementById('file-info-text'); 
 
     if (type === 'FHIR') {
         hintElement.innerText = ".json";
         infoElement.innerText = "上傳的FHIR檔案將以POST方式上傳至FHIR server，若需以PUT上傳請用transaction打包。";
-        fileInput.accept = ".json"; // FHIR 只收 JSON
+        fileInput.accept = ".json"; 
     } 
     else if (type === 'Watch') {
         hintElement.innerText = ".csv";
         infoElement.innerText = "格式範例";
-        fileInput.accept = ".csv,.xlsx"; // 其他來源收表格檔
+        fileInput.accept = ".csv,.xlsx"; 
     }
     else if (type === 'Asus') {
         document.getElementById('fhir_project').classList.remove('hidden');
         hintElement.innerText = ".json";
         infoElement.innerText = "請直接上傳華碩手表api的回傳檔案，並直接由系統上傳FHIR Server。";
-        fileInput.accept = ".json"; // 其他來源收表格檔
+        fileInput.accept = ".json"; 
     }
 }
 
 function goToStep1() {
-    // 返回步驟 1 的邏輯
+    
     document.getElementById('step-1-content').classList.remove('hidden');
     document.getElementById('step-2-content').classList.add('hidden');
 
-    // 還原進度條顏色
+    
     const circle2 = document.getElementById('step-circle-2');
     circle2.classList.add('bg-slate-200', 'text-slate-500');
     circle2.classList.remove('bg-blue-600', 'text-white');
@@ -82,11 +82,11 @@ function goToStep1() {
     document.getElementById('step-line-1').classList.add('bg-slate-200');
     document.getElementById('step-line-1').classList.remove('bg-blue-600');
 
-    // --- 核心步驟：清空檔案資料 ---
-    const fileInput = document.getElementById('file-upload'); // 確保 ID 跟你的 input 一致
+    
+    const fileInput = document.getElementById('file-upload'); 
     fileInput.value = ""; 
 
-    // 順便把介面上的檔名文字改回原本的提示
+    
     const statusText = document.getElementById('file-status-text');
     statusText.innerText = "點擊上傳或將檔案拖曳至此";
     statusText.classList.remove('text-blue-600', 'font-bold');
@@ -120,7 +120,7 @@ function hideUploadSpinner() {
 function handleUpload() {
     const fileInput = document.getElementById('file-upload');
     const fileType = document.getElementById('type-hidden').value;
-    // alert(fileType);
+    
     const file = fileInput.files[0];
 
     const select = document.getElementById("fhir_project");
@@ -129,27 +129,27 @@ function handleUpload() {
         return;
     }
 
-    // 1. 基本檢查
+    
     if (!file) {
         alert("請先選擇或拖曳檔案！");
         return;
     }
-    // 2. 建立 FormData 物件（這是 AJAX 傳檔案的關鍵）
+    
     const formData = new FormData();
-    formData.append('file', file); // 'file' 要對應 Flask 裡的 request.files['file']
-    formData.append('fileType', fileType);  // 把fileType也一起傳到後端
-    formData.append('fhir_project', select.value);  // 把fileType也一起傳到後端
+    formData.append('file', file); 
+    formData.append('fileType', fileType);  
+    formData.append('fhir_project', select.value);  
 
-    // 3. 建立傳統的 AJAX 請求 (XMLHttpRequest)
+    
     const xhr = new XMLHttpRequest();
     showUploadSpinner();
 
-    // 設定請求目標
+    
     xhr.open('POST', '/api/uploadFHIR', true);
 
     
 
-    // 監聽回傳結果
+    
     xhr.onload = function () {
         
 
@@ -179,7 +179,7 @@ function handleUpload() {
         }
     };
 
-    // (選填) 如果你以後想做進度條，就是在這監聽
+    
     xhr.upload.onprogress = function (e) {
         if (e.lengthComputable) {
             const percent = (e.loaded / e.total) * 100;
@@ -187,7 +187,7 @@ function handleUpload() {
         }
     };
 
-    // 4. 正式發送資料
+    
     xhr.send(formData);
     
     
@@ -197,9 +197,9 @@ function handleUpload() {
 
 
 
-// 下面是寫上傳檔案的那個框框
 
-// 上傳
+
+
 document.getElementById('file-upload').addEventListener('change', function(e) {
   const fileName = e.target.files[0]?.name;
   if (fileName) {
@@ -214,7 +214,7 @@ const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-upload');
 const statusText = document.getElementById('file-status-text');
 
-// 阻止瀏覽器預設行為（防止拖入檔案時瀏覽器直接打開檔案）
+
 ['dragover', 'dragenter', 'dragleave', 'drop'].forEach(eventName => {
     dropZone.addEventListener(eventName, (e) => {
         e.preventDefault();
@@ -222,41 +222,41 @@ const statusText = document.getElementById('file-status-text');
     }, false);
 });
 
-// 1. 當檔案拖到框框上方時：變色提示
+
 ['dragover', 'dragenter'].forEach(eventName => {
     dropZone.addEventListener(eventName, () => {
         dropZone.classList.add('border-blue-500', 'bg-blue-100/50');
     }, false);
 });
 
-// 2. 當檔案離開框框或放開時：恢復原狀
+
 ['dragleave', 'drop'].forEach(eventName => {
     dropZone.addEventListener(eventName, () => {
         dropZone.classList.remove('border-blue-500', 'bg-blue-100/50');
     }, false);
 });
 
-// 3. 核心功能：當使用者「放開檔案」時
+
 dropZone.addEventListener('drop', (e) => {
-    const draggedFiles = e.dataTransfer.files; // 取得拖進來的檔案
+    const draggedFiles = e.dataTransfer.files; 
 
     if (draggedFiles.length > 0) {
-        // 重要：將拖入的檔案賦值給隱藏的 input
+        
         fileInput.files = draggedFiles; 
         
-        // 更新介面文字
+        
         updateFileName(draggedFiles[0].name);
     }
 });
 
-// 4. 監聽「點擊選擇」檔案的動作 (使用者不用拖的，用點的)
+
 fileInput.addEventListener('change', (e) => {
     if (e.target.files.length > 0) {
         updateFileName(e.target.files[0].name);
     }
 });
 
-// 輔助函式：更新介面上的檔名
+
 function updateFileName(name) {
     statusText.innerText = "已選取檔案：" + name;
     statusText.classList.remove('text-slate-700');
@@ -264,12 +264,12 @@ function updateFileName(name) {
 }
 
 function goToStep3(stats = null) {
-    // 1. 隱藏步驟 1、2，顯示步驟 3
+    
     document.getElementById('step-1-content')?.classList.add('hidden');
     document.getElementById('step-2-content')?.classList.add('hidden');
     document.getElementById('step-3-content')?.classList.remove('hidden');
 
-    // 2. 更新上方進度條
+    
     const circle1 = document.getElementById('step-circle-1');
     const circle2 = document.getElementById('step-circle-2');
     const circle3 = document.getElementById('step-circle-3');
@@ -292,7 +292,7 @@ function goToStep3(stats = null) {
     line2?.classList.remove('bg-slate-200');
     line2?.classList.add('bg-blue-600');
 
-    // 3. 顯示 FHIR 驗證結果
+    
     if (stats) {
         renderStep3FHIRResult(stats);
     }
@@ -403,15 +403,15 @@ function renderStep3ObservationTable(obsLogs) {
         `;
     });
 
-    // if (obsLogs.length === 0) {
-    //     tbody.innerHTML = `
-    //         <tr>
-    //             <td colspan="5" class="px-4 py-6 text-center text-slate-500">
-    //                 沒有 Observation 明細資料
-    //             </td>
-    //         </tr>
-    //     `;
-    // }
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
 
 
@@ -424,7 +424,7 @@ document.addEventListener("DOMContentLoaded", function () {
             loadUploadLogs(studyId);
         });
 
-        // 頁面載入時也先讀一次
+        
         const studyId = btnReloadUploadLogs.dataset.bsStudyid;
         loadUploadLogs(studyId);
 

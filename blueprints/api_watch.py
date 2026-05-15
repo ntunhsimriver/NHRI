@@ -60,9 +60,9 @@ def is_int(value):
 
 
 TIME_FORMATS = [
-    "%Y-%m-%d %H:%M:%S",  # 2026-05-04 07:58:00
-    "%Y/%m/%d %H:%M:%S",  # 2026/4/1 00:00:00
-    "%Y/%m/%d %H:%M",     # 2026/4/1 00:00
+    "%Y-%m-%d %H:%M:%S",  
+    "%Y/%m/%d %H:%M:%S",  
+    "%Y/%m/%d %H:%M",     
 ]
 
 def is_datetime(value, time_formats=None):
@@ -107,9 +107,6 @@ def handler_watch(data, project_type):
 def clean_duplicate_entries_with_server_check(bundle_json, auth_token=None):
     unique_entries = []
     seen_full_urls = set()
-    
-    # 設定 Header (如果有 token 的話)
-    # headers = fhir.get_token()
     for entry in bundle_json.get('entry', []):
         resource = entry.get('resource')
         if not resource:
@@ -118,19 +115,14 @@ def clean_duplicate_entries_with_server_check(bundle_json, auth_token=None):
         res_type = resource.get('resourceType')
         res_id = resource.get('id')
         full_url = entry.get('fullUrl')
-        # 1. 檢查 Device 是否已經存在於 FHIR Server
         if res_type == 'Device' and res_id:
             try:
-                # 使用 GET 請求確認資源是否存在
                 response = fhir.read_FHIR_api(f"Device/{res_id}")
-
-                # 如果有回傳資料（代表存在）
                 if response and isinstance(response, dict) and response.get("resourceType") == "Device":
                     continue
             except Exception as e:
                 print(f"連線至 FHIR Server 出錯: {e}")
 
-        # 2. 原有的本地去重邏輯 (防止同一個 Bundle 內有重複的 fullUrl)
         if full_url:
             if full_url not in seen_full_urls:
                 unique_entries.append(entry)
@@ -167,7 +159,6 @@ def watch_mapping_patient(data):
             if pat_id:
                 row["PatientID"] = pat_id.replace("Patient/", "")
 
-        # 不管有沒有找到 Device / Patient，都保留資料
         result.append(row)
 
     return result
@@ -249,7 +240,6 @@ def check_upload_csv(file):
 
     for i, row in df.iterrows():
         row_num = i + 2
-        # 檢查整列是否都是空白
         if row.isna().all() or row.fillna("").astype(str).str.strip().eq("").all():
             errors.append(f"第 {row_num} 列：此列為空白列，請先刪除空白列後再上傳")
             continue
@@ -373,13 +363,6 @@ def check_sleep_json(data):
         for key in required:
             if key not in item:
                 errors.append(f"{prefix}：缺少欄位 {key}")
-
-        # if item.get("StartTime") and not is_datetime(item.get("StartTime"), JSON_TIME_FORMAT):
-        #     errors.append(f"{prefix}：StartTime 格式錯誤")
-
-        # if item.get("EndTime") and not is_datetime(item.get("EndTime"), JSON_TIME_FORMAT):
-        #     errors.append(f"{prefix}：EndTime 格式錯誤")
-
         for key in int_fields:
             if key in item:
                 value = item.get(key)
@@ -397,7 +380,6 @@ def api_trans_watch(datatype, study_id=None, filename=None, data=None):
         if study_id is None:
             study_id = request.args.get("study_id")
         if datatype == "Watch":
-            # df = pd.read_csv(filename)
             is_valid, errors, df = check_upload_csv(filename)
             Groundhog_datatype = "麗臺手錶"
             if not is_valid:
@@ -405,10 +387,6 @@ def api_trans_watch(datatype, study_id=None, filename=None, data=None):
                 return jsonify({"error": str(errors)}), 500
 
             Groundhog_data = Watch_leadtek(df)
-            # res_Groundhog = handler_watch(data, "麗臺手錶")
-
-            # CleanJson = clean_duplicate_entries_with_server_check(res_Groundhog)
-            # res, stats = fhir.upload_FHIR_mappingID(study_id, CleanJson)
         elif datatype == "historic_data_origin":
             if data is None:
                 data = request.get_json()
@@ -423,10 +401,6 @@ def api_trans_watch(datatype, study_id=None, filename=None, data=None):
             Groundhog_data = []
             for row in data['daily_data']:
                 Groundhog_data.append(row)
-                # res_Groundhog = handler_watch([row], datatype)
-                # CleanJson = clean_duplicate_entries_with_server_check(res_Groundhog)
-                # res, stats = fhir.upload_FHIR_mappingID(study_id, CleanJson)
-                # break
         else:
             if data is None:
                 data = request.get_json()

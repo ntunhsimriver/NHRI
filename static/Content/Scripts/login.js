@@ -1,4 +1,4 @@
-// 先宣告
+
 const form = document.getElementById('loginForm');
 const msg = document.getElementById('message');
 
@@ -7,7 +7,7 @@ form.addEventListener('submit', async function (e) {
     
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    // 清除前一次樣式
+    
     msg.classList.remove('error-message', 'success-message');
     if (!email || !password) {
         msg.textContent = '請填寫帳號與密碼！';

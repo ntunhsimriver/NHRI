@@ -1,7 +1,7 @@
 const patIdInput = document.getElementById("pat_id_hidden");
 const patId = patIdInput.value;
 
-// 新增個案及關連個案
+
 document.querySelectorAll('.progress-bar').forEach(el => {
     el.style.width = el.dataset.width + '%';
 });
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const startInput = document.getElementById("startDate");
     const endInput = document.getElementById("endDate");
 
-    // 如果元素不存在就不做
+    
     if (!startInput || !endInput) return;
 
     const today = new Date();
@@ -34,15 +34,15 @@ document.addEventListener("DOMContentLoaded", () => {
     startDate.setDate(today.getDate() - 14);
     const start = startDate.toISOString().split("T")[0];
 
-    // ⭐ 只有在沒有值時才自動填
+    
     if (!startInput.value) startInput.value = start;
     if (!endInput.value) endInput.value = end;
 
-    // 限制日期
+    
     endInput.min = startInput.value;
     startInput.max = endInput.value;
 
-    // 點按鈕時，打開對應的 file input
+    
     document.addEventListener('click', function (e) {
         const btn = e.target.closest('.file-trigger');
         if (!btn) return;
@@ -52,18 +52,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const input = document.getElementById(targetId);
 
         if (input) {
-            input.dataset.type = fileType; // 把按鈕的 data-type 存到 input
+            input.dataset.type = fileType; 
             input.click();
         }
     });
 
-    // 只綁一次 change
+    
     document.querySelectorAll('input[type="file"]').forEach(input => {
         input.addEventListener('change', function (event) {
             const fileType = this.dataset.type;
             handleFileSelect(event, fileType);
 
-            // 讓同一個檔案再次選取時也能觸發 change
+            
             this.value = '';
         });
     });
@@ -110,13 +110,13 @@ function handleFilter() {
 
     console.log("handleFilter:", { start, end, patId });
 
-    // 清掉舊圖
+    
     if (vitalsChart) {
         vitalsChart.destroy();
         vitalsChart = null;
     }
 
-    // 顯示 loading
+    
     if (spinner) {
         spinner.classList.remove("hidden");
     }
@@ -134,11 +134,11 @@ function handleFilter() {
             SERVER_DATA.hr = data[2];
             SERVER_DATA.labels = data[3];
 
-            // 隱藏 loading
+            
             if (spinner) {
                 spinner.classList.add("hidden");
             }
-            // 直接畫圖
+            
             drawChart();
         })
         .catch(err => {
@@ -152,17 +152,17 @@ function handleFilter() {
 
 let vitalsChart = null;
 
-// 將原本的繪圖邏輯封裝成函式
+
 function drawChart() {
     const ctx = document.getElementById('myChart-Vitals');
     if (!ctx) return;
 
-    // 如果已經有圖表，先銷毀防止重複疊加
+    
     if (vitalsChart) {
         vitalsChart.destroy();
     }
 
-    // 這裡放你原本定義的 data 與 config
+    
     const data = {
         labels: SERVER_DATA.labels,
         datasets: [
@@ -199,9 +199,9 @@ function drawChart() {
         options: {
         responsive: true,
         interaction: {
-          mode: 'nearest',   // 吸附最近的點
-          axis: 'x',         // 只看 X 軸距離（Day）
-          intersect: false   // 不用滑到點上
+          mode: 'nearest',   
+          axis: 'x',         
+          intersect: false   
         },
 
         plugins: {
@@ -211,8 +211,8 @@ function drawChart() {
           },
           legend: {
             labels: {
-              usePointStyle: true,   // 要啟用自定義的圖例
-              pointStyle: 'line',  // circle | rect | rectRounded | triangle
+              usePointStyle: true,   
+              pointStyle: 'line',  
               boxWidth: 30
             }
           }
@@ -239,30 +239,30 @@ function drawChart() {
     });
 }
 
-// 監聽 Tab 點擊
+
 document.querySelectorAll('#nav-tab button').forEach(btn => {
     btn.addEventListener('click', () => {
         const tab = new bootstrap.Tab(btn);
         tab.show();
 
-        // 只要點到「檢驗檢查」就觸發繪圖
+        
         if (btn.innerText.includes("檢驗檢查")) {
-            // 使用 requestAnimationFrame 確保在 DOM 更新後才畫圖
+            
             window.requestAnimationFrame(() => {
-                // --- 這裡就是你的外掛檢查邏輯 ---
-                // 1. 先確認變數存在，避免噴 ReferenceError
+                
+                
                 if (typeof SERVER_DATA !== 'undefined') {
                     
-                    // 2. 檢查是否全為空
+                    
                     const hasData = SERVER_DATA.sbp && SERVER_DATA.sbp.some(v => v !== null);
                     
                     if (!hasData) {
-                        // 沒資料就改文字，不畫圖
+                        
                         const title = document.getElementById('myChartText');
                         if (title) title.innerText = "生理趨勢圖 (近14天) - 暫無量測紀錄";
                         console.warn("No data found in SERVER_DATA");
                     } else {
-                        // 有資料才執行你原本的 drawChart
+                        
                         drawChart();
                     }
                 }
@@ -272,22 +272,22 @@ document.querySelectorAll('#nav-tab button').forEach(btn => {
 });
 
 
-// 這邊是同意書
+
 var ModalConsent = document.getElementById('Modal_Consent');
 if (ModalConsent) {
     ModalConsent.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget; // 取得被點擊的按鈕
+        var button = event.relatedTarget; 
         var title = button.getAttribute('data-bs-title');
         var pdfUrl = "/static/data/consent" + button.getAttribute('data-bs-url');
-        // 更新標題
+        
         ModalConsent.querySelector('#Modal_Consent_title').textContent = title;
-        // 更新 PDF 檢視器
+        
         var iframe = ModalConsent.querySelector('#Consent_PDF_Viewer');
         iframe.src = pdfUrl;
 
     });
 
-    // 當 Modal 關閉時，清空 src 停止載入，節省資源
+    
     ModalConsent.addEventListener('hidden.bs.modal', function () {
     ModalConsent.querySelector('#Consent_PDF_Viewer').src = "";
 });
@@ -296,33 +296,33 @@ if (ModalConsent) {
 
 
 
-// 同意書上傳的按鈕
+
 function handleFileSelect(event, fileType) {
-    const file = event.target.files[0]; // 取得第一個檔案
-    const patid = document.getElementById('pat_id_hidden').value; // 抓pat id
+    const file = event.target.files[0]; 
+    const patid = document.getElementById('pat_id_hidden').value; 
     if (file) {
         console.log("選取的檔案名稱:", file.name);
         console.log("檔案大小:", (file.size / 1024).toFixed(2), "KB");
         
-        // 這裡可以加入上傳到伺服器的邏輯 (例如使用 Fetch API)
+        
         alert("你已選取檔案：" + file.name);
 
         const formData = new FormData();
-        formData.append('file', file); // 'file' 要對應 Flask 裡的 request.files['file']
-        formData.append('fileType', fileType);  // 把fileType也一起傳到後端
-        formData.append('patid', patid);  // 把patid也一起傳到後端
+        formData.append('file', file); 
+        formData.append('fileType', fileType);  
+        formData.append('patid', patid);  
 
-        // 3. 建立傳統的 AJAX 請求 (XMLHttpRequest)
+        
         const xhr = new XMLHttpRequest();
 
 
-        // 設定請求目標
+        
         xhr.open('POST', '/api/uploadFHIR', true);
 
-        // 監聽回傳結果
+        
         xhr.onload = function () {
             if (xhr.status === 200) {
-                // 解析 Flask 回傳的 JSON
+                
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
                     alert(response.message);
@@ -335,7 +335,7 @@ function handleFileSelect(event, fileType) {
             }
         };
 
-        // (選填) 如果你以後想做進度條，就是在這監聽
+        
         xhr.upload.onprogress = function (e) {
             if (e.lengthComputable) {
                 const percent = (e.loaded / e.total) * 100;
@@ -343,14 +343,14 @@ function handleFileSelect(event, fileType) {
             }
         };
 
-        // 4. 正式發送資料
+        
         xhr.send(formData);
         
     }
 }
 
 
-// 點開Ecounter底下的Condition
+
 document.addEventListener("click", function(e) {
   const toggle = e.target.closest(".tw-encounter-one");
   if (!toggle) return;
@@ -361,10 +361,10 @@ document.addEventListener("click", function(e) {
 
   const isOpening = target.classList.contains("hidden");
 
-  // 先切換展開 / 收合
+  
   target.classList.toggle("hidden");
 
-  // 如果是展開，才 call API
+  
   if (isOpening) {
     fetch(`/api/getEncounter/${encounterId}`)
       .then(response => response.json())
@@ -413,7 +413,7 @@ document.addEventListener("click", function(e) {
   }
 });
 
-// 點開Ecounter
+
 document.addEventListener("click", function (e) {
   const toggle = e.target.closest(".tw-encounter-list-toggle");
   
@@ -648,13 +648,13 @@ document.addEventListener("click", function (e) {
 
 
 
-// 新增使用者
+
 var ModalupdatePatient = document.getElementById('Modal_updatePatient');
-// 等等要關閉這個彈跳視窗用的
+
 var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModalupdatePatient);
 
 ModalupdatePatient.addEventListener('show.bs.modal', function (event) {
-    var button = event.relatedTarget; // 取得被點擊的按鈕
+    var button = event.relatedTarget; 
     var input_data = button.getAttribute('data-bs-value')
     var data = JSON.parse(input_data);
 
@@ -669,11 +669,11 @@ ModalupdatePatient.addEventListener('show.bs.modal', function (event) {
 
 });
 
-// 先宣告
+
 const form = document.getElementById('registerForm');
 const msg = document.getElementById('message');
 
-// 當 Modal 關閉時自動重置表單
+
 document.getElementById('Modal_updatePatient').addEventListener('hidden.bs.modal', function () {
     form.reset();
     msg.textContent = '';
@@ -695,7 +695,7 @@ form.addEventListener('submit', async function (e) {
     const type = 'update'
 
 
-    // 清除前一次樣式
+    
     msg.classList.remove('error-message', 'success-message');
 
     const response = await fetch('/api/addPatient', {

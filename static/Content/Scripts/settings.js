@@ -1,11 +1,11 @@
 
-// 新增使用者
+
 var ModaladdUser = document.getElementById('Modal_addUser');
-// 等等要關閉這個彈跳視窗用的
+
 var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModaladdUser);
 
 ModaladdUser.addEventListener('show.bs.modal', function (event) {
-    var button = event.relatedTarget; // 取得被點擊的按鈕
+    var button = event.relatedTarget; 
     var input_data = button.getAttribute('data-bs-value')
     var data = JSON.parse(input_data);
     if (input_data){
@@ -35,7 +35,7 @@ ModaladdUser.addEventListener('show.bs.modal', function (event) {
 });
 
 
-// 當 Modal 關閉時自動重置表單
+
 document.getElementById('Modal_addUser').addEventListener('hidden.bs.modal', function () {
     form.reset();
     msg.textContent = '';
@@ -47,7 +47,7 @@ document.getElementById('Modal_addUser').addEventListener('hidden.bs.modal', fun
 });
 
 
-// 先宣告
+
 const form = document.getElementById('registerForm');
 const msg = document.getElementById('message');
 
@@ -66,7 +66,7 @@ form.addEventListener('submit', async function (e) {
         ? 'new'
         : 'update';
 
-    // 清除前一次樣式
+    
     msg.classList.remove('error-message', 'success-message');
     if (!full_name || !email) {
         msg.textContent = '請填寫帳號與密碼！';

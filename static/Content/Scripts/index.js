@@ -3,17 +3,17 @@ let myChart = null;
 const maxValue = Math.max(...SERVER_DATA.months_data);
 const minValue = Math.min(...SERVER_DATA.months_data);
 
-// 將原本的繪圖邏輯封裝成函式
+
 function drawChart() {
     const ctx = document.getElementById('myChart-SubjectIn');
     if (!ctx) return;
 
-    // 如果已經有圖表，先銷毀防止重複疊加
+    
     if (myChart) {
         myChart.destroy();
     }
 
-    // 這裡放你原本定義的 data 與 config
+    
     const data = {
         labels: SERVER_DATA.months,
         datasets: [
@@ -35,9 +35,9 @@ function drawChart() {
         responsive: true,
         maintainAspectRatio: false,
         interaction: {
-          mode: 'nearest',   // 吸附最近的點
-          axis: 'x',         // 只看 X 軸距離（Day）
-          intersect: false   // 不用滑到點上
+          mode: 'nearest',   
+          axis: 'x',         
+          intersect: false   
         },
 
         plugins: {
@@ -47,8 +47,8 @@ function drawChart() {
           },
           legend: {
             labels: {
-              usePointStyle: true,   // 要啟用自定義的圖例
-              pointStyle: 'line',  // circle | rect | rectRounded | triangle
+              usePointStyle: true,   
+              pointStyle: 'line',  
               boxWidth: 30
             }
           }
@@ -81,57 +81,57 @@ drawChart();
 
 const resourceTypes = ["Encounter", "Observation", "MedicationRequest", "Procedure", "Condition", "DiagnosticReport", "Consent", "Device"];
 
-// 模擬數據，實際請替換為你的 API 資料
+
 const mockData = [12, 45, 7, 15, 22, 5, 2, 8];
 
 function CountDataChart() {
     const canvas = document.getElementById('CountDataChart');
-    if (!canvas) return; // 安全檢查
+    if (!canvas) return; 
 
     const ctx = canvas.getContext('2d');
     
-    // 如果圖表實例已存在，先銷毀它，避免重複渲染 bug
+    
     if (window.myChart instanceof Chart) {
         window.myChart.destroy();
     }
 
-    // 定義 8 種不同的柔和、現代感醫療風格顏色
+    
     const fhirPalette = [
-        '#60a5fa', // Blue (Encounter)
-        '#16a34a', // Green (Observation)
-        '#fb923c', // Orange (MedicationRequest)
-        '#a78bfa', // Violet (Procedure)
-        '#f87171', // Red (Condition)
-        '#22d3ee', // Cyan (DiagnosticReport)
-        '#fbbf24', // Amber (Consent)
-        '#94a3b8'  // Slate (Device)
+        '#60a5fa', 
+        '#16a34a', 
+        '#fb923c', 
+        '#a78bfa', 
+        '#f87171', 
+        '#22d3ee', 
+        '#fbbf24', 
+        '#94a3b8'  
     ];
 
     const rawMax = Math.max(...SERVER_DATA.CountData_data);
-    const chartMax = Math.ceil(rawMax <= 0 ? 10 : rawMax * 1.2); // 如果沒數據，預設 max 為 10
+    const chartMax = Math.ceil(rawMax <= 0 ? 10 : rawMax * 1.2); 
 
     window.myChart = new Chart(ctx, {
-        type: 'bar', // 垂直直條圖
+        type: 'bar', 
         data: {
             labels: SERVER_DATA.CountData_list,
             datasets: [{
-                // label: '今日匯入數量', // 隱藏 legend 了，這裡可寫可不寫
-                data: SERVER_DATA.CountData_data, // 這裡之後記得換成 SERVER_DATA 的值
-                backgroundColor: fhirPalette, // 賦予不同的顏色陣列
-                borderRadius: 6, // 頂部圓角，更顯現代感
-                barPercentage: 0.7, // 調整直條寬度佔比 (0-1)，讓柱子之間有呼吸空間
+                
+                data: SERVER_DATA.CountData_data, 
+                backgroundColor: fhirPalette, 
+                borderRadius: 6, 
+                barPercentage: 0.7, 
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // 搭配 CSS fixed height 防止無限拉長
+            maintainAspectRatio: false, 
             plugins: {
                 legend: {
-                    display: false // 隱藏上方的數據標籤，因為顏色已經區分了
+                    display: false 
                 },
                 tooltip: {
-                    // 優化滑鼠移上去時的提示框
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)', // slate-900
+                    
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                     padding: 12,
                     cornerRadius: 8,
                     titleFont: { size: 14, weight: 'bold' },
@@ -146,26 +146,26 @@ function CountDataChart() {
             scales: {
                 x: {
                     grid: { 
-                        display: false // 隱藏 X 軸網格線，畫面更乾淨
+                        display: false 
                     },
                     ticks: {
                         maxRotation: 45,
                         minRotation: 45,
-                        color: '#64748b', // slate-500
+                        color: '#64748b', 
                         font: { size: 12 } 
                     }
                 },
                 y: {
                     beginAtZero: true,
                     border: {
-                        display: false // 隱藏 Y 軸邊框線
+                        display: false 
                     },
                     grid: {
-                        color: '#f1f5f9' // 使用輕微的灰色網格線 (slate-100)
+                        color: '#f1f5f9' 
                     },
                     ticks: {
-                        color: '#64748b', // slate-500
-                        stepSize: 10 // 根據數據量調整刻度間隔
+                        color: '#64748b', 
+                        stepSize: 10 
                     }
                 }
             }

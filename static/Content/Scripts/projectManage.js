@@ -1,6 +1,6 @@
-// 新增使用者
+
 var ModaladdProject = document.getElementById('Modal_addProject');
-// 等等要關閉這個彈跳視窗用的
+
 var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModaladdProject);
 
 
@@ -16,18 +16,18 @@ ModaladdProject.addEventListener('show.bs.modal', function (event) {
     var modalTitle = document.getElementById('Modal_addProject_title');
     var submitBtn = document.getElementById('Modal_addProject_submit');
     var Model_id = document.getElementById('new_id');
-    // 有資料 => 更新模式
+    
     if (data.id || data.name || data.status || data.note || data.dataType) {
       if (modalTitle) modalTitle.textContent = '更新計劃';
       if (submitBtn) submitBtn.textContent = '儲存修改';
-      Model_id.readOnly = true;   // 編輯 → 鎖住
+      Model_id.readOnly = true;   
 
     } 
-    // 沒資料 => 新增模式
+    
     else {
       if (modalTitle) modalTitle.textContent = '新增計畫';
       if (submitBtn) submitBtn.textContent = '建立計畫';
-      Model_id.readOnly = false;   // 編輯 → 鎖住
+      Model_id.readOnly = false;   
 
     }
 
@@ -51,7 +51,7 @@ ModaladdProject.addEventListener('show.bs.modal', function (event) {
 });
 
 
-// 當 Modal 關閉時自動重置表單
+
 document.getElementById('Modal_addProject').addEventListener('hidden.bs.modal', function () {
     form.reset();
     msg.textContent = '';
@@ -59,7 +59,7 @@ document.getElementById('Modal_addProject').addEventListener('hidden.bs.modal', 
 });
 
 
-// 先宣告
+
 const form = document.getElementById('registerForm');
 const msg = document.getElementById('message');
 
@@ -72,7 +72,7 @@ form.addEventListener('submit', async function (e) {
     const regex = /^[A-Za-z0-9-]+$/;
 
     if (!regex.test(value)) {
-        e.preventDefault();  // 擋送出
+        e.preventDefault();  
         msg.classList.add('error-message');
         msg.textContent = 'ID 只能包含英文、數字與 -';
         idInput.focus();
@@ -82,7 +82,7 @@ form.addEventListener('submit', async function (e) {
     const ProjectStatus = document.getElementById('new_status').value;
     const ProjectNote = document.getElementById('new_note').value;
     const checkboxes = document.querySelectorAll('input[name="new_dataType"]:checked');
-    // const role = document.getElementById('newUser_role').value;
+    
 
 	const dataType = Array.from(checkboxes).map(cb => cb.value).join(',');
 
@@ -90,7 +90,7 @@ form.addEventListener('submit', async function (e) {
 
     
     var type = idInput.readOnly ? "update" : "new";
-    // 清除前一次樣式
+    
     msg.classList.remove('error-message', 'success-message');
 
     const response = await fetch('/api/addProject', {
@@ -112,16 +112,16 @@ form.addEventListener('submit', async function (e) {
     }
 });
 
-// 新增使用者
+
 var ModalmemberManage = document.getElementById('Modal_memberManage');
-// 等等要關閉這個彈跳視窗用的
+
 var ModalInstance = bootstrap.Modal.getOrCreateInstance(ModalmemberManage);
 
 
-// 先宣告
+
 const addMemberform = document.getElementById('addMemberForm');
 const addMembermsg = document.getElementById('addMember_message');
-// 抓選項用的
+
 function getSelectedAssistants() {
     const checkedBoxes = document.querySelectorAll('input[name="assistant_ids"]:checked');
     const selected = Array.from(checkedBoxes).map(cb => cb.value);
@@ -133,7 +133,7 @@ addMemberform.addEventListener('submit', async function (e) {
     const item_member = getSelectedAssistants();
     const item_proid = document.getElementById('item_proid').value;
 
-    // 清除前一次樣式
+    
     msg.classList.remove('error-message', 'success-message');
 
     const response = await fetch('/api/addMember', {

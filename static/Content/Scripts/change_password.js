@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// 先宣告
+
 const form = document.getElementById('changepwForm');
 const msg = document.getElementById('message');
 
@@ -35,13 +35,13 @@ form.addEventListener('submit', async function (e) {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/;
 
     if (!regex.test(new_password)) {
-      // alert("密碼需包含：大小寫英文、數字、符號");
+      
         msg.textContent = "密碼需包含：大小寫英文、數字、符號";
         msg.classList.add('error-message');
         return;
     }
 
-    // 清除前一次樣式
+    
     msg.classList.remove('error-message', 'success-message');
     if (!old_password || !new_password) {
         msg.textContent = '請填寫帳號與密碼！';

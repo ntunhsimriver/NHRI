@@ -27,7 +27,7 @@ function sendList() {
     let hasError = false;
 
     rows.forEach((row, index) => {
-        // 已標記刪除的列，不送出
+        
         if (row.classList.contains("row-deleted")) {
             return;
         }
@@ -43,7 +43,7 @@ function sendList() {
         const oldPatientId = oldPatientInput?.value.trim() || "";
         const newPatientId = newPatientInput?.value.trim() || "";
 
-        // 檢查 old_patient_id 格式
+        
         if (!oldPatientId.startsWith("Patient/") || oldPatientId === "Patient/") {
             hasError = true;
 
@@ -206,7 +206,7 @@ function createCaseTable(studyId) {
 function addList(projectId) {
     let tbody = document.getElementById("caseTableBody");
 
-    // 如果沒有 table，代表目前是第一筆資料，要先建立 table
+    
     if (!tbody) {
         createCaseTable(projectId);
         tbody = document.getElementById("caseTableBody");
@@ -283,22 +283,22 @@ function addList(projectId) {
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    // const statusSelect = document.getElementById('statusSelect');
+    
     const searchInput = document.getElementById('searchInput');
     const caseRows = document.querySelectorAll('.case-row');
 
     function filterRows() {
-        // const selectedStatus = statusSelect.value;
+        
         const searchText = searchInput.value.toLowerCase();
 
         caseRows.forEach(row => {
 
-            // const rowStatus = row.getAttribute('data-status');
+            
             const hashId_oldID = row.getAttribute('data-hash-oldID').toLowerCase();
             const hashId_newID = row.getAttribute('data-hash-newID').toLowerCase();
 
-            // const matchStatus =
-            //     selectedStatus === 'all' || rowStatus === selectedStatus;
+            
+            
             
             const matchSearch =
                 hashId_oldID.includes(searchText) ||
@@ -313,9 +313,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    //  if (statusSelect) {
-    //     statusSelect.addEventListener('change', filterRows);
-    // }
+    
+    
+    
 
     if (searchInput) {
         searchInput.addEventListener('input', filterRows);

@@ -8,10 +8,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- <section class="welcome">
-  <h2>歡迎來到健康資料平台</h2>
-  <p>探索病人的健康事件與醫療資訊。</p>
-</section> -->
 
 <section class="space-y-6 fade-in">
   <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -74,7 +70,6 @@
             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item['study_info'].ProjectStatus}}">{{item['study_info'].ProjectStatus}}</span>
           </td>
           <td class="px-6 py-4 text-right">
-            <!-- <button class="block text-blue-600 hover:text-blue-800 font-medium text-xs border border-blue-200 rounded px-2 py-1 hover:bg-blue-50">成員管理</button> -->
             <button class="block text-blue-600 hover:text-blue-800 font-medium text-xs border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
               data-bs-toggle="modal" 
               data-bs-target="#Modal_memberManage"

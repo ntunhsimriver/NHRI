@@ -80,10 +80,7 @@
   background: #55a0f5;
 }
 
-/* .navbar.bg-blue {
-  background-color: #606c72 !important;
-  color: #dadcde;
-} */
+
 .navbar.bg-blue .navbar-brand {
   color: #fff;
 }

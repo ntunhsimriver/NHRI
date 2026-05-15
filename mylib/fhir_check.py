@@ -2,10 +2,10 @@ import json
 from collections import Counter
 from models.project import Project, ProjectMember
 from blueprints import fhir 
-import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
+import models.fhir as FHIR 
 from pathlib import Path
 from datetime import datetime
-from config import BaseConfig as cfg  # 讀 config
+from config import BaseConfig as cfg  
 
 
 def find_references(obj, target_type, path=""):
@@ -110,7 +110,7 @@ def upload_FHIR_mappingID(study_id, data):
         if res_type:
             resource_counter[res_type] += 1
 
-    # replace 前：每筆 Observation 檢查 Patient / Device reference
+    
     observation_reference_summary_before, observation_reference_logs_before = collect_observation_reference_check(data)
 
     json_str = json.dumps(data, ensure_ascii=False)
@@ -132,7 +132,7 @@ def upload_FHIR_mappingID(study_id, data):
     patient_replace_logs = []
     patient_not_found = []
 
-    # 專門處理 Patient.id
+    
     for entry in data.get("entry", []):
         resource = entry.get("resource", {})
 
@@ -173,7 +173,7 @@ def upload_FHIR_mappingID(study_id, data):
                 "action": "找不到對應 ProjectMember，未替換"
             })
 
-    # replace 後：每筆 Observation 檢查 Patient / Device reference
+    
     observation_reference_summary_after, observation_reference_logs_after = collect_observation_reference_check(data)
 
     stats = {
@@ -208,33 +208,33 @@ def findReference(data):
     else:
         query = FHIR.resourceInfo.query.filter(
             FHIR.resourceInfo.ResourceType == resourceType,
-            # FHIR.resourceInfo.Type.like('%Reference(%Patient%'),
+            
             FHIR.resourceInfo.MainPatient == '1'
 
         )
 
         resource_info = query.first()
-        # if not results:
-        #     resource_info = None
-        # elif len(results) == 1:
-        #     resource_info = results[0]
-        # else:
-        #     resource_info = next(
-        #         (r for r in results if r.MainPatient == 1),
-        #         results[0] 
-        #     )
-        # print(resource_info)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         if resource_info is None:
             return  None
         else:
-            # print(resource_info)
+            
             Type = resource_info.Type
             Name = resource_info.Name
             Card = resource_info.Card
-            if '*' in Card: # 有*字表示，他是多層
+            if '*' in Card: 
                 Name = Name + '[*]'
 
-            # print(Type)
+            
 
             if 'Reference' in Type:
                 PathResult = Name + '.reference'
@@ -242,7 +242,7 @@ def findReference(data):
                 PathResult = Name
             return PathResult
 
-# 這個是補subject用的，(進來的json, 我的fhir路徑 如subject.reference, 要填進去的值 如Patient/test)
+
 def set_nested_value(data, path, value):
     """
     支援路徑中包含 [*] 的自動填充
@@ -252,24 +252,24 @@ def set_nested_value(data, path, value):
     
     current = data
     for i, key in enumerate(parts):
-        # 檢查是否包含 [*]
+        
         if '[*]' in key:
             real_key = key.replace('[*]', '')
-            # 確保該鍵值存在且是列表
-            if real_key not in current or not isinstance(current[real_key], list):
-                current[real_key] = [{}] # 至少建立一個空物件
             
-            # 剩餘的路徑遞迴處理
+            if real_key not in current or not isinstance(current[real_key], list):
+                current[real_key] = [{}] 
+            
+            
             remaining_path = ".".join(parts[i+1:])
             for item in current[real_key]:
                 set_nested_value(item, remaining_path, value)
-            return data # 陣列處理完畢，直接返回
+            return data 
             
-        # 處理最後一層
+        
         if i == len(parts) - 1:
             current[key] = value
         else:
-            # 處理中間層
+            
             current = current.setdefault(key, {})
             
     return data
@@ -280,7 +280,7 @@ def upload_FHIR_changeID(pat_id, data):
 
     resource_counter = Counter()
 
-    # 統計 ResourceType
+    
     if data.get("resourceType") == "Bundle":
         for entry in data.get("entry", []):
             resource = entry.get("resource", {})
@@ -459,7 +459,7 @@ def upload_log(result, stats, pat_id=None, study_id=None):
     if not folder_key:
         raise ValueError("pat_id 和 study_id 至少要有一個")
 
-    # 日期時間格式：20260513_153045
+    
     now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     folderName = Path(cfg.FHIRUPLOAD_DIR) / folder_key / now_str

@@ -3,7 +3,7 @@ import uuid
 from extensions import db
 from models.user import User, UserRole, UserSession, LoginFailLog
 from werkzeug.security import generate_password_hash
-import models.fhir as FHIR # 這邊是抓全部FHIR Resource的Class(就是抓全部欄位的內容)
+import models.fhir as FHIR 
 from blueprints import fhir
 from datetime import datetime, timedelta
 from config import BaseConfig as cfg
@@ -41,7 +41,7 @@ def logout():
 
 @bp.route('/register', methods=['POST'])
 def register():
-    # 先給他一個預設的uuid
+    
     new_uuid = uuid.uuid4()
     data = request.get_json()
 
@@ -49,25 +49,21 @@ def register():
     full_name = data.get('full_name')
     organization = data.get('organization')
     role = data.get('role')
-    status = data.get('active')  # 註冊的人先都給他active
-    type = data.get('type')      # 紀錄這次是按註冊還是按編輯
+    status = data.get('active')  
+    type = data.get('type')      
 
     if data.get('password'):
         password = data.get('password')
     else:
-        password = cfg.USER_DEFAULT_PASSWORD  # 管理員新增時給預設密碼
+        password = cfg.USER_DEFAULT_PASSWORD  
 
-    # 如果使用者註冊時有指定fhir_practitioner_id就直接抓，沒有就直接帶入uuid
     if data.get('fhir_practitioner_id'):
         fhir_practitioner_id = data.get('fhir_practitioner_id')
     else:
         fhir_practitioner_id = "Practitioner/" + str(new_uuid)
 
-    # 新增時，email 已存在就擋掉
     if User.query.filter_by(email=email, Del=0).first() and type == 'new':
         return jsonify({'success': False, 'message': '帳號已存在'})
-
-    # 編輯時：不要新增 user，要找原本的 user 來改
     if type == 'update':
         user = User.query.filter_by(email=email, Del=0).first()
 
@@ -80,7 +76,6 @@ def register():
         user.role = role
         user.fhir_practitioner_id = fhir_practitioner_id
 
-        # 權限/狀態被修改後，讓這個帳號目前所有登入 session 失效
         UserSession.query.filter_by(
             user_id=user.id,
             is_active=True
@@ -113,13 +108,12 @@ def register():
         message = '註冊成功'
         print(f"[REGISTER] 建立新帳號：{full_name}")
 
-    # 這邊拚FHIR json
-    pra_obj = FHIR.FHIR_Practitioner()  # 先建立空物件
+    pra_obj = FHIR.FHIR_Practitioner()  
     pra_obj.id = fhir_practitioner_id.split("/")[1]
     pra_obj.name = full_name
     pra_obj.active = status
 
-    result_json = pra_obj.to_fhir()  # 把他拚成json
+    result_json = pra_obj.to_fhir()  
     print(fhir_practitioner_id)
     print(result_json)
     FHIR_response = fhir.put_FHIR_api(fhir_practitioner_id, result_json)
@@ -138,7 +132,6 @@ def api_login():
     now = datetime.now()
     ip = request.remote_addr
 
-    # 先檢查是否已被鎖定：改成查 DB，不用 session
     fail_log = LoginFailLog.query.filter_by(
         email=email,
         ip=ip
@@ -151,37 +144,35 @@ def api_login():
                 'message': '登入失敗過多，請30分鐘後再試'
             })
         else:
-            # 已過鎖定時間，清掉
+            
             fail_log.lock_until = None
             fail_log.fail_count = 0
             db.session.commit()
 
     user = User.query.filter_by(email=email, Del=0).first()
 
-    # 帳號不存在
+    
     if not user:
         return login_failed(email, now)
 
-    # 停權判斷
+    
     if user.status is False or user.status == "False":
         return jsonify({
             'success': False,
             'message': '您的帳號已停權，請聯絡管理員恢復!!!'
         })
 
-    # 帳號存在且密碼正確
+    
     if user.check_password(password):
         username = user.full_name
         role = user.role
         fhir_practitioner_id = user.fhir_practitioner_id
 
-        # 保留原本給其他頁面用的 session
         session['username'] = username
         session['fhir_practitioner_id'] = fhir_practitioner_id
         session['role'] = role.value
 
 
-        # 同帳號登入時，讓其他裝置失效
         UserSession.query.filter_by(
             user_id=user.id,
             is_active=True
@@ -189,7 +180,7 @@ def api_login():
             'is_active': False
         })
 
-        # 建立新的 session token
+        
         token = secrets.token_urlsafe(64)
 
         new_session = UserSession(
@@ -203,7 +194,6 @@ def api_login():
 
         db.session.add(new_session)
 
-        # 登入成功，清掉 DB 裡的失敗紀錄
         fail_log = LoginFailLog.query.filter_by(
             email=email,
             ip=ip
@@ -231,7 +221,7 @@ def api_login():
             token,
             max_age=60 * 30,
             httponly=True,
-            secure=False,   # 正式 HTTPS 改 True
+            secure=False,   
             samesite='Lax'
         )
 
@@ -259,7 +249,7 @@ def login_failed(email, now):
         fail_log.fail_count += 1
         fail_log.last_failed_at = now
 
-    # 錯誤達 5 次，鎖定 30 分鐘
+    
     if fail_log.fail_count >= 5:
         fail_log.lock_until = now + timedelta(minutes=30)
         fail_log.fail_count = 0
@@ -327,7 +317,7 @@ def api_delete_user():
 
     user.Del = 1
 
-    # 如果這個帳號目前有登入，順便強制登出
+    
     UserSession.query.filter_by(
         user_id=user.id,
         is_active=True
@@ -392,7 +382,7 @@ def check_login_session():
         response.delete_cookie('session_token')
         return response
 
-    # 超過 30 分鐘無動作，強制登出
+    
     now = datetime.now()
 
     if now - user_session.last_activity > timedelta(minutes=30):
@@ -430,6 +420,6 @@ def check_login_session():
         response.delete_cookie('session_token')
         return response
 
-    # 沒超過 30 分鐘，就更新最後活動時間
+    
     user_session.last_activity = now
     db.session.commit()

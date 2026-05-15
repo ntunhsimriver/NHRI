@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, jsonif
 from blueprints import fhir 
 from blueprints import api_watch 
 import mylib.fhir_check as fhir_check
-from config import BaseConfig as cfg  # 讀 config
+from config import BaseConfig as cfg  
 import requests
 import json
 import os
@@ -14,7 +14,7 @@ from models.project import Project, ProjectMember
 from extensions import db
 import re
 from pathlib import Path
-# import shutil
+
 import pyminizip
 import tempfile
 
@@ -43,8 +43,8 @@ bp = Blueprint("pages", __name__)
 
 @bp.app_context_processor
 def inject_user():
-    # study_id = session.get('study_id')
-    # ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
+    
+    
     fhir_practitioner_id=session.get('fhir_practitioner_id')
     getProjectID = fhir.get_ProjectID(fhir_practitioner_id)
     return dict(username=session.get('username'), 
@@ -73,15 +73,15 @@ def selectproject():
         data = fhir.get_Project(session['fhir_practitioner_id'])
         return render_template('selectproject.html', data=data, script_path=url_for('static', filename='Content/Scripts/selectproject.js'))
     except Exception as e:
-        # 取得詳細的錯誤追蹤（Traceback）
+        
         exc_type, exc_value, exc_traceback = sys.exc_info()
         detailed_error = traceback.format_exception(exc_type, exc_value, exc_traceback)
         
-        # 將錯誤印在終端機方便排錯
+        
         print("".join(detailed_error))
         
-        # 將錯誤訊息傳給前端模板
-        # 在開發階段，建議直接顯示 e，正式上線再改回模糊訊息
+        
+        
         return render_template('error_page.html', message=f"錯誤原因：{str(e)}"), 503
 @bp.route('/index')
 def index_page():
@@ -94,11 +94,11 @@ def index_page():
     getProjectInfo_All = fhir.get_IndexProject(session['study_id'])
     getProjectInfo = getProjectInfo_All[0]
     getMonthProjectInfo = getProjectInfo_All[1]
-    # print(getProjectInfo_All)
+    
 
-    # CountAllData_All = fhir.countAllData(session['study_id'])
-    # CountAllData = CountAllData_All[0]
-    # getCountDataList = CountAllData_All[1:]
+    
+    
+    
     ProjectInfo = Project.query.filter_by(irb_number=session['study_id']).first()
     CountAllData_All_update_at = ProjectInfo.resource_count_updated_at
     CountAllData_All_rawdata = ProjectInfo.resource_count
@@ -106,22 +106,22 @@ def index_page():
 
     CountAllData = CountAllData_All[0]
     getCountDataList = CountAllData_All[1:]
-    # print(CountAllData_All)
+    
 
     getDevice = fhir.getDeviceCount(session['study_id'])
-    TotalDev = getDevice[0] # 總設備術
-    CountDev = getDevice[1] # 個別設備數
-    # print(getDevice)
+    TotalDev = getDevice[0] 
+    CountDev = getDevice[1] 
+    
 
     return render_template('index.html', CountDev=CountDev, TotalDev=TotalDev, getProjectInfo=getProjectInfo, getMonthProjectInfo=getMonthProjectInfo, CountAllData=CountAllData, getCountDataList=getCountDataList, CountAllData_All_update_at=CountAllData_All_update_at, script_path=url_for('static', filename='Content/Scripts/index.js'))
 
-@bp.route('/set_study_session/<study_id>/<study_name>/<study_status>') # 這個是為了先把study ID寄進去session裡面，這樣後續要抓資料比較好抓，不用再透過PI
+@bp.route('/set_study_session/<study_id>/<study_name>/<study_status>') 
 def set_study_session(study_id, study_name, study_status):
-    # 將 ID 存入 session
+    
     session['study_id'] = study_id
     session['study_name'] = study_name
     session['study_status'] = study_status
-    # 跳轉到目標頁面 (此時網址就不會帶有 ID)
+    
     return redirect(url_for('pages.index_page'))
 
 @bp.route('/caseManage')
@@ -144,58 +144,58 @@ def caseMember(study_id):
 
 @bp.route("/caseManageDetail/<case_id>/<ResearchSubjectStatus>")
 def caseManageDetail(case_id, ResearchSubjectStatus):
-    # 這裡的 case_id 就是你要的
+    
     if 'username' not in session:
         return redirect(url_for('auth.login_page'))
     elif 'study_id' not in session:
         return redirect(url_for('pages.selectproject'))
-    getPatInfo = fhir.get_Patient(case_id, session['study_id']) # 同意書可以這邊一起讀取?
+    getPatInfo = fhir.get_Patient(case_id, session['study_id']) 
     PatInfo = getPatInfo[0]
-    FirstDate = getPatInfo[1] # 最後更新日期(當作收案日)
-    getConsent = getPatInfo[2] # 抓同意書內容
-    getDeviceInfo = getPatInfo[3] # 抓所有設備的資訊
+    FirstDate = getPatInfo[1] 
+    getConsent = getPatInfo[2] 
+    getDeviceInfo = getPatInfo[3] 
 
 
-    # 這邊是問卷資料
+    
     getQAInfo = fhir.getQA(case_id)
 
 
     return render_template("caseManageDetail.html", PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, getQAInfo=getQAInfo, script_path=url_for('static', filename='Content/Scripts/caseManageDetail.js'))
 
 
-# @bp.route("/api/caseManage/<case_id>")
-# def case_encounter(case_id):
-#     result = fhir.getAllEncounter(case_id)
-#     return jsonify(result)
+
+
+
+
 
 @bp.route("/api/getEncounter_all/<case_id>")
 def api_getEnc_all(case_id):
-    # print(enc_id)
+    
     getAllEncounter = fhir.getAllEncounter(case_id)
 
-    return jsonify(getAllEncounter) # 使用 jsonify 確保格式正確
+    return jsonify(getAllEncounter) 
 
 @bp.route("/api/getTreatment_all/<case_id>/<Resource>")
 def api_getTreat_all(case_id, Resource):
     getAllData = fhir.getAllTreatment(case_id, [Resource])
 
-    return jsonify(getAllData) # 使用 jsonify 確保格式正確
+    return jsonify(getAllData) 
 
 @bp.route("/api/getEncounter/<enc_id>")
 def api_getEnc(enc_id):
     print(enc_id)
     getEncInfo = fhir.getEnc(enc_id)
 
-    return jsonify(getEncInfo) # 使用 jsonify 確保格式正確
+    return jsonify(getEncInfo) 
 
 
 @bp.route("/deviceDetail/<pat_id>/<device_id>")
 def deviceDetail(pat_id, device_id):
 
 
-    PatInfo = fhir.get_DevicePatient(pat_id, session['study_id']) # 同意書可以這邊一起讀取?
+    PatInfo = fhir.get_DevicePatient(pat_id, session['study_id']) 
 
-    # getObs14daysResult = fhir.getObs14days("", device_id)
+    
     return render_template("deviceDetail.html", PatInfo=PatInfo, device_id=device_id, script_path=url_for('static', filename='Content/Scripts/deviceDetail.js'))
 
 @bp.route("/api/deviceDetailObs14days/<device_id>")
@@ -204,7 +204,7 @@ def api_deviceDetail(device_id):
     start = request.args.get("start")
     end = request.args.get("end")
     getObs14daysResult = fhir.getObs14days("", device_id, start, end)
-    return jsonify(getObs14daysResult) # 使用 jsonify 確保格式正確
+    return jsonify(getObs14daysResult) 
 
 @bp.route("/api/caseManageObs14days/<pat_id>")
 def api_patObs14days(pat_id):
@@ -215,7 +215,7 @@ def api_patObs14days(pat_id):
     getObs14daysResult = fhir.getObs14days(pat_id, "", start, end)
     print(getObs14daysResult)
 
-    return jsonify(getObs14daysResult) # 使用 jsonify 確保格式正確
+    return jsonify(getObs14daysResult) 
 
 
 @bp.route('/api/addPatient', methods=['POST'])
@@ -270,10 +270,10 @@ def deviceManage():
     elif 'study_id' not in session:
         return redirect(url_for('pages.selectproject'))
     getDevice = fhir.getDevice(session['study_id'])
-    data = getDevice[0] # 所有device的內容
-    TotalDev = getDevice[1] # 總設備術
-    CountDev = getDevice[2] # 個別設備數
-    status_counts_updated_at = getDevice[3] # 個別設備數
+    data = getDevice[0] 
+    TotalDev = getDevice[1] 
+    CountDev = getDevice[2] 
+    status_counts_updated_at = getDevice[3] 
 
     return render_template('deviceManage.html', data=data, TotalDev=TotalDev, CountDev=CountDev, status_counts_updated_at=status_counts_updated_at, script_path=url_for('static', filename='Content/Scripts/deviceManage.js'))
 
@@ -355,7 +355,7 @@ def projectManage():
         return redirect(url_for('auth.login_page'))
     data = fhir.get_Project(session['fhir_practitioner_id'])    
     print(data)
-    # PatInfo = fhir.getProjectManagePatient(session['study_id'])
+    
 
     return render_template('projectManage.html', data=data, script_path=url_for('static', filename='Content/Scripts/projectManage.js'))
 
@@ -368,8 +368,8 @@ def api_addProject():
 
 @bp.route('/api/addMember', methods=['POST'])
 def api_addMember():
-    # if session['study_status'] == "withdrawn":
-    #     return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
+    
+    
     data = request.get_json()
     member_result = data['item_member']
     getMember_proid = data['item_proid']
@@ -385,12 +385,12 @@ def api_uploadFHIR():
     if session['study_status'] == "withdrawn":
         return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
     file = request.files.get('file')
-    file_type = request.form.get('fileType')  # 這樣拿
-    pat_id = request.form.get('patid')  # 這樣拿
+    file_type = request.form.get('fileType')  
+    pat_id = request.form.get('patid')  
     study_id = session['study_id']
     print(file_type)
     if file:
-        # 1. 定義上傳路徑
+        
         subfilename = file.filename.split('.')[-1]
         now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         new_filename = now + '.' + subfilename
@@ -399,17 +399,17 @@ def api_uploadFHIR():
         else:
             upload_dir = "./static/data/" + file_type + '/'
 
-        # 2. 檢查資料夾是否存在，不存在就建立 (核心修復)
+        
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
             print(f"建立資料夾: {upload_dir}")
 
-        # 3. 執行存檔
+        
         save_path = os.path.join(upload_dir, new_filename)
         file.save(save_path)
-        # 指針歸0
+        
         file.seek(0)
-        # data = json.load(file)
+        
         
         if file_type == 'FHIR':
             try:
@@ -466,7 +466,7 @@ def api_uploadFHIR():
                 })
         
         elif file_type == 'Consent':
-            result = fhir.upload_Consent(study_id, pat_id, new_filename) # 直接把檔案轉成 Python 字典
+            result = fhir.upload_Consent(study_id, pat_id, new_filename) 
             if result.ok:
                 return jsonify({"success": True, "message": "已收到同意書: " + file.filename})
             else:
@@ -547,8 +547,8 @@ def api_uploadFHIR():
                 return jsonify({"success": True, "message": "已收到問卷: " + file.filename})
             else:
                 return jsonify({"success": False, "message": "上傳失敗"})
-        # elif file_type == 'FHIR_ChangeId':
-        #     data = json.load(file)
+        
+        
     return jsonify({"success": False, "message": "上傳失敗"})
 
 @bp.route('/api/download', methods=['GET'])
@@ -567,16 +567,16 @@ def download_export():
     if not zip_password:
         return {"error": "zip_password.txt 內容是空的"}, 400
 
-    # 暫存 zip 檔
+    
     temp_zip = Path(cfg.NDJSON_DIR) / f"{folder_name}.zip"
 
-    # 收集資料夾內所有檔案
+    
     file_list = []
     relative_list = []
 
     for root, dirs, files in os.walk(base_path):
         for file in files:
-            # 不把密碼檔自己壓進去
+            
             if file == "zip_password.txt":
                 continue
 
@@ -589,7 +589,7 @@ def download_export():
     if not file_list:
         return {"error": "沒有可壓縮的檔案"}, 400
 
-    # 建立加密 zip
+    
     pyminizip.compress_multiple(
         file_list,
         relative_list,
@@ -627,7 +627,7 @@ def save_all_project_member():
         return jsonify({"error": "缺少 project_id"}), 400
 
     try:
-        # 1. 取出目前 DB 裡這個 project 還有效的資料
+        
         existing_members = ProjectMember.query.filter_by(
             project_id=project_id,
             Del=0
@@ -638,7 +638,7 @@ def save_all_project_member():
             for m in existing_members
         }
 
-        # 2. 整理前端送來的資料
+        
         incoming_map = {}
 
         for item in rows:
@@ -657,22 +657,22 @@ def save_all_project_member():
                 "created_at": created_at
             }
 
-        # 3. DB 有，但前端沒有 => 標記刪除
+        
         for key, member in existing_map.items():
             if key not in incoming_map:
                 member.Del = 1
 
-        # 4. 前端有，但 DB 沒有 => 新增
+        
         for key, item in incoming_map.items():
             if key in existing_map:
-                # 一模一樣已存在，不需要重建
+                
                 continue
 
             old_patient_id = item["old_patient_id"]
             new_patient_id = item["new_patient_id"]
             created_at = item["created_at"]
 
-            # 如果 Patient 不存在，才新增 FHIR Patient
+            
             PatInfo = fhir.read_FHIR_api(new_patient_id)
 
             if PatInfo.get("resourceType") != "Patient":
@@ -710,7 +710,7 @@ def save_all_project_member():
 def api_test():
     study_id = 'IRB-2026-001'
     data = request.get_json()
-    # result = fhir.check_export_folder(data)
+    
     result, stats = fhir_check.upload_FHIR_mappingID(study_id, data)
 
     return jsonify(result)
@@ -857,7 +857,7 @@ def api_save_project_devices():
         project.device_list = None
     else:
         project.device_list = json.dumps(device_list, ensure_ascii=False)
-    # project.device_count = len(device_list)
+    
 
     db.session.commit()
 

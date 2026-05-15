@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('click', function (e) {
 
-        // 匯出
+        
         const exportBtn = e.target.closest('.btn-export');
         if (exportBtn) {
             const studyId = exportBtn.dataset.studyId;
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // 下載
+        
         const downloadBtn = e.target.closest('.btn-download');
         if (downloadBtn) {
             const projectId = downloadBtn.dataset.projectId;
@@ -26,10 +26,10 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 async function ExportAPI(projectId) {
-  // 跳出輸入框
+  
   const password = prompt("請輸入ZIP壓縮密碼：");
 
-  // 使用者按取消
+  
   if (password === null) {
     return;
   }
@@ -44,7 +44,7 @@ async function ExportAPI(projectId) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         project_id: projectId,
-        zip_password: password   // 👈 把密碼送出去
+        zip_password: password   
       })
     });
 
@@ -59,10 +59,10 @@ async function ExportAPI(projectId) {
 }
 
 function  downloadData(projectId, folderName, status) {
-  // body...
+  
     if (status === "completed") {
         const url = `/api/download?folder_name=${projectId}/${folderName}`;
-        // 👉 直接跳下載
+        
         window.location.href = url;
         } else if (status === "running") {
           alert("資料仍在匯出中，請稍後再下載......");

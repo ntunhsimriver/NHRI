@@ -1,4 +1,3 @@
-// 新增個案及關連個案
 document.querySelectorAll('.progress-bar').forEach(el => {
     el.style.width = el.dataset.width + '%';
 });
@@ -21,7 +20,6 @@ document.querySelectorAll('[data-url]').forEach(btn => {
     });
 });
 
-// 先宣告
 const form = document.getElementById('registerForm');
 const patid = document.getElementById("addPatId");
 

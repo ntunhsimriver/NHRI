@@ -27,10 +27,10 @@ class User(db.Model):
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 
-    # 使用 @property 讓它變成一個「虛擬屬性」
+    
     @property
     def roleName(self):
-        # 把資料庫的 SUPER_ADMIN 轉成漂亮的人類文字
+        
         role_map = {
             UserRole.SUPER_ADMIN: "超級管理員",
             UserRole.PI: "計畫主持人",
@@ -38,7 +38,7 @@ class User(db.Model):
         }
         return role_map.get(self.role, "未知角色")
 
-# 記錄使用者登入資訊
+
 class UserSession(db.Model):
     __tablename__ = 'user_sessions'
 

@@ -8,10 +8,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- <section class="welcome">
-  <h2>歡迎來到健康資料平台</h2>
-  <p>探索病人的健康事件與醫療資訊。</p>
-</section> -->
 
 {% if PatInfo %}
 <main class="flex-1 overflow-auto bg-slate-50 p-8">
@@ -27,7 +23,6 @@
           <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ResearchSubjectStatus}}">{{ResearchSubjectStatus}}</span>
         </div>
         <p class="text-sm text-slate-500">{{study_id}} | {{PatInfo.gender}}
-         <!-- | 最後訪視: 2024-01-05 -->
        </p>
       </div>
 
@@ -125,19 +120,8 @@
               </div>
               <div>
                 <p class="text-lg font-semibold text-slate-900">{{item.model}} (ID: {{item.id}})</p>
-                <!-- <p class="text-sm text-slate-500">最後同步: 2024-05-15 14:30</p> -->
               </div>
             </div>
-<!--             <div class="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
-              <div>
-                <span class="text-xs text-slate-500">電池電量</span>
-                <p class="font-mono text-lg font-medium text-emerald-600">85%</p>
-              </div>
-              <div>
-                <span class="text-xs text-slate-500">今日步數</span>
-                <p class="font-mono text-lg font-medium text-slate-900">4,520</p>
-              </div>
-            </div> -->
           </div>
           {% endfor %}
         </div>
@@ -177,12 +161,10 @@
           <div width="100%" height="100%">
               <canvas id="myChart-Vitals"  width="100%" height="50%"></canvas>
           </div>
-          <!-- <canvas id="myChart-Vitals" width="100%" height="50%"></canvas> -->
 
           
         </div>
 
-        <!-- DiagnosticReport Timeline start -->
         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
           <h3
             class="mb-6 text-lg font-bold text-slate-900 tw-treatment-list-toggle"
@@ -201,7 +183,6 @@
             </div>
           </div>
         </div>
-        <!-- DiagnosticReport Timeline end -->
       </div>
         
       
@@ -226,7 +207,6 @@
             </div>
           </div>
 
-        <!-- Procedure Timeline start -->
         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
           <h3
             class="mb-6 text-lg font-bold text-slate-900 tw-treatment-list-toggle"
@@ -245,9 +225,6 @@
             </div>
           </div>
         </div>
-        <!-- Procedure Timeline end -->
-
-        <!-- MedicationRequest Timeline start -->
         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
           <h3
             class="mb-6 text-lg font-bold text-slate-900 tw-treatment-list-toggle"
@@ -266,7 +243,6 @@
             </div>
           </div>
         </div>
-        <!-- MedicationRequest Timeline end -->
       </div>
 
 
@@ -276,7 +252,6 @@
             <h3 class="text-lg font-bold text-slate-900">已填寫問卷</h3>
             
 
-            <!-- 隱藏的上傳口 -->
             <input type="file" id="fileInput_QA" hidden accept=".json">
             <button  type="button" id="fileInput_QA_btn" 
               class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput_QA" data-type="FHIR_pat">
@@ -365,7 +340,6 @@
           <div class="flex justify-between">
             <h3 class="text-lg font-bold text-slate-900">已簽署文件</h3>
 
-            <!-- 隱藏的上傳口 -->
             <input type="file" id="fileInput"  hidden  accept=".pdf, image/*">
             <button  type="button" id="fileInput_Consent_btn" 
 =              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput" data-type="Consent">
@@ -375,7 +349,6 @@
           </div>
           <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             
-            <!-- 迴圈開始 -->
 
             {% if getConsent %}
               {% for item in getConsent %}
@@ -401,7 +374,6 @@
               </div>
               {% endfor %}
             {% endif %}
-            <!-- 迴圈結束 -->
           </div>
         </div>
       </div>
@@ -411,7 +383,6 @@
 
 
 
-  <!-- 這邊放問卷裡面的視窗 -->
   <div class="modal fade" id="Modal_Consent" tabindex="-1" aria-labelledby="Modal_Consent_Label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content border-0 shadow-2xl rounded-xl">
@@ -434,7 +405,6 @@
   </div>
 
 
-  <!-- 這邊是更新收案日期 -->
   <div class="modal fade" id="Modal_updatePatient" tabindex="-1" aria-labelledby="Modal_updatePatient_Label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md">
       <form id="registerForm" class="modal-content border-0 shadow-2xl rounded-xl">
@@ -461,16 +431,6 @@
                 <option value="on-study">On-study</option>
                 <option value="follow-up">Follow-up</option>
                 <option value="withdrawn">Withdrawn</option>
-                <!-- <option value="candidate">Candidate</option>
-                <option value="eligible">Eligible</option>
-                <option value="ineligible">Ineligible</option>
-                <option value="not-registered">Not Registered</option>
-                <option value="off-study">Off-study</option>
-                <option value="on-study-intervention">On-study-intervention</option>
-                <option value="on-study-observation">On-study-observation</option>
-                <option value="pending-on-study">Pending on-study</option>
-                <option value="potential-candidate">Potential Candidate</option>
-                <option value="screening">Screening</option> -->
                 
               </select>
 

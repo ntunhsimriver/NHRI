@@ -89,7 +89,7 @@ function handleFilter() {
     statusText.innerText = "資料載入中...";
     statusText.classList.remove('text-green-500', 'text-red-500');
     statusText.classList.add('text-blue-500');
-    // 顯示 loading
+    
     if (spinner) {
         spinner.classList.remove("hidden");
     }
@@ -109,12 +109,12 @@ function handleFilter() {
             statusText.classList.remove('text-blue-500', 'text-red-500');
             statusText.classList.add('text-green-500');
 
-            // 隱藏 loading
+            
             if (spinner) {
                 spinner.classList.add("hidden");
             }
 
-            // 直接畫圖
+            
             drawChart();
         })
         .catch(err => {
@@ -128,7 +128,7 @@ function handleFilter() {
         });
 }
 
-// 繪圖
+
 function drawChart() {
     console.log("drawChart called");
 

@@ -1,4 +1,4 @@
-# models/history.py
+
 import uuid
 from datetime import datetime
 from extensions import db
@@ -9,11 +9,11 @@ from sqlalchemy import text
 class Project(db.Model):
     __tablename__ = "Project_Management"
 
-    irb_number = db.Column(db.String(50), primary_key=True) # [PK] character varying(50)
+    irb_number = db.Column(db.String(50), primary_key=True) 
     name = db.Column(db.String(255), nullable=False) #計畫名稱
-    pi_id = db.Column(db.Text, nullable=True) # 關聯到您之前的 User 模型
-    fhir_study_id = db.Column(db.String(64)) # 對應 FHIR 資源的 ID
-    status = db.Column(db.String(64), default='ACTIVE') # 狀態
+    pi_id = db.Column(db.Text, nullable=True) 
+    fhir_study_id = db.Column(db.String(64)) 
+    status = db.Column(db.String(64), default='ACTIVE') 
     dataType = db.Column(db.String(255), nullable=False) #計畫名稱
     Del = db.Column(db.SmallInteger, default=0)
     Assistant = db.Column(db.Text)
@@ -61,8 +61,8 @@ class ProjectMember(db.Model):
     old_patient_id = db.Column(db.Text, nullable=False)
     new_patient_id = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, server_default=text("timezone('Asia/Taipei', now())"))
-    Del = db.Column(db.SmallInteger, nullable=True)   # NULL = 還活著
-    data_count = db.Column(db.Integer, default=0)   # 資料量計算
+    Del = db.Column(db.SmallInteger, nullable=True)   
+    data_count = db.Column(db.Integer, default=0)   
     data_count_updated_at = db.Column(
         db.DateTime,
         server_default=text("timezone('Asia/Taipei', now())"),
