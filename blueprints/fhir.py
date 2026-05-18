@@ -1510,3 +1510,53 @@ def cleanup_all_old_export_folders(days=90):
 
     print(f"[CLEANUP] 共刪除 {total_deleted} 個超過 {days} 天的匯出資料夾")
     return total_deleted
+
+
+
+
+def create_page_visit_audit_event(user_practitioner_id, username, path, endpoint=None, method="GET", ip=None):
+    return {
+        "resourceType": "AuditEvent",
+        "type": {
+            "system": "http://terminology.hl7.org/CodeSystem/audit-event-type",
+            "code": "rest",
+            "display": "RESTful Operation"
+        },
+        "action": "R",
+        "recorded": datetime.now().isoformat(),
+        "outcome": "0",
+        "agent": [
+            {
+                "who": {
+                    "reference": user_practitioner_id,
+                    "display": username
+                },
+                "requestor": True,
+                "network": {
+                    "address": ip or "",
+                    "type": "2"
+                }
+            }
+        ],
+        "source": {
+            "observer": {
+                "display": "NHRI System"
+            }
+        },
+        "entity": [
+            {
+                "name": path,
+                "description": f"User visited page: {path}",
+                "detail": [
+                    {
+                        "type": "endpoint",
+                        "valueString": endpoint or ""
+                    },
+                    {
+                        "type": "method",
+                        "valueString": method
+                    }
+                ]
+            }
+        ]
+    }

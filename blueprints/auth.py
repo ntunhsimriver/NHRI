@@ -382,7 +382,6 @@ def check_login_session():
         response.delete_cookie('session_token')
         return response
 
-    
     now = datetime.now()
 
     if now - user_session.last_activity > timedelta(minutes=30):
@@ -420,6 +419,26 @@ def check_login_session():
         response.delete_cookie('session_token')
         return response
 
-    
+    # 到這裡才代表登入有效，這裡再記 AuditEvent
+    if (
+        not request.path.startswith("/static")
+        and request.path != "/favicon.ico"
+    ):
+        try:
+            audit_event = fhir.create_page_visit_audit_event(
+                user_practitioner_id=user.fhir_practitioner_id,
+                username=user.full_name,
+                path=request.path,
+                endpoint=request.endpoint,
+                method=request.method,
+                ip=request.remote_addr
+            )
+            print(audit_event)
+            res = fhir.post_FHIR_api(audit_event, 'AuditEvent')
+            print(res.json())
+
+        except Exception as e:
+            print("[AUDIT EVENT] 紀錄失敗：", e)
+
     user_session.last_activity = now
     db.session.commit()
