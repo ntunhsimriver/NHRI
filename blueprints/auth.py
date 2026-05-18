@@ -362,7 +362,32 @@ def check_login_session():
         '/api/trans_watch',
     ]
 
-    if any(request.path.startswith(path) for path in public_paths):
+    is_public_path = any(request.path.startswith(path) for path in public_paths)
+
+    # public path 也想記錄的話，放在 return 前
+    # 但 static / favicon 通常不要記
+    if (
+        not request.path.startswith("/static")
+        and request.path != "/favicon.ico"
+    ):
+        try:
+            audit_event = fhir.create_page_visit_audit_event(
+                user_practitioner_id=session.get("fhir_practitioner_id") or "Practitioner/anonymous",
+                username=session.get("username") or "anonymous",
+                path=request.path,
+                endpoint=request.endpoint,
+                method=request.method,
+                ip=request.remote_addr
+            )
+
+            res = fhir.post_FHIR_api(audit_event, 'AuditEvent')
+            print("[AUDIT]", request.method, request.path, res.status_code)
+
+        except Exception as e:
+            print("[AUDIT EVENT] 紀錄失敗：", e)
+
+    # public path 不做登入檢查
+    if is_public_path:
         return
 
     token = request.cookies.get('session_token')
@@ -418,27 +443,6 @@ def check_login_session():
         response = redirect(url_for('auth.login_page'))
         response.delete_cookie('session_token')
         return response
-
-    # 到這裡才代表登入有效，這裡再記 AuditEvent
-    if (
-        not request.path.startswith("/static")
-        and request.path != "/favicon.ico"
-    ):
-        try:
-            audit_event = fhir.create_page_visit_audit_event(
-                user_practitioner_id=user.fhir_practitioner_id,
-                username=user.full_name,
-                path=request.path,
-                endpoint=request.endpoint,
-                method=request.method,
-                ip=request.remote_addr
-            )
-            print(audit_event)
-            res = fhir.post_FHIR_api(audit_event, 'AuditEvent')
-            print(res.json())
-
-        except Exception as e:
-            print("[AUDIT EVENT] 紀錄失敗：", e)
 
     user_session.last_activity = now
     db.session.commit()
