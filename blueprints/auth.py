@@ -359,7 +359,7 @@ def check_login_session():
         '/api/logout',
         '/register',
         '/static',
-        '/api/trans_watch',
+        '/api/trans_watch','/api/check-session',
     ]
 
     is_public_path = any(request.path.startswith(path) for path in public_paths)
@@ -369,6 +369,7 @@ def check_login_session():
     if (
         not request.path.startswith("/static")
         and request.path != "/favicon.ico"
+        and request.path != "/api/check-session"
     ):
         try:
             audit_event = fhir.create_page_visit_audit_event(
@@ -409,7 +410,7 @@ def check_login_session():
 
     now = datetime.now()
 
-    if now - user_session.last_activity > timedelta(minutes=30):
+    if now - user_session.last_activity > timedelta(minutes=1):
         user_session.is_active = False
         db.session.commit()
 
@@ -446,3 +447,56 @@ def check_login_session():
 
     user_session.last_activity = now
     db.session.commit()
+
+@bp.route('/api/check-session', methods=['POST'])
+def api_check_session():
+    token = request.cookies.get('session_token')
+
+    if not token:
+        session.clear()
+        return jsonify({
+            'success': False,
+            'expired': True,
+            'message': '尚未登入'
+        }), 401
+
+    user_session = UserSession.query.filter_by(
+        session_token=token,
+        is_active=True
+    ).first()
+
+    if not user_session:
+        session.clear()
+        response = jsonify({
+            'success': False,
+            'expired': True,
+            'message': '登入狀態已失效'
+        })
+        response.delete_cookie('session_token')
+        return response, 401
+
+
+    now = datetime.now()
+    print(now)
+
+    if now - user_session.last_activity > timedelta(minutes=30):
+        user_session.is_active = False
+        db.session.commit()
+
+        session.clear()
+
+        response = jsonify({
+            'success': False,
+            'expired': True,
+            'message': '登入已逾時'
+        })
+        response.delete_cookie('session_token')
+        return response, 401
+
+    user_session.last_activity = now
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'expired': False
+    })

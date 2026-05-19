@@ -93,8 +93,9 @@ def check_range(value, min_value, max_value):
 # 轉土撥鼠的東西
 def handler_watch(data, project_type):
     print(len(data))
-    if project_type != "麗臺手錶":
-        data = watch_mapping_patient(data)
+    # if project_type != "麗臺手錶":
+    data = watch_mapping_patient(data)
+    print(data)
     inputdata = {
         "ProjectGroup": "THBC_NHRI",
         "Project": project_type}
@@ -215,6 +216,7 @@ def Watch_leadtek(df):
             }
         
         result_data.append(data)
+    print(result_data)
     return result_data
 
 STEPS_MAX = 100000
