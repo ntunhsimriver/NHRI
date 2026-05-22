@@ -41,6 +41,12 @@ function sendList() {
         const oldPatientId = oldPatientInput?.value.trim() || "";
         const newPatientId = newPatientInput?.value.trim() || "";
 
+        // 已刪除列且原有ID空白，不送出、不檢查
+        if (isDeleted && !oldPatientId) {
+            return;
+        }
+
+        // 原有ID格式檢查
         if (!oldPatientId.startsWith("Patient/") || oldPatientId === "Patient/") {
             hasError = true;
             oldPatientInput?.classList.add("border-red-500");
@@ -50,8 +56,7 @@ function sendList() {
             oldPatientInput?.classList.remove("border-red-500");
         }
 
-        // 檢查原有ID不可重複
-        // 如果 row-deleted 也要納入重複檢查，把 !isDeleted 條件拿掉
+        // 未刪除列才檢查 oldPatientId 不可重複
         if (!isDeleted) {
             if (oldPatientSet.has(oldPatientId)) {
                 hasError = true;
@@ -63,6 +68,7 @@ function sendList() {
             oldPatientSet.add(oldPatientId);
         }
 
+        // 資料不足就不送出
         if (!projectId || !oldPatientId || !newPatientId) {
             return;
         }

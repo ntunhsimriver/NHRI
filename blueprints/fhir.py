@@ -657,7 +657,16 @@ def get_Project(pi_id):
         })
 
     return getResult
-def get_device_query_period(device_id, start_date, end_date, study_id=None):
+def get_device_query_period(device_id, start_date=None, end_date=None, study_id=None):
+    device_id = str(device_id or "").strip()
+    study_id = str(study_id or "").strip() if study_id else None
+
+    if start_date is None:
+        start_date = date(1900, 1, 1)
+
+    if end_date is None:
+        end_date = date.today()
+
     query = FHIR.device_history.query.filter(
         FHIR.device_history.device_id == device_id,
         FHIR.device_history.start_datetime <= datetime.combine(end_date, datetime.max.time())
@@ -667,7 +676,7 @@ def get_device_query_period(device_id, start_date, end_date, study_id=None):
             FHIR.device_history.end_datetime >= datetime.combine(start_date, datetime.min.time())
         )
     )
-    print(start_date, end_date)
+
     if study_id:
         query = query.filter(
             FHIR.device_history.project_id == study_id
@@ -676,21 +685,19 @@ def get_device_query_period(device_id, start_date, end_date, study_id=None):
     history = query.order_by(
         FHIR.device_history.start_datetime.desc()
     ).first()
-    print(study_id)
-    print(history)
 
     if not history:
         return None, None
 
     bind_start = history.start_datetime.date() if history.start_datetime else start_date
     bind_end = history.end_datetime.date() if history.end_datetime else end_date
-    print(bind_start, bind_end)
+
     real_start = max(start_date, bind_start)
     real_end = min(end_date, bind_end)
 
     if real_start > real_end:
         return None, None
-    print(real_start, real_end)
+
     return real_start, real_end
 
 def getObs14days(PatID, DeviceID, start, end, study_id=None): 
@@ -709,8 +716,8 @@ def getObs14days(PatID, DeviceID, start, end, study_id=None):
     if DeviceID:
         real_start, real_end = get_device_query_period(
             DeviceID,
-            start_date,
-            end_date,
+            start_date=start_date,
+            end_date=end_date,
             study_id=study_id
         )
 
@@ -811,7 +818,7 @@ def getObs14days(PatID, DeviceID, start, end, study_id=None):
 
     return sbp_list, dbp_list, hr_list, sorted_dates
 
-def getDeviceCount_toSQL(study_id, new_device_id=None):
+def getDeviceCount_toSQL(study_id, new_device_id=None, start=None, end=None):
     result = []
 
     ProjectInfo = Project.query.filter_by(irb_number=study_id).first()
@@ -819,6 +826,16 @@ def getDeviceCount_toSQL(study_id, new_device_id=None):
     if ProjectInfo is None:
         print("找不到 ProjectInfo:", study_id)
         return result
+
+    # 使用者有傳 start/end 就用；沒傳就先給 None，後面由 device_history 決定
+    start_date = None
+    end_date = None
+
+    if start:
+        start_date = datetime.strptime(start, "%Y-%m-%d").date()
+
+    if end:
+        end_date = datetime.strptime(end, "%Y-%m-%d").date()
 
     device_data = []
 
@@ -842,7 +859,6 @@ def getDeviceCount_toSQL(study_id, new_device_id=None):
     if new_device_id and new_device_id not in device_ids:
         device_ids.append(new_device_id)
 
-    
     device_ids = list(dict.fromkeys(
         str(device_id).strip()
         for device_id in device_ids
@@ -856,17 +872,41 @@ def getDeviceCount_toSQL(study_id, new_device_id=None):
     device_list = ",".join(device_ids)
 
     getFHIR = FHIRData_Handle(
-        None, f"Device?_id={device_list}&_sort=patient&_sort=status&_count=100", 6, 1
+        None,
+        f"Device?_id={device_list}&_sort=patient&_sort=status&_count=100",
+        6,
+        1
     )
 
     for device in getFHIR:
-        countData = FHIRData_Handle(
-            None, f"Observation?device=Device/{device.id}&_summary=count", 1, 1
-        )[0].SummaryCount
+        real_start, real_end = get_device_query_period(
+            device.id,
+            start_date=start_date,
+            end_date=end_date,
+            study_id=study_id
+        )
+
+        # 沒有 device_history 區間：count 給 0
+        if not real_start or not real_end:
+            countData = 0
+            count_query = None
+        else:
+            count_query = (
+                f"Observation?"
+                f"device=Device/{device.id}"
+                f"&date=ge{real_start.isoformat()}"
+                f"&date=le{real_end.isoformat()}"
+                f"&_summary=count"
+            )
+
+            count_rows = FHIRData_Handle(None, count_query, 1, 1)
+            countData = count_rows[0].SummaryCount if count_rows else 0
 
         result.append({
             "device_id": device.id,
-            "count": countData
+            "count": countData,
+            "query_start": real_start.isoformat() if real_start else None,
+            "query_end": real_end.isoformat() if real_end else None
         })
 
     status_counts = Counter(

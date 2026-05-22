@@ -24,29 +24,53 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
+async function ExportAPI(projectId, event) {
+  let password = "";
 
-async function ExportAPI(projectId) {
-  
-  const password = prompt("請輸入ZIP壓縮密碼：");
+  while (true) {
+    password = prompt("請輸入ZIP壓縮密碼：");
 
-  
-  if (password === null) {
-    return;
+    if (password === null) {
+      alert("已取消匯出");
+      return;
+    }
+
+    password = password.trim();
+
+    if (!password) {
+      alert("ZIP壓縮密碼不可空白");
+      continue;
+    }
+
+    break;
   }
 
-  const button = event.currentTarget;
-  button.disabled = true;
-  button.innerText = '匯出中...';
+  const button = event?.currentTarget;
+  if (button) {
+    button.disabled = true;
+    button.innerText = '匯出中...';
+  }
 
   try {
-    await fetch('/api/export', {
+    const res = await fetch('/api/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         project_id: projectId,
-        zip_password: password   
+        zip_password: password
       })
     });
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      alert(result.message || '匯出失敗');
+      if (button) {
+        button.disabled = false;
+        button.innerText = '匯出';
+      }
+      return;
+    }
 
     setTimeout(() => {
       window.location.reload();
@@ -55,6 +79,11 @@ async function ExportAPI(projectId) {
   } catch (err) {
     console.error(err);
     alert('匯出失敗');
+
+    if (button) {
+      button.disabled = false;
+      button.innerText = '匯出';
+    }
   }
 }
 
