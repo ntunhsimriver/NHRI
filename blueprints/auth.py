@@ -62,10 +62,10 @@ def register():
     else:
         fhir_practitioner_id = "Practitioner/" + str(new_uuid)
 
-    if User.query.filter_by(email=email, Del=0).first() and type == 'new':
+    if User.query.filter_by(email=email).first() and type == 'new':
         return jsonify({'success': False, 'message': '帳號已存在'})
     if type == 'update':
-        user = User.query.filter_by(email=email, Del=0).first()
+        user = User.query.filter_by(email=email).first()
 
         if not user:
             return jsonify({'success': False, 'message': '找不到使用者'})
@@ -149,7 +149,7 @@ def api_login():
             fail_log.fail_count = 0
             db.session.commit()
 
-    user = User.query.filter_by(email=email, Del=0).first()
+    user = User.query.filter_by(email=email).first()
 
     
     if not user:
@@ -171,6 +171,7 @@ def api_login():
         session['username'] = username
         session['fhir_practitioner_id'] = fhir_practitioner_id
         session['role'] = role.value
+        session['user_id'] = str(user.id)
 
 
         UserSession.query.filter_by(
@@ -282,16 +283,16 @@ def settings():
 
     rolename = session['role']
     if rolename == "SUPER_ADMIN":
-        users = User.query.filter(User.Del==0).all()
+        users = User.query.all()
 
     elif rolename == "PI":
         users = User.query.filter(
-            User.role.in_([UserRole.PI, UserRole.ASSISTANT]), User.Del==0
+            User.role.in_([UserRole.PI, UserRole.ASSISTANT])
         ).all()
 
     else:
         users = User.query.filter(
-            User.role == UserRole.ASSISTANT, User.Del==0
+            User.role == UserRole.ASSISTANT
         ).all()
     return render_template('settings.html', users=users, script_path=url_for('static', filename='Content/Scripts/settings.js'))
 
@@ -302,22 +303,64 @@ def change_password():
     
     return render_template('change_password.html', script_path=url_for('static', filename='Content/Scripts/change_password.js'))
 
-@bp.route('/api/delete_user', methods=['POST'])
-def api_delete_user():
+
+@bp.route('/api/change_password', methods=['POST'])
+def api_change_password():
+    data = request.get_json() or {}
+
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    if not old_password or not new_password:
+        return jsonify({
+            'success': False,
+            'message': '請輸入原始密碼與新密碼'
+        })
+
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return jsonify({
+            'success': False,
+            'message': '登入狀態已失效，請重新登入'
+        })
+
+    user = User.query.filter_by(id=user_id, Del=0).first()
+
+    if not user:
+        return jsonify({
+            'success': False,
+            'message': '找不到使用者'
+        })
+
+    if not user.check_password(old_password):
+        return jsonify({
+            'success': False,
+            'message': '原有密碼輸入錯誤'
+        })
+
+    user.password_hash = generate_password_hash(new_password)
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'redirect': '/logout'
+    })
+    
+@bp.route('/api/reset_password', methods=['POST'])
+def api_reset_password():
     data = request.get_json()
     email = data.get('email')
-
-    if not email:
-        return jsonify({'success': False, 'message': '缺少 email'})
-
+    
     user = User.query.filter_by(email=email, Del=0).first()
 
     if not user:
         return jsonify({'success': False, 'message': '找不到使用者'})
 
-    user.Del = 1
+    new_hashed_password = generate_password_hash(cfg.USER_DEFAULT_PASSWORD)
+    user.password_hash = new_hashed_password
 
-    
+    # 密碼被重設後，強制該使用者所有已登入裝置登出
     UserSession.query.filter_by(
         user_id=user.id,
         is_active=True
@@ -327,29 +370,11 @@ def api_delete_user():
 
     db.session.commit()
 
-    return jsonify({'success': True, 'message': '已刪除成功!'})
+    return jsonify({
+        'success': True,
+        'message': '密碼已還原成預設密碼，該使用者已強制登出'
+    })
 
-
-@bp.route('/api/change_password', methods=['POST'])
-def api_change_password():
-    data = request.get_json()
-    old_password = data.get('old_password')
-    new_password = data.get('new_password')
-    
-    user = User.query.filter_by(full_name=session['username'], Del=0).first()
-
-    if not user:
-        return jsonify({'success': False, 'message': '找不到使用者'})
-
-    if user.check_password(old_password):
-        new_hashed_password = generate_password_hash(new_password)
-        user.password_hash = new_hashed_password
-        db.session.commit()
-
-        return jsonify({'success': True, 'redirect': '/logout'})
-
-    return jsonify({'success': False, 'message': '原有密碼輸入錯誤'})
-    
 @bp.before_app_request
 def check_login_session():
     public_paths = [
@@ -421,8 +446,7 @@ def check_login_session():
         return response
 
     user = User.query.filter(
-        User.id == user_session.user_id,
-        User.Del == 0
+        User.id == user_session.user_id
     ).first()
 
     if not user:
@@ -457,12 +481,12 @@ def api_check_session():
         return jsonify({
             'success': False,
             'expired': True,
+            'reason': 'no_token',
             'message': '尚未登入'
         }), 401
 
     user_session = UserSession.query.filter_by(
-        session_token=token,
-        is_active=True
+        session_token=token
     ).first()
 
     if not user_session:
@@ -470,17 +494,40 @@ def api_check_session():
         response = jsonify({
             'success': False,
             'expired': True,
+            'reason': 'invalid',
             'message': '登入狀態已失效'
         })
         response.delete_cookie('session_token')
         return response, 401
 
+    if not user_session.is_active:
+        reason = user_session.logout_reason or 'invalid'
+
+        message_map = {
+            'login_elsewhere': '此帳號已在其他裝置登入，您已被登出',
+            'permission_changed': '您的帳號權限已被修改，請重新登入',
+            'password_reset': '您的密碼已被重設，請重新登入',
+            'timeout': '登入已逾時',
+            'disabled': '您的帳號已停權，請聯絡管理員',
+            'deleted': '您的帳號已被刪除，請聯絡管理員',
+            'invalid': '登入狀態已失效'
+        }
+
+        session.clear()
+        response = jsonify({
+            'success': False,
+            'expired': True,
+            'reason': reason,
+            'message': message_map.get(reason, '登入狀態已失效')
+        })
+        response.delete_cookie('session_token')
+        return response, 401
 
     now = datetime.now()
-    print(now)
 
     if now - user_session.last_activity > timedelta(minutes=30):
         user_session.is_active = False
+        user_session.logout_reason = 'timeout'
         db.session.commit()
 
         session.clear()
@@ -488,6 +535,7 @@ def api_check_session():
         response = jsonify({
             'success': False,
             'expired': True,
+            'reason': 'timeout',
             'message': '登入已逾時'
         })
         response.delete_cookie('session_token')

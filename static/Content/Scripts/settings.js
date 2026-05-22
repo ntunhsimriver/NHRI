@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 document.addEventListener("click", function (event) {
-    const btn = event.target.closest(".delete-user");
+    const btn = event.target.closest(".reset-password");
 
     if (!btn) return;
 
@@ -140,7 +140,7 @@ document.addEventListener("click", function (event) {
         data = JSON.parse(btn.getAttribute("data-bs-value"));
     } catch (e) {
         console.error("data-bs-value 格式錯誤", e);
-        alert("刪除失敗：資料格式錯誤");
+        alert("重設失敗：資料格式錯誤");
         return;
     }
 
@@ -148,15 +148,15 @@ document.addEventListener("click", function (event) {
     const fullName = data.full_name || email;
 
     if (!email) {
-        alert("刪除失敗：缺少 email");
+        alert("重設失敗：缺少 email");
         return;
     }
 
-    if (!confirm(`確定要刪除使用者「${fullName}」嗎？`)) {
+    if (!confirm(`確定要將使用者「${fullName}」的密碼重設為預設密碼嗎？`)) {
         return;
     }
 
-    fetch("/api/delete_user", {
+    fetch("/api/reset_password", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -168,14 +168,14 @@ document.addEventListener("click", function (event) {
     .then(res => res.json())
     .then(result => {
         if (result.success) {
-            alert(result.message || "刪除成功");
+            alert(result.message || "密碼已還原成預設密碼");
             window.location.reload();
         } else {
-            alert(result.message || "刪除失敗");
+            alert(result.message || "重設失敗");
         }
     })
     .catch(err => {
         console.error(err);
-        alert("刪除失敗");
+        alert("重設失敗");
     });
 });

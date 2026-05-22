@@ -43,17 +43,26 @@ bp = Blueprint("pages", __name__)
 
 @bp.app_context_processor
 def inject_user():
-    
-    
-    fhir_practitioner_id=session.get('fhir_practitioner_id')
-    getProjectID = fhir.get_ProjectID(fhir_practitioner_id)
-    return dict(username=session.get('username'), 
+    fhir_practitioner_id = session.get('fhir_practitioner_id')
+
+    getProjectID = []
+
+    if fhir_practitioner_id:
+        try:
+            getProjectID = fhir.get_ProjectID(fhir_practitioner_id)
+        except Exception as e:
+            print("[inject_user] get_ProjectID 失敗：", e)
+            getProjectID = []
+
+    return dict(
+        username=session.get('username'),
+        user_id=session.get('user_id'),
         fhir_practitioner_id=fhir_practitioner_id,
         role=session.get('role'),
-        study_id=session.get('study_id'), 
+        study_id=session.get('study_id'),
         study_name=session.get('study_name'),
         project_all_id=getProjectID,
-        )
+    )
 
 @bp.route('/')
 def root():

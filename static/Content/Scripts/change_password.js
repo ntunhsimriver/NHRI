@@ -23,6 +23,7 @@ function resetIdleTimer() {
 
 resetIdleTimer();
 
+
 let isCheckingSession = false;
 
 async function checkSessionFromServer() {
@@ -38,6 +39,13 @@ async function checkSessionFromServer() {
             }
         });
 
+        const contentType = res.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+            window.location.href = "/login";
+            return false;
+        }
+
         const result = await res.json();
 
         if (!res.ok || result.expired) {
@@ -50,7 +58,7 @@ async function checkSessionFromServer() {
 
     } catch (err) {
         console.error("檢查登入狀態失敗", err);
-        return true; // 網路瞬斷時不要直接登出
+        return true;
     } finally {
         isCheckingSession = false;
     }
@@ -65,69 +73,150 @@ document.addEventListener("click", async function (event) {
         event.stopImmediatePropagation();
     }
 }, true);
-document.querySelectorAll('.project-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        
-        window.location.href = this.dataset.url;
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (window.layoutHelpers) {
+        window.layoutHelpers.init();
+    }
+
+    document.querySelectorAll(".layout-sidenav-toggle").forEach(function (el) {
+        el.addEventListener("click", function () {
+            if (window.layoutHelpers && typeof window.layoutHelpers.toggleCollapsed === "function") {
+                window.layoutHelpers.toggleCollapsed();
+            }
+        });
     });
+
+    document.querySelectorAll(".project-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            window.location.href = this.dataset.url;
+        });
+    });
+
+    const userMenu = document.getElementById("userMenu");
+    const userAvatar = document.getElementById("userAvatar");
+
+    if (userMenu && userAvatar) {
+        userAvatar.addEventListener("click", function (e) {
+            e.stopPropagation();
+            userMenu.classList.toggle("active");
+        });
+
+        document.addEventListener("click", function () {
+            userMenu.classList.remove("active");
+        });
+    }
+
+    const searchInput = document.getElementById("searchInput");
+    const caseRows = document.querySelectorAll(".case-row");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const searchText = searchInput.value.toLowerCase().trim();
+
+            caseRows.forEach(row => {
+                const proid = (row.getAttribute("data-proid") || "").toLowerCase();
+                const proname = (row.getAttribute("data-name") || "").toLowerCase();
+
+                const matchSearch =
+                    proid.includes(searchText) ||
+                    proname.includes(searchText);
+
+                row.style.display = matchSearch ? "" : "none";
+            });
+        });
+    }
+});
+
+
+document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".toggle-password");
+
+    if (!btn) return;
+
+    const targetId = btn.getAttribute("data-target");
+    const input = document.getElementById(targetId);
+
+    if (!input) return;
+
+    const icon = btn.querySelector("i");
+
+    if (input.type === "password") {
+        input.type = "text";
+        btn.setAttribute("aria-label", "隱藏密碼");
+
+        if (icon) {
+            icon.className = "bi bi-eye-slash text-sm";
+        }
+    } else {
+        input.type = "password";
+        btn.setAttribute("aria-label", "顯示密碼");
+
+        if (icon) {
+            icon.className = "bi bi-eye text-sm";
+        }
+    }
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-            if (window.layoutHelpers) {
-                window.layoutHelpers.init();
+    const changepwForm = document.getElementById("changepwForm");
+    const message = document.getElementById("message");
+
+    if (!changepwForm) return;
+
+    changepwForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const oldPassword = document.getElementById("old_password")?.value || "";
+        const newPassword = document.getElementById("new_password")?.value || "";
+
+        if (!oldPassword || !newPassword) {
+            if (message) {
+                message.innerHTML = `<div class="text-red-500 text-sm">請輸入原始密碼與新密碼</div>`;
+            } else {
+                alert("請輸入原始密碼與新密碼");
             }
+            return;
+        }
+        alert(oldPassword);
+        alert(newPassword);
+        fetch("/api/change_password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                old_password: oldPassword,
+                new_password: newPassword
+            })
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                alert("密碼修改成功，請重新登入");
 
-            
-            document.querySelectorAll('.layout-sidenav-toggle').forEach(function (el) {
-                el.addEventListener('click', function () {
-                    if (window.layoutHelpers && typeof window.layoutHelpers.toggleCollapsed === 'function') {
-                        window.layoutHelpers.toggleCollapsed();
-                    }
-                });
-            });
+                if (result.redirect) {
+                    window.location.href = result.redirect;
+                } else {
+                    window.location.href = "/logout";
+                }
+            } else {
+                if (message) {
+                    message.innerHTML = `<div class="text-red-500 text-sm">${result.message || "修改失敗"}</div>`;
+                } else {
+                    alert(result.message || "修改失敗");
+                }
+            }
+        })
+        .catch(err => {
+            console.error(err);
+
+            if (message) {
+                message.innerHTML = `<div class="text-red-500 text-sm">修改失敗，請稍後再試</div>`;
+            } else {
+                alert("修改失敗，請稍後再試");
+            }
         });
-
-        document.querySelectorAll('.project-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                window.location.href = this.dataset.url;
-            });
-        });
-
-const userMenu = document.getElementById("userMenu");
-  const userAvatar = document.getElementById("userAvatar");
-
-  userAvatar.addEventListener("click", function (e) {
-    e.stopPropagation();
-    userMenu.classList.toggle("active");
-  });
-
-  document.addEventListener("click", function () {
-    userMenu.classList.remove("active");
-  });
-
-  document.addEventListener('DOMContentLoaded', function() {
-
-    const searchInput = document.getElementById('searchInput');
-    const caseRows = document.querySelectorAll('.case-row');
-
-    function filterRows() {
-        const searchText = searchInput.value.toLowerCase().trim();
-
-        caseRows.forEach(row => {
-
-            const proid = (row.getAttribute('data-proid') || '').toLowerCase();
-            const proname = (row.getAttribute('data-name') || '').toLowerCase();
-
-            const matchSearch =
-                proid.includes(searchText) ||
-                proname.includes(searchText);
-
-            row.style.display = matchSearch ? '' : 'none';
-        });
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', filterRows);
-    }
-
+    });
 });

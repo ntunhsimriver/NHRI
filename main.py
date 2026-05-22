@@ -108,5 +108,12 @@ if __name__ == "__main__":
             db.create_all()
             print("📦 已自動建立資料表（開發模式）")
 
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return render_template(
+            "errors/500.html",
+            error_message=str(error) if current_app.debug else None
+        ), 500
+
     app.run(host=app.config["HOST"], port=app.config["PORT"], debug=debug)
 
