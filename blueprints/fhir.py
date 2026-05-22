@@ -24,6 +24,7 @@ import hashlib
 import uuid
 from threading import Thread
 import shutil
+from urllib.parse import urlencode
 
 resource_types = [
         "Encounter",
@@ -142,7 +143,6 @@ def put_FHIR_api(id, FHIR):
     URL = cfg.FHIR_SERVER_URL + id 
     res = requests.put(URL, json=FHIR, headers=headers, verify=False)
     
-
     return res
 
 def post_FHIR_api(FHIR, resource): 
@@ -152,7 +152,12 @@ def post_FHIR_api(FHIR, resource):
     res = requests.post(full_url, json=FHIR, headers=headers, verify=False)
 
     return res
-
+def delete_FHIR_api(resource, id): 
+    headers = get_token()
+    URL = cfg.FHIR_SERVER_URL + resource + "/" + id 
+    res = requests.delete(URL, headers=headers, verify=False)
+    
+    return res
 
 
 def FHIRData_Handle(resource, SearchURL, CatId, readFlag): 
@@ -652,103 +657,43 @@ def get_Project(pi_id):
         })
 
     return getResult
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def getObs14days(PatID, DeviceID, start, end): 
+def get_device_query_period(device_id, start_date, end_date, study_id=None):
+    query = FHIR.device_history.query.filter(
+        FHIR.device_history.device_id == device_id,
+        FHIR.device_history.start_datetime <= datetime.combine(end_date, datetime.max.time())
+    ).filter(
+        or_(
+            FHIR.device_history.end_datetime.is_(None),
+            FHIR.device_history.end_datetime >= datetime.combine(start_date, datetime.min.time())
+        )
+    )
+    print(start_date, end_date)
+    if study_id:
+        query = query.filter(
+            FHIR.device_history.project_id == study_id
+        )
+
+    history = query.order_by(
+        FHIR.device_history.start_datetime.desc()
+    ).first()
+    print(study_id)
+    print(history)
+
+    if not history:
+        return None, None
+
+    bind_start = history.start_datetime.date() if history.start_datetime else start_date
+    bind_end = history.end_datetime.date() if history.end_datetime else end_date
+    print(bind_start, bind_end)
+    real_start = max(start_date, bind_start)
+    real_end = min(end_date, bind_end)
+
+    if real_start > real_end:
+        return None, None
+    print(real_start, real_end)
+    return real_start, real_end
+
+def getObs14days(PatID, DeviceID, start, end, study_id=None): 
     target_codes = "85354-9,8480-6,8462-4,8867-4"
 
     code_map = {
@@ -760,6 +705,20 @@ def getObs14days(PatID, DeviceID, start, end):
     
     start_date = datetime.strptime(start, "%Y-%m-%d").date()
     end_date = datetime.strptime(end, "%Y-%m-%d").date()
+
+    if DeviceID:
+        real_start, real_end = get_device_query_period(
+            DeviceID,
+            start_date,
+            end_date,
+            study_id=study_id
+        )
+
+        if not real_start or not real_end:
+            return [], [], [], []
+
+        start_date = real_start
+        end_date = real_end
 
     days = (end_date - start_date).days
 
@@ -982,57 +941,92 @@ def getDeviceCount(study_id):
     return [len(device_ids), status_counts]
 
 
-def update_device_history(device_id, patient_id, note=None):
-
+def update_device_history(device_id, patient_id, project_id=None, note=None):
     now_time = datetime.now()
+
+    device_id = str(device_id or "").strip()
+    patient_id = str(patient_id or "").strip()
+    project_id = str(project_id or "").strip() if project_id else None
 
     old_history = FHIR.device_history.query.filter_by(
         device_id=device_id,
         status="active"
     ).filter(
         FHIR.device_history.end_datetime.is_(None)
+    ).order_by(
+        FHIR.device_history.start_datetime.desc()
     ).first()
 
-    
-    if patient_id == "":
-        if old_history:
-            old_history.end_datetime = now_time
-            old_history.status = "ended"
-            if note:
-                old_history.note = note
-        db.session.commit()
-        return True
-
-    
+    # 沒有 active history，直接新增一筆
+    # patient_id 可以是空字串，代表目前未綁人
     if not old_history:
         new_history = FHIR.device_history(
             device_id=device_id,
             patient_id=patient_id,
+            project_id=project_id,
             start_datetime=now_time,
             end_datetime=None,
+            project_start_datetime=now_time if project_id else None,
+            project_end_datetime=None,
             status="active",
             note=note
         )
+
         db.session.add(new_history)
         db.session.commit()
         return True
 
-    
-    if old_history.patient_id == patient_id:
+    old_patient_id = str(old_history.patient_id or "").strip()
+    old_project_id = str(getattr(old_history, "project_id", "") or "").strip()
+
+    same_patient = old_patient_id == patient_id
+    same_project = old_project_id == (project_id or "")
+
+    # 同一狀態：不新增，只補資料
+    if same_patient and same_project:
+        changed = False
+
+        if project_id and not old_project_id:
+            old_history.project_id = project_id
+            changed = True
+
+        if project_id and not getattr(old_history, "project_start_datetime", None):
+            old_history.project_start_datetime = old_history.start_datetime or now_time
+            changed = True
+
+        if note:
+            old_history.note = note
+            changed = True
+
+        if changed:
+            db.session.commit()
+
         return True
 
-    
+    # 病人或計畫有變更：結束舊紀錄
     old_history.end_datetime = now_time
     old_history.status = "ended"
 
+    if hasattr(old_history, "project_end_datetime"):
+        old_history.project_end_datetime = now_time
+
+    if note:
+        old_history.note = note
+
+    # 新增新紀錄
+    # patient_id 可以是空字串，代表解除綁人後仍保留設備入庫/計畫紀錄
     new_history = FHIR.device_history(
         device_id=device_id,
         patient_id=patient_id,
+        project_id=project_id,
         start_datetime=now_time,
         end_datetime=None,
+        project_start_datetime=now_time if project_id else None,
+        project_end_datetime=None,
         status="active",
         note=note
     )
+
     db.session.add(new_history)
     db.session.commit()
 
@@ -1116,6 +1110,7 @@ def addDevice_FHIR(data, study_id):
         update_device_history(
             device_id=device_id,
             patient_id=pat_id,
+            project_id=study_id,
             note=""
         )
 
@@ -1316,32 +1311,108 @@ def get_DevicePatient(pat_id, study_id):
     
     return PatInfo
 
+def getAllEncounterCount(pat_id, start=None, end=None):
+    query_params = [
+        ("patient", f"Patient/{pat_id}"),
+        ("_summary", "count")
+    ]
 
-def getAllEncounter(pat_id):
+    if start:
+        query_params.append(("date", f"ge{start}"))
 
-    EncBundle = FHIRData_Handle(None, "Encounter?_sort=-date&patient=Patient/" + pat_id, 1, 1)
+    if end:
+        query_params.append(("date", f"le{end}"))
+
+    query = "Encounter?" + urlencode(query_params)
+
+    bundle = read_FHIR_api(query)
+
+    return bundle.get("total", 0)
+
+def getAllEncounter(pat_id, start=None, end=None):
+    total = getAllEncounterCount(pat_id, start=start, end=end)
+
+    query_params = [
+        ("_sort", "-date"),
+        ("patient", f"Patient/{pat_id}"),
+        ("_count", str(min(resource_total, 50) if resource_total > 0 else 1))
+    ]
+
+    if start:
+        query_params.append(("date", f"ge{start}"))
+
+    if end:
+        query_params.append(("date", f"le{end}"))
+
+    query = "Encounter?" + urlencode(query_params)
+
+    EncBundle = FHIRData_Handle(None, query, 1, 1)
     
     result = []
+
     for e in EncBundle:
-        
         enc_data = FHIRData_Handle(None, e.BundleResource, 11, 0)
-        
-        result.extend(e.model_dump() for e in enc_data)
-    
-    return result
+        result.extend(row.model_dump() for row in enc_data)
 
-def getAllTreatment(pat_id, needType):
+    return {
+        "total": total,
+        "Encounter": result
+    }
+
+def getAllTreatmentCount(pat_id, resource_type, start=None, end=None):
+    query_params = [
+        ("patient", f"Patient/{pat_id}"),
+        ("_summary", "count")
+    ]
+
+    if start:
+        query_params.append(("date", f"ge{start}"))
+
+    if end:
+        query_params.append(("date", f"le{end}"))
+
+    query = resource_type + "?" + urlencode(query_params)
+
+    bundle = read_FHIR_api(query)
+
+    return bundle.get("total", 0)
+def getAllTreatment(pat_id, needType, start=None, end=None):
     result = []
+    main_resource = needType[0] if needType else "data"
+    total = 0
 
     for n in needType:
+        resource_total = getAllTreatmentCount(
+            pat_id,
+            n,
+            start=start,
+            end=end
+        )
 
-        Bundles = FHIRData_Handle(None, n + "?_sort=-date&patient=Patient/" + pat_id, 1, 1)
+        total += resource_total
+
+        query_params = [
+            ("_sort", "-date"),
+            ("patient", f"Patient/{pat_id}"),
+            ("_count", str(min(resource_total, 50) if resource_total > 0 else 1))
+        ]
+
+
+        if start:
+            query_params.append(("date", f"ge{start}"))
+
+        if end:
+            query_params.append(("date", f"le{end}"))
+
+        query = n + "?" + urlencode(query_params)
+
+        Bundles = FHIRData_Handle(None, query, 1, 1)
 
         for b in Bundles:
             if not b.BundleResource:
                 continue
 
-            resource_type = b.BundleResource['resourceType']
+            resource_type = b.BundleResource["resourceType"]
             ResultData = FHIRData_Handle(resource_type, b.BundleResource, 13, 0)
 
             for model in ResultData:
@@ -1351,10 +1422,14 @@ def getAllTreatment(pat_id, needType):
 
     result_sorted = sorted(
         result,
-        key=lambda x: x["date"] or "",
+        key=lambda x: x.get("date") or "",
         reverse=True
     )
-    return result_sorted
+
+    return {
+        "total": total,
+        main_resource: result_sorted
+    }
 
 
 def getEnc(enc_id):

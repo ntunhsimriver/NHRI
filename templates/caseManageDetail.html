@@ -173,9 +173,10 @@
           
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
+      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
+        <div class="mb-4 flex items-center justify-between">
           <h3
-            class="mb-6 text-lg font-bold text-slate-900 tw-treatment-list-toggle"
+            class="text-lg font-bold text-slate-900 tw-treatment-list-toggle"
             data-target="#DiagnosticReportList"
             data-body="#DiagnosticReportListBody"
             data-treatment-type="DiagnosticReport"
@@ -184,21 +185,92 @@
             檢驗檢查紀錄時間軸 (DiagnosticReport Timeline)
           </h3>
 
-          <div class="relative hidden pl-4" id="DiagnosticReportList">
-            <div class="timeline-line absolute bottom-0 left-0 top-2 ml-4 w-px bg-slate-200"></div>
-            <div class="space-y-8" id="DiagnosticReportListBody">
-              資料讀取中......
-            </div>
+          <div class="flex items-center gap-1 text-xs">
+            <input
+              type="date"
+              id="DiagnosticReportStartDate"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+            <span class="text-slate-400">~</span>
+            <input
+              type="date"
+              id="DiagnosticReportEndDate"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+            <button
+                type="button"
+                id="btn-filter-diagnosticreport"
+                data-target="#DiagnosticReportList"
+                data-body="#DiagnosticReportListBody"
+                data-treatment-type="DiagnosticReport"
+                class="ml-1 rounded-md bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700"
+              >
+              查詢
+            </button>
+          </div>
+        </div>
+
+        <div class="relative hidden pl-4" id="DiagnosticReportList">
+          <div class="timeline-line absolute bottom-0 left-0 top-2 ml-4 w-px bg-slate-200"></div>
+          <div class="space-y-8" id="DiagnosticReportListBody">
+            資料讀取中......
           </div>
         </div>
       </div>
-        
-      
+
+            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
+        <div class="mb-4 flex items-center justify-between">
+          <h3
+            class="text-lg font-bold text-slate-900 tw-treatment-list-toggle"
+            data-target="#ObservationList"
+            data-body="#ObservationListBody"
+            data-treatment-type="Observation"
+            role="button"
+          >
+            檢驗檢查紀錄時間軸 (Observation Timeline)
+          </h3>
+
+          <div class="flex items-center gap-1 text-xs">
+            <input
+              type="date"
+              id="ObservationStartDate"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+            <span class="text-slate-400">~</span>
+            <input
+              type="date"
+              id="ObservationEndDate"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+            <button
+                type="button"
+                id="btn-filter-observation"
+                data-target="#ObservationList"
+                data-body="#ObservationListBody"
+                data-treatment-type="Observation"
+                class="ml-1 rounded-md bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700"
+              >
+              查詢
+            </button>
+          </div>
+        </div>
+
+        <div class="relative hidden pl-4" id="ObservationList">
+          <div class="timeline-line absolute bottom-0 left-0 top-2 ml-4 w-px bg-slate-200"></div>
+          <div class="space-y-8" id="ObservationListBody">
+            資料讀取中......
+          </div>
+        </div>
+      </div>
+
+      </div>
       <div class="tab-pane fade" id="nav-Clinical" role="tabpanel" aria-labelledby="nav-Clinical-tab">
 
+        <!-- Encounter -->
         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="mb-6 flex items-center justify-between">
             <h3
-              class="mb-6 text-lg font-bold text-slate-900 tw-encounter-list-toggle"
+              class="text-lg font-bold text-slate-900 tw-encounter-list-toggle"
               data-target="#EncounterList"
               data-target-study="{{study_id}}"
               role="button"
@@ -206,25 +278,75 @@
               看診紀錄時間軸 (Encounter Timeline)
             </h3>
 
-            <div class="relative pl-4 hidden" id="EncounterList">
-              <div class="timeline-line absolute bottom-0 left-0 top-2 w-px bg-slate-200 ml-4"></div>
-
-              <div class="space-y-8" id="EncounterListBody">
-                資料讀取中......
-              </div>
+            <div class="flex items-center gap-1 text-xs">
+              <input
+                type="date"
+                id="EncounterStartDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+              <span class="text-slate-400">~</span>
+              <input
+                type="date"
+                id="EncounterEndDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+              <button
+                id="btn-filter-encounter"
+                data-target="#EncounterList"
+                data-body="#EncounterListBody"
+                data-treatment-type="Encounter"
+                class="ml-1 rounded-md bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700"
+              >
+                查詢
+              </button>
             </div>
           </div>
 
+          <div class="relative pl-4 hidden" id="EncounterList">
+            <div class="timeline-line absolute bottom-0 left-0 top-2 w-px bg-slate-200 ml-4"></div>
+
+            <div class="space-y-8" id="EncounterListBody">
+              資料讀取中......
+            </div>
+          </div>
+        </div>
+
+        <!-- Procedure -->
         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
-          <h3
-            class="mb-6 text-lg font-bold text-slate-900 tw-treatment-list-toggle"
-            data-target="#ProcedureList"
-            data-body="#ProcedureListBody"
-            data-treatment-type="Procedure"
-            role="button"
-          >
-            治療紀錄時間軸 (Procedure Timeline)
-          </h3>
+          <div class="mb-6 flex items-center justify-between">
+            <h3
+              class="text-lg font-bold text-slate-900 tw-treatment-list-toggle"
+              data-target="#ProcedureList"
+              data-body="#ProcedureListBody"
+              data-treatment-type="Procedure"
+              role="button"
+            >
+              治療紀錄時間軸 (Procedure Timeline)
+            </h3>
+
+            <div class="flex items-center gap-1 text-xs">
+              <input
+                type="date"
+                id="ProcedureStartDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+              <span class="text-slate-400">~</span>
+              <input
+                type="date"
+                id="ProcedureEndDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+              <button
+                id="btn-filter-procedure"
+                data-target="#ProcedureList"
+                data-body="#ProcedureListBody"
+                data-treatment-type="Procedure"
+                class="ml-1 rounded-md bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700"
+              >
+                查詢
+              </button>
+            </div>
+          </div>
 
           <div class="relative hidden pl-4" id="ProcedureList">
             <div class="timeline-line absolute bottom-0 left-0 top-2 w-px bg-slate-200 ml-4"></div>
@@ -233,16 +355,43 @@
             </div>
           </div>
         </div>
+
+        <!-- MedicationRequest -->
         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-10">
-          <h3
-            class="mb-6 text-lg font-bold text-slate-900 tw-treatment-list-toggle"
-            data-target="#MedicationRequestList"
-            data-body="#MedicationRequestListBody"
-            data-treatment-type="MedicationRequest"
-            role="button"
-          >
-            用藥紀錄時間軸 (MedicationRequest Timeline)
-          </h3>
+          <div class="mb-6 flex items-center justify-between">
+            <h3
+              class="text-lg font-bold text-slate-900 tw-treatment-list-toggle"
+              data-target="#MedicationRequestList"
+              data-body="#MedicationRequestListBody"
+              data-treatment-type="MedicationRequest"
+              role="button"
+            >
+              用藥紀錄時間軸 (MedicationRequest Timeline)
+            </h3>
+
+            <div class="flex items-center gap-1 text-xs">
+              <input
+                type="date"
+                id="MedicationRequestStartDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+              <span class="text-slate-400">~</span>
+              <input
+                type="date"
+                id="MedicationRequestEndDate"
+                class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+              <button
+                id="btn-filter-medication"
+                data-target="#MedicationRequestList"
+                data-body="#MedicationRequestListBody"
+                data-treatment-type="MedicationRequest"
+                class="ml-1 rounded-md bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700"
+              >
+                查詢
+              </button>
+            </div>
+          </div>
 
           <div class="relative hidden pl-4" id="MedicationRequestList">
             <div class="timeline-line absolute bottom-0 left-0 top-2 w-px bg-slate-200 ml-4"></div>
@@ -258,14 +407,6 @@
         <div class="space-y-4">
           <div class="flex justify-between ">
             <h3 class="text-lg font-bold text-slate-900">已填寫問卷</h3>
-            
-
-            <input type="file" id="fileInput_QA" hidden accept=".json">
-            <button  type="button" id="fileInput_QA_btn" 
-              class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 file-trigger" data-target="fileInput_QA" data-type="FHIR_pat">
-              <i class="bi bi-upload"></i> 
-              上傳新文件
-            </button>
           </div>
           
         </div>
@@ -358,30 +499,50 @@
           <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             
 
-            {% if getConsent %}
-              {% for item in getConsent %}
-              <div class="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
-                <div class="mb-3 flex items-start justify-between">
-                  <div class="rounded-lg bg-red-50 p-2 text-red-500 d-flex align-items-center justify-content-center" id="ContentInfo">
-                    <i class="bi bi-file-earmark-medical" id="ContentInfo_i"></i>
-                  </div>
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">
-                  {{item.status}}</span>
+          {% if getConsent %}
+            {% for item in getConsent %}
+            <div class="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+              <div class="mb-3 flex items-start justify-between">
+                <div class="rounded-lg bg-red-50 p-2 text-red-500 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-file-earmark-medical"></i>
                 </div>
-                <h4 class="font-medium text-slate-900">{{item.title}}</h4>
-                <p class="mb-4 text-xs text-slate-500">{{item.url}}</p>
-                <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
-                  <span>簽署日: {{item.dateTime}}</span>
-                  <button class="flex items-center gap-1 font-medium text-blue-600 hover:underline" 
-                          data-bs-toggle="modal" 
-                          data-bs-target="#Modal_Consent" 
-                          data-bs-title="{{item.title}}"
-                          data-bs-url="{{item.url}}"> <i class="bi bi-eye"></i> 檢視內容
+
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{ item.status }}">
+                  {{ item.status }}
+                </span>
+              </div>
+
+              <h4 class="font-medium text-slate-900">{{ item.title }}</h4>
+              <p class="mb-4 text-xs text-slate-500">{{ item.url }}</p>
+
+              <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
+                <span>簽署日: {{ item.dateTime }}</span>
+
+                <div class="flex items-center gap-3">
+                  <button
+                    type="button"
+                    class="btn-delete-consent font-medium text-red-500 hover:underline"
+                    data-consent-id="{{ item.id }}"
+                    data-consent-title="{{ item.title }}"
+                    data-consent-url="{{ item.url }}">
+                    刪除
+                  </button>
+
+                  <button
+                    type="button"
+                    class="flex items-center gap-1 font-medium text-blue-600 hover:underline"
+                    data-bs-toggle="modal"
+                    data-bs-target="#Modal_Consent"
+                    data-bs-id="{{ item.id }}"
+                    data-bs-title="{{ item.title }}"
+                    data-bs-url="{{ item.url }}">
+                    <i class="bi bi-eye"></i> 檢視內容
                   </button>
                 </div>
               </div>
-              {% endfor %}
-            {% endif %}
+            </div>
+            {% endfor %}
+          {% endif %}
           </div>
         </div>
       </div>
@@ -405,7 +566,14 @@
         </div>
 
         <div class="modal-footer border-t border-slate-100 p-3">
-          <button type="button" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors" data-bs-dismiss="modal">關閉</button>
+          
+
+          <button
+            type="button"
+            class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
+            data-bs-dismiss="modal">
+            關閉
+          </button>
         </div>
         
       </div>

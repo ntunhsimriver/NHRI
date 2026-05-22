@@ -149,6 +149,7 @@ function drawChart() {
 
     if (!hasAnyData) {
         document.getElementById('myChartText').innerText = "生理趨勢圖 - 暫無量測紀錄";
+        document.getElementById('data-status').innerText = "數據已就緒 - 暫無資料";
         return;
     }
 

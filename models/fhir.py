@@ -74,6 +74,19 @@ class device_history(db.Model):
     )
     status = db.Column(db.String(20), nullable=False, server_default="active")
     note = db.Column(db.Text, nullable=True)
+    
+     # 設備所屬計畫
+    project_id = db.Column(db.Text, nullable=True)
+
+    # 設備綁定計畫的時間
+    project_start_datetime = db.Column(
+        db.DateTime,
+        nullable=True
+    )
+    project_end_datetime = db.Column(
+        db.DateTime,
+        nullable=True
+    )
 
 class FHIR_Practitioner:
     def __init__(self, fhir=None):

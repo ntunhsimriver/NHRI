@@ -183,9 +183,17 @@ def api_getEnc_all(case_id):
             "success": False,
             "message": "未登入或帳號密碼錯誤"
         }), 401
-    getAllEncounter = fhir.getAllEncounter(case_id)
 
-    return jsonify(getAllEncounter) 
+    start = request.args.get("start")
+    end = request.args.get("end")
+
+    getAllEncounter = fhir.getAllEncounter(
+        case_id,
+        start=start,
+        end=end
+    )
+
+    return jsonify(getAllEncounter)
 
 @bp.route("/api/getTreatment_all/<case_id>/<Resource>")
 def api_getTreat_all(case_id, Resource):
@@ -196,10 +204,18 @@ def api_getTreat_all(case_id, Resource):
             "success": False,
             "message": "未登入或帳號密碼錯誤"
         }), 401
-    getAllData = fhir.getAllTreatment(case_id, [Resource])
 
-    return jsonify(getAllData) 
+    start = request.args.get("start")
+    end = request.args.get("end")
 
+    getAllData = fhir.getAllTreatment(
+        case_id,
+        [Resource],
+        start=start,
+        end=end
+    )
+
+    return jsonify(getAllData)
 @bp.route("/api/getEncounter/<enc_id>")
 def api_getEnc(enc_id):
     ok, user_id = auth.check_session_or_header_login()
@@ -214,7 +230,32 @@ def api_getEnc(enc_id):
 
     return jsonify(getEncInfo) 
 
+@bp.route("/api/consent/delete", methods=["POST"])
+def api_delete_consent():
+    ok, user_id = auth.check_session_or_header_login()
 
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
+
+    data = request.get_json(silent=True) or {}
+    id = data.get("id")
+
+    if not id:
+        return jsonify({
+            "success": False,
+            "message": "缺少同意書檔案資訊"
+        }), 400
+
+    # TODO: 用 consent_url 找到對應 Consent 資源後刪除或標記 inactive
+    result = fhir.delete_FHIR_api('Consent', id)
+
+    return jsonify({
+        "success": True,
+        "message": "同意書已刪除"
+    })
 @bp.route("/deviceDetail/<pat_id>/<device_id>")
 def deviceDetail(pat_id, device_id):
 
@@ -235,7 +276,8 @@ def api_deviceDetail(device_id):
         }), 401
     start = request.args.get("start")
     end = request.args.get("end")
-    getObs14daysResult = fhir.getObs14days("", device_id, start, end)
+    study_id = session['study_id']
+    getObs14daysResult = fhir.getObs14days("", device_id, start, end, study_id=study_id)
     return jsonify(getObs14daysResult) 
 
 @bp.route("/api/caseManageObs14days/<pat_id>")

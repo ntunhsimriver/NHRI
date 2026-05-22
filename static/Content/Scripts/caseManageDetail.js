@@ -272,30 +272,92 @@ document.querySelectorAll('#nav-tab button').forEach(btn => {
 });
 
 
-
 var ModalConsent = document.getElementById('Modal_Consent');
+
 if (ModalConsent) {
     ModalConsent.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget; 
+        var button = event.relatedTarget;
+
+        var consentId = button.getAttribute('data-bs-id');
         var title = button.getAttribute('data-bs-title');
-        var pdfUrl = "/static/data/consent" + button.getAttribute('data-bs-url');
-        
+        var consentUrl = button.getAttribute('data-bs-url');
+        var pdfUrl = "/static/data/consent" + consentUrl;
+
         ModalConsent.querySelector('#Modal_Consent_title').textContent = title;
-        
+
         var iframe = ModalConsent.querySelector('#Consent_PDF_Viewer');
         iframe.src = pdfUrl;
 
+        var deleteBtn = document.getElementById("btnDeleteConsent");
+        if (deleteBtn) {
+            deleteBtn.dataset.id = consentId || "";
+            deleteBtn.dataset.title = title || "";
+            deleteBtn.dataset.url = consentUrl || "";
+        }
     });
 
-    
     ModalConsent.addEventListener('hidden.bs.modal', function () {
-    ModalConsent.querySelector('#Consent_PDF_Viewer').src = "";
-});
+        ModalConsent.querySelector('#Consent_PDF_Viewer').src = "";
+
+        var deleteBtn = document.getElementById("btnDeleteConsent");
+        if (deleteBtn) {
+            deleteBtn.dataset.id = "";
+            deleteBtn.dataset.title = "";
+            deleteBtn.dataset.url = "";
+        }
+    });
 }
 
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".btn-delete-consent");
 
+    if (!btn) return;
 
+    e.preventDefault();
+    e.stopPropagation();
 
+    const consentId = btn.dataset.consentId || "";
+    const consentUrl = btn.dataset.consentUrl || "";
+    const title = btn.dataset.consentTitle || "";
+
+    if (!consentId) {
+        alert("找不到同意書 ID");
+        return;
+    }
+
+    const ok = confirm(
+        `確定要刪除此同意書嗎？\n\n` +
+        `文件：${title || consentUrl || consentId}\n\n` +
+        `刪除後將無法從列表檢視。`
+    );
+
+    if (!ok) return;
+
+    fetch("/api/consent/delete", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            id: consentId,
+            url: consentUrl,
+            title: title
+        })
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.success) {
+            alert(result.message || "刪除成功");
+            window.location.reload();
+        } else {
+            alert(result.message || "刪除失敗");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("刪除失敗");
+    });
+});
 
 function handleFileSelect(event, fileType) {
     const file = event.target.files[0]; 
@@ -414,23 +476,10 @@ document.addEventListener("click", function(e) {
 });
 
 
-document.addEventListener("click", function (e) {
-  const toggle = e.target.closest(".tw-encounter-list-toggle");
-  
-  if (!toggle) return;
-
-  const target = document.querySelector(toggle.dataset.target);
-  const body = document.getElementById("EncounterListBody");
-
+function loadEncounterList(target, body) {
   if (!target || !body) return;
 
-  const isOpening = target.classList.contains("hidden");
-
-  target.classList.toggle("hidden");
-
-  if (!isOpening) return;
-
-  if (target.dataset.loaded === "true") return;
+  target.classList.remove("hidden");
 
   body.innerHTML = `
     <div class="text-sm text-slate-500">
@@ -438,7 +487,19 @@ document.addEventListener("click", function (e) {
     </div>
   `;
 
-  fetch(`/api/getEncounter_all/${patId}`)
+  const startDate = document.getElementById("EncounterStartDate")?.value || "";
+  const endDate = document.getElementById("EncounterEndDate")?.value || "";
+
+  const params = new URLSearchParams();
+
+  if (startDate) params.append("start", startDate);
+  if (endDate) params.append("end", endDate);
+
+  const url = `/api/getEncounter_all/${patId}` + (
+    params.toString() ? `?${params.toString()}` : ""
+  );
+
+  fetch(url)
     .then(response => {
       if (!response.ok) {
         throw new Error("API 回傳錯誤");
@@ -447,9 +508,13 @@ document.addEventListener("click", function (e) {
     })
     .then(data => {
       let encounters = data.Encounter || data.encounters || data || [];
+      const total = data.total ?? encounters.length;
 
       if (!encounters || encounters.length === 0) {
         body.innerHTML = `
+          <div class="mb-3 text-xs text-slate-500">
+            共 ${total} 筆看診紀錄
+          </div>
           <p class="text-sm text-slate-500">暫無資料</p>
         `;
         target.dataset.loaded = "true";
@@ -502,7 +567,12 @@ document.addEventListener("click", function (e) {
         `;
       });
 
-      body.innerHTML = html;
+      body.innerHTML = `
+        <div class="mb-3 text-xs text-slate-500 text-right">
+          共 ${total} 筆看診紀錄
+        </div>
+      ` + html;
+
       target.dataset.loaded = "true";
     })
     .catch(err => {
@@ -514,17 +584,33 @@ document.addEventListener("click", function (e) {
         </div>
       `;
     });
+}
+
+
+// 查詢按鈕：直接當作展開 + 重新查詢
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest("#btn-filter-encounter");
+  if (!btn) return;
+
+  const target = document.querySelector(btn.dataset.target);
+  const body = document.querySelector(btn.dataset.body);
+
+  if (!target || !body) return;
+
+  target.dataset.loaded = "false";
+  loadEncounterList(target, body);
 });
 
+
+// 標題：只負責展開/收合，第一次展開才載入
 document.addEventListener("click", function (e) {
-  const toggle = e.target.closest(".tw-treatment-list-toggle");
+  const toggle = e.target.closest(".tw-encounter-list-toggle");
   if (!toggle) return;
 
   const target = document.querySelector(toggle.dataset.target);
-  const body = document.querySelector(toggle.dataset.body);
-  const treatmentType = toggle.dataset.treatmentType;
+  const body = document.getElementById("EncounterListBody");
 
-  if (!target || !body || !treatmentType) return;
+  if (!target || !body) return;
 
   const isOpening = target.classList.contains("hidden");
 
@@ -534,13 +620,80 @@ document.addEventListener("click", function (e) {
 
   if (target.dataset.loaded === "true") return;
 
+  loadEncounterList(target, body);
+});
+
+function getTreatmentDateInputIds(treatmentType) {
+  if (treatmentType === "Procedure") {
+    return {
+      startId: "ProcedureStartDate",
+      endId: "ProcedureEndDate",
+      countLabel: "筆治療紀錄"
+    };
+  }
+
+  if (treatmentType === "MedicationRequest") {
+    return {
+      startId: "MedicationRequestStartDate",
+      endId: "MedicationRequestEndDate",
+      countLabel: "筆用藥紀錄"
+    };
+  }
+
+  if (treatmentType === "DiagnosticReport") {
+    return {
+      startId: "DiagnosticReportStartDate",
+      endId: "DiagnosticReportEndDate",
+      countLabel: "筆檢驗檢查紀錄"
+    };
+  }
+
+  if (treatmentType === "Observation") {
+    return {
+      startId: "ObservationStartDate",
+      endId: "ObservationEndDate",
+      countLabel: "筆檢驗檢查紀錄"
+    };
+  }
+
+  return {
+    startId: "",
+    endId: "",
+    countLabel: "筆紀錄"
+  };
+}
+
+function loadTreatmentList(target, body, treatmentType) {
+  if (!target || !body || !treatmentType) return;
+
+  target.classList.remove("hidden");
+
   body.innerHTML = `
     <div class="text-sm text-slate-500">
       資料讀取中......
     </div>
   `;
 
-  fetch(`/api/getTreatment_all/${patId}/${treatmentType}`)
+  const config = getTreatmentDateInputIds(treatmentType);
+
+  const startDate = config.startId
+    ? document.getElementById(config.startId)?.value || ""
+    : "";
+
+  const endDate = config.endId
+    ? document.getElementById(config.endId)?.value || ""
+    : "";
+
+  const params = new URLSearchParams();
+
+  if (startDate) params.append("start", startDate);
+  if (endDate) params.append("end", endDate);
+
+  const url = `/api/getTreatment_all/${patId}/${treatmentType}` + (
+    params.toString() ? `?${params.toString()}` : ""
+  );
+
+  fetch(url)
     .then(response => {
       if (!response.ok) {
         throw new Error("API 回傳錯誤");
@@ -553,12 +706,18 @@ document.addEventListener("click", function (e) {
         data.Procedure ||
         data.MedicationRequest ||
         data.DiagnosticReport ||
+        data.Observation ||
         data.treatments ||
-        data ||
+        data.data ||
         [];
+
+      const total = data.total ?? records.length;
 
       if (!records || records.length === 0) {
         body.innerHTML = `
+          <div class="mb-3 text-right text-xs text-slate-500">
+            共 ${total} ${config.countLabel}
+          </div>
           <p class="text-sm text-slate-500">暫無資料</p>
         `;
         target.dataset.loaded = "true";
@@ -599,6 +758,12 @@ document.addEventListener("click", function (e) {
           detailLabel = "檢驗檢查結果";
           detailValue = result;
         }
+        if (treatmentType === "Observation") {
+          titleLabel = "檢驗檢查項目";
+          dateLabel = "檢驗檢查日期";
+          detailLabel = "檢驗檢查結果";
+          detailValue = result;
+        }
 
         html += `
           <div class="relative flex gap-6">
@@ -632,7 +797,12 @@ document.addEventListener("click", function (e) {
         `;
       });
 
-      body.innerHTML = html;
+      body.innerHTML = `
+        <div class="mb-3 text-right text-xs text-slate-500">
+          共 ${total} ${config.countLabel}
+        </div>
+      ` + html;
+
       target.dataset.loaded = "true";
     })
     .catch(err => {
@@ -644,9 +814,49 @@ document.addEventListener("click", function (e) {
         </div>
       `;
     });
+}
+
+
+// 查詢按鈕：當作展開 + 重新查詢
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest(
+    "#btn-filter-procedure, #btn-filter-medication, #btn-filter-diagnosticreport, #btn-filter-observation"
+  );
+
+  if (!btn) return;
+
+  const target = document.querySelector(btn.dataset.target);
+  const body = document.querySelector(btn.dataset.body);
+  const treatmentType = btn.dataset.treatmentType;
+
+  if (!target || !body || !treatmentType) return;
+
+  target.dataset.loaded = "false";
+  loadTreatmentList(target, body, treatmentType);
 });
 
 
+// 標題：只負責展開/收合，第一次展開才載入
+document.addEventListener("click", function (e) {
+  const toggle = e.target.closest(".tw-treatment-list-toggle");
+  if (!toggle) return;
+
+  const target = document.querySelector(toggle.dataset.target);
+  const body = document.querySelector(toggle.dataset.body);
+  const treatmentType = toggle.dataset.treatmentType;
+
+  if (!target || !body || !treatmentType) return;
+
+  const isOpening = target.classList.contains("hidden");
+
+  target.classList.toggle("hidden");
+
+  if (!isOpening) return;
+
+  if (target.dataset.loaded === "true") return;
+
+  loadTreatmentList(target, body, treatmentType);
+});
 
 
 var ModalupdatePatient = document.getElementById('Modal_updatePatient');
