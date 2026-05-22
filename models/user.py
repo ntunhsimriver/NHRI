@@ -48,6 +48,7 @@ class UserSession(db.Model):
     last_activity = db.Column(db.DateTime, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     permission_version = db.Column(db.Integer, default=1)
+    logout_reason = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, server_default=text("timezone('Asia/Taipei', now())"), nullable=False)
 
 class LoginFailLog(db.Model):

@@ -1,5 +1,6 @@
 let idleTimer = null;
 let isUploading = false;
+let isCheckingSession = false;
 
 const IDLE_LIMIT = 30 * 60 * 1000;
 
@@ -17,15 +18,6 @@ function resetIdleTimer() {
     }, IDLE_LIMIT);
 }
 
-["click", "keydown", "scroll", "touchstart"].forEach(eventName => {
-    document.addEventListener(eventName, resetIdleTimer, true);
-});
-
-resetIdleTimer();
-
-
-let isCheckingSession = false;
-
 async function checkSessionFromServer() {
     if (isCheckingSession) return true;
 
@@ -42,7 +34,8 @@ async function checkSessionFromServer() {
         const contentType = res.headers.get("content-type") || "";
 
         if (!contentType.includes("application/json")) {
-            window.location.href = "/login";
+            alert("登入狀態已失效，請重新登入");
+            window.location.href = "/logout";
             return false;
         }
 
@@ -64,6 +57,10 @@ async function checkSessionFromServer() {
     }
 }
 
+["click", "keydown", "scroll", "touchstart"].forEach(eventName => {
+    document.addEventListener(eventName, resetIdleTimer, true);
+});
+
 document.addEventListener("click", async function (event) {
     const ok = await checkSessionFromServer();
 
@@ -73,6 +70,8 @@ document.addEventListener("click", async function (event) {
         event.stopImmediatePropagation();
     }
 }, true);
+
+resetIdleTimer();
 
 
 document.addEventListener("DOMContentLoaded", function () {

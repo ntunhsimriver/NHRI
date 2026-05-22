@@ -19,53 +19,59 @@ def login_page():
 
 @bp.route('/logout')
 def logout():
+    reason = request.args.get('reason', '')
+
     token = request.cookies.get('session_token')
 
     if token:
         user_session = UserSession.query.filter_by(
-            session_token=token,
-            is_active=True
+            session_token=token
         ).first()
 
         if user_session:
             user_session.is_active = False
+            if not user_session.logout_reason:
+                user_session.logout_reason = reason or 'logout'
             db.session.commit()
 
     session.clear()
 
-    response = redirect(url_for('auth.login_page'))
+    response = redirect(url_for('auth.login_page', reason=reason))
     response.delete_cookie('session_token')
-
     return response
 
 
 @bp.route('/register', methods=['POST'])
 def register():
-    
     new_uuid = uuid.uuid4()
-    data = request.get_json()
+    data = request.get_json() or {}
 
     email = data.get('email')
     full_name = data.get('full_name')
     organization = data.get('organization')
     role = data.get('role')
-    status = data.get('active')  
-    type = data.get('type')      
+    status = data.get('active')
+    type = data.get('type')
 
-    if data.get('password'):
-        password = data.get('password')
+    if status is None:
+        status = "true"
     else:
-        password = cfg.USER_DEFAULT_PASSWORD  
+        status = str(status).lower()
+
+    password = data.get('password') or cfg.USER_DEFAULT_PASSWORD
 
     if data.get('fhir_practitioner_id'):
         fhir_practitioner_id = data.get('fhir_practitioner_id')
     else:
         fhir_practitioner_id = "Practitioner/" + str(new_uuid)
 
-    if User.query.filter_by(email=email).first() and type == 'new':
+    existing_user = User.query.filter_by(email=email).first()
+
+    if existing_user and type == 'new':
         return jsonify({'success': False, 'message': '帳號已存在'})
+
     if type == 'update':
-        user = User.query.filter_by(email=email).first()
+        user = existing_user
 
         if not user:
             return jsonify({'success': False, 'message': '找不到使用者'})
@@ -76,14 +82,14 @@ def register():
         user.role = role
         user.fhir_practitioner_id = fhir_practitioner_id
 
+        # 帳號資訊 / 權限被修改後，強制登出並記錄原因
         UserSession.query.filter_by(
             user_id=user.id,
             is_active=True
         ).update({
-            'is_active': False
+            'is_active': False,
+            'logout_reason': 'permission_changed'
         })
-
-        db.session.commit()
 
         message = '更新成功'
         print(f"[REGISTER] 更新帳號：{full_name}")
@@ -99,28 +105,30 @@ def register():
             full_name=full_name,
             organization=organization,
             role=role,
-            fhir_practitioner_id=fhir_practitioner_id
+            fhir_practitioner_id=fhir_practitioner_id,
+            Del=0
         )
 
         db.session.add(new_user)
-        db.session.commit()
 
         message = '註冊成功'
         print(f"[REGISTER] 建立新帳號：{full_name}")
 
-    pra_obj = FHIR.FHIR_Practitioner()  
+    # 先準備 FHIR Practitioner
+    pra_obj = FHIR.FHIR_Practitioner()
     pra_obj.id = fhir_practitioner_id.split("/")[1]
     pra_obj.name = full_name
     pra_obj.active = status
 
-    result_json = pra_obj.to_fhir()  
-    print(fhir_practitioner_id)
-    print(result_json)
+    result_json = pra_obj.to_fhir()
+
     FHIR_response = fhir.put_FHIR_api(fhir_practitioner_id, result_json)
-    print(FHIR_response.text)
+
     if FHIR_response.ok:
+        db.session.commit()
         return jsonify({'success': True, 'message': message})
     else:
+        db.session.rollback()
         return jsonify({'success': False, 'message': "FHIR資源新增失敗"})
 
 @bp.route('/api/login', methods=['POST'])
@@ -349,23 +357,27 @@ def api_change_password():
     
 @bp.route('/api/reset_password', methods=['POST'])
 def api_reset_password():
-    data = request.get_json()
+    data = request.get_json() or {}
     email = data.get('email')
     
     user = User.query.filter_by(email=email, Del=0).first()
 
     if not user:
-        return jsonify({'success': False, 'message': '找不到使用者'})
+        return jsonify({
+            'success': False,
+            'message': '找不到使用者'
+        })
 
     new_hashed_password = generate_password_hash(cfg.USER_DEFAULT_PASSWORD)
     user.password_hash = new_hashed_password
 
-    # 密碼被重設後，強制該使用者所有已登入裝置登出
+    # 密碼被重設後，強制該使用者所有已登入裝置登出，並記錄原因
     UserSession.query.filter_by(
         user_id=user.id,
         is_active=True
     ).update({
-        'is_active': False
+        'is_active': False,
+        'logout_reason': 'password_reset'
     })
 
     db.session.commit()

@@ -33,3 +33,20 @@ form.addEventListener('submit', async function (e) {
         msg.classList.add('error-message');
     }
 });
+document.addEventListener("DOMContentLoaded", function () {
+    const reason = document.getElementById("logoutReason")?.dataset.reason;
+
+    const messages = {
+        timeout: "您已超過 30 分鐘未操作，系統已自動登出",
+        login_elsewhere: "此帳號已在其他裝置登入，您已被登出",
+        password_reset: "您的密碼已被重設，請重新登入",
+        permission_changed: "您的帳號權限已被修改，請重新登入",
+        disabled: "您的帳號已停權，請聯絡管理員",
+        deleted: "您的帳號已被刪除，請聯絡管理員",
+        invalid: "登入狀態已失效，請重新登入"
+    };
+
+    if (reason && messages[reason]) {
+        alert(messages[reason]);
+    }
+});

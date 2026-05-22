@@ -1,5 +1,6 @@
 let idleTimer = null;
 let isUploading = false;
+let isCheckingSession = false;
 
 const IDLE_LIMIT = 30 * 60 * 1000;
 
@@ -13,17 +14,10 @@ function resetIdleTimer() {
         }
 
         alert("您已超過 30 分鐘未操作，系統將自動登出");
-        window.location.href = "/logout";
+        const reason = result.reason || "invalid";
+        window.location.href = `/logout?reason=${encodeURIComponent(reason)}`;
     }, IDLE_LIMIT);
 }
-
-["click", "keydown", "scroll", "touchstart"].forEach(eventName => {
-    document.addEventListener(eventName, resetIdleTimer, true);
-});
-
-resetIdleTimer();
-
-let isCheckingSession = false;
 
 async function checkSessionFromServer() {
     if (isCheckingSession) return true;
@@ -38,11 +32,22 @@ async function checkSessionFromServer() {
             }
         });
 
+        const contentType = res.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+            alert("登入狀態已失效，請重新登入");
+            window.location.href = "/logout?reason=invalid";
+            return false;
+        }
+
         const result = await res.json();
 
         if (!res.ok || result.expired) {
             alert(result.message || "登入已逾時，請重新登入");
-            window.location.href = "/logout";
+
+            const reason = result.reason || "invalid";
+            window.location.href = `/logout?reason=${encodeURIComponent(reason)}`;
+
             return false;
         }
 
@@ -50,21 +55,47 @@ async function checkSessionFromServer() {
 
     } catch (err) {
         console.error("檢查登入狀態失敗", err);
-        return true; // 網路瞬斷時不要直接登出
+        alert("登入狀態檢查失敗，請重新登入");
+        window.location.href = "/logout?reason=invalid";
+        return false;
     } finally {
         isCheckingSession = false;
     }
 }
 
+["click"].forEach(eventName => {
+    document.addEventListener(eventName, resetIdleTimer, true);
+});
+
 document.addEventListener("click", async function (event) {
+    const linkOrButton = event.target.closest("a, .project-btn, [data-url]");
+
+    if (!linkOrButton) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
     const ok = await checkSessionFromServer();
 
-    if (!ok) {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
+    if (!ok) return;
+
+    resetIdleTimer();
+
+    if (linkOrButton.tagName === "A" && linkOrButton.href) {
+        window.location.href = linkOrButton.href;
+        return;
+    }
+
+    const url = linkOrButton.dataset.url;
+    if (url) {
+        window.location.href = url;
+        return;
     }
 }, true);
+
+resetIdleTimer();
+
 document.addEventListener("click", function(e) {
   const btn = e.target.closest(".tw-collapse-toggle");
   if (!btn) return;
