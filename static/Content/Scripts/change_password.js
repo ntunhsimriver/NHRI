@@ -178,8 +178,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             return;
         }
-        alert(oldPassword);
-        alert(newPassword);
         fetch("/api/change_password", {
             method: "POST",
             headers: {

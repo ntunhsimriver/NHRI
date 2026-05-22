@@ -70,7 +70,6 @@ class device_history(db.Model):
     )
     end_datetime = db.Column(
         db.DateTime,
-        server_default=text("timezone('Asia/Taipei', now())"),
         nullable=False
     )
     status = db.Column(db.String(20), nullable=False, server_default="active")

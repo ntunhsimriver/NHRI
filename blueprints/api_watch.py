@@ -10,6 +10,8 @@ import csv
 import pandas as pd
 from pathlib import Path
 import traceback
+from sqlalchemy import or_
+from models.fhir import device_history  # 依你實際 model 路徑調整
 
 
 bp = Blueprint("api_watch", __name__)
@@ -135,17 +137,146 @@ def clean_duplicate_entries_with_server_check(bundle_json, auth_token=None):
 
     return bundle_json
 
+def parse_dt(value):
+    if isinstance(value, datetime.datetime):
+        return value.replace(tzinfo=None)
+
+    if not value:
+        return None
+
+    value = str(value).strip()
+
+    # 移除 timezone offset，例如 2026-04-01T00:05:00+0800
+    if len(value) >= 24 and (value[-5] in ["+", "-"]):
+        value = value[:-5]
+
+    for fmt in [
+        "%Y-%m-%d %H:%M:%S",
+        "%Y/%m/%d %H:%M:%S",
+        "%Y/%m/%d %H:%M",
+        "%Y-%m-%dT%H:%M:%S",
+    ]:
+        try:
+            return datetime.datetime.strptime(value, fmt)
+        except:
+            pass
+
+    return None
+
+def get_patient_by_device_time(device_id, measure_time):
+    measure_dt = parse_dt(measure_time)
+
+    if not device_id or not measure_dt:
+        return None
+
+    history = device_history.query.filter(
+        device_history.device_id == device_id,
+        device_history.start_datetime <= measure_dt,
+        or_(
+            device_history.end_datetime.is_(None),
+            device_history.end_datetime >= measure_dt
+        )
+    ).order_by(
+        device_history.start_datetime.desc()
+    ).first()
+
+    if not history:
+        return None
+
+    return history.patient_id
+
+
+def get_patient_by_device_period(device_id, start_time, end_time):
+    start_dt = parse_dt(start_time)
+    end_dt = parse_dt(end_time)
+
+    if not device_id or not start_dt or not end_dt:
+        return None
+
+    history = device_history.query.filter(
+        device_history.device_id == device_id,
+        device_history.start_datetime <= end_dt,
+        or_(
+            device_history.end_datetime.is_(None),
+            device_history.end_datetime >= start_dt
+        )
+    ).order_by(
+        device_history.start_datetime.desc()
+    ).first()
+
+    if not history:
+        return None
+
+    return history.patient_id
 def watch_mapping_patient(data):
-    result = []
+    # historic_data_origin 原始格式：
+    # {"daily_data": [{deviceid, hb, bp, spo2, step...}]}
+    if isinstance(data, dict) and "daily_data" in data:
+        return watch_mapping_daily_data_patient(data)
 
-    for row in data:
-        deviceid = row.get("deviceid")
+    # 你目前 api_trans_watch 裡已經把 daily_data 攤平成 list：
+    # [{deviceid, hb, bp, spo2, step...}]
+    if isinstance(data, list):
+        result = []
 
-        if not deviceid:
-            # 沒有 deviceid 也照樣保留
-            result.append(row)
-            continue
+        for row in data:
+            if not isinstance(row, dict):
+                result.append(row)
+                continue
 
+            # 如果這筆是巢狀 daily row，就處理內層
+            if any(k in row for k in ["hb", "bp", "spo2", "step", "tp"]):
+                result.append(watch_mapping_daily_row_patient(row))
+            else:
+                result.append(watch_mapping_single_row_patient(row))
+
+        return result
+
+    return data
+def watch_mapping_single_row_patient(row):
+    deviceid = row.get("deviceid")
+
+    if not deviceid:
+        return row
+
+    pat_id = None
+    has_time = False
+
+    if row.get("StartTime") and row.get("EndTime"):
+        has_time = True
+        pat_id = get_patient_by_device_period(
+            deviceid,
+            row.get("StartTime"),
+            row.get("EndTime")
+        )
+
+    elif row.get("time"):
+        has_time = True
+        pat_id = get_patient_by_device_time(
+            deviceid,
+            row.get("time")
+        )
+
+    elif row.get("Observation_HeartRate"):
+        obs = row["Observation_HeartRate"][0] if row["Observation_HeartRate"] else {}
+        if obs.get("datetime"):
+            has_time = True
+            pat_id = get_patient_by_device_time(
+                deviceid,
+                obs.get("datetime")
+            )
+
+    elif row.get("Observation_Sport"):
+        obs = row["Observation_Sport"][0] if row["Observation_Sport"] else {}
+        if obs.get("datetime"):
+            has_time = True
+            pat_id = get_patient_by_device_time(
+                deviceid,
+                obs.get("datetime")
+            )
+
+    # 只有「沒有時間可判斷」時，才退回目前 Device 綁定
+    if not pat_id and not has_time:
         DeviceInfo = fhir.FHIRData_Handle(
             None,
             f"Device/{deviceid}",
@@ -156,13 +287,58 @@ def watch_mapping_patient(data):
         if DeviceInfo:
             pat_id = DeviceInfo[0].pat_id
 
+    if pat_id:
+        row["PatientID"] = pat_id.replace("Patient/", "")
+    else:
+        row.pop("PatientID", None)
+
+    return row
+
+def watch_mapping_daily_row_patient(row):
+    deviceid = row.get("deviceid")
+
+    if not deviceid:
+        return row
+
+    row_patient_id = None
+
+    for key in ["hb", "bp", "spo2", "step", "tp", "bia"]:
+        items = row.get(key, [])
+
+        if not isinstance(items, list):
+            continue
+
+        for item in items:
+            measure_time = item.get("time")
+            pat_id = get_patient_by_device_time(deviceid, measure_time)
+
+            print("[DEVICE HISTORY CHECK]", key, deviceid, measure_time, pat_id)
+
             if pat_id:
-                row["PatientID"] = pat_id.replace("Patient/", "")
+                clean_pat_id = pat_id.replace("Patient/", "")
+                item["PatientID"] = clean_pat_id
 
-        result.append(row)
+                if not row_patient_id:
+                    row_patient_id = clean_pat_id
+            else:
+                item.pop("PatientID", None)
 
-    return result
+    if row_patient_id:
+        row["PatientID"] = row_patient_id
+    else:
+        row.pop("PatientID", None)
 
+    print("[AFTER DAILY MAPPING]", row)
+
+    return row
+def watch_mapping_daily_data_patient(data):
+    daily_data = data.get("daily_data", [])
+
+    for i, row in enumerate(daily_data):
+        if isinstance(row, dict):
+            daily_data[i] = watch_mapping_daily_row_patient(row)
+
+    return data
 def Watch_leadtek(df):
     result_data = []
     df = df.dropna()
@@ -398,6 +574,7 @@ def api_trans_watch(datatype, study_id=None, filename=None, data=None):
                     "success": False,
                     "message": errors
                 }), 400
+
             Groundhog_data = []
             for row in data['daily_data']:
                 Groundhog_data.append(row)
