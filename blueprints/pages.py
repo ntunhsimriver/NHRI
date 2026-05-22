@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request, send_file
 from blueprints import fhir 
 from blueprints import api_watch 
+from blueprints import auth 
 import mylib.fhir_check as fhir_check
 from config import BaseConfig as cfg  
 import requests
@@ -524,7 +525,12 @@ def api_uploadFHIR():
                 }), 400
 
             try:
-                result, stats = fhir_check.upload_FHIR_mappingID(study_id, data)
+                result, stats = fhir_check.upload_FHIR_mappingID(
+                    study_id,
+                    data,
+                    original_filename=file.filename,
+                    saved_filename=new_filename
+                )
             except Exception as e:
                 return jsonify({
                     "success": False,
@@ -553,7 +559,12 @@ def api_uploadFHIR():
             }), result.status_code
         elif file_type == 'FHIR_pat':
             data = json.load(file)
-            result, stats = fhir_check.upload_FHIR_changeID(pat_id, data)
+            result, stats = fhir_check.upload_FHIR_changeID(
+                pat_id,
+                data,
+                original_filename=file.filename,
+                saved_filename=new_filename
+            )
 
             if result.ok:
                 return jsonify({
@@ -645,7 +656,12 @@ def api_uploadFHIR():
 
         elif file_type == 'Questionnaire':
             data = json.load(file)
-            result = fhir_check.upload_FHIR_changeID(pat_id, data)
+            result, stats = fhir_check.upload_FHIR_changeID(
+                pat_id,
+                data,
+                original_filename=file.filename,
+                saved_filename=new_filename
+            )
             if result.ok:
                 return jsonify({"success": True, "message": "已收到問卷: " + file.filename})
             else:
@@ -849,7 +865,12 @@ def api_test():
     study_id = 'IRB-2026-001'
     data = request.get_json()
     
-    result, stats = fhir_check.upload_FHIR_mappingID(study_id, data)
+    result, stats = fhir_check.upload_FHIR_mappingID(
+        study_id,
+        data,
+        original_filename=file.filename,
+        saved_filename=new_filename
+    )
 
     return jsonify(result)
 
@@ -882,6 +903,8 @@ def api_fhir_upload_logs(study_id):
         total_resources = "-"
         status = "無統計檔"
 
+        original_filename = folder.name
+
         if stats_file.exists():
             try:
                 with open(stats_file, "r", encoding="utf-8") as f:
@@ -889,11 +912,16 @@ def api_fhir_upload_logs(study_id):
 
                 total_resources = stats.get("total_resources", "-")
                 status = "成功"
+
+                upload_file = stats.get("upload_file", {})
+                original_filename = upload_file.get("original_filename") or folder.name
+
             except Exception:
                 status = "統計檔讀取失敗"
 
         logs.append({
-            "folder": folder.name,
+            "folder": folder.name,  # 真正資料夾，查詳細結果用
+            "original_filename": original_filename,
             "time": folder.name,
             "total_resources": total_resources,
             "status": status,

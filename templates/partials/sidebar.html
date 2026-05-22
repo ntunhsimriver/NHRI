@@ -8,7 +8,9 @@
 <div id="layout-sidenav" class="layout-sidenav sidenav sidenav-vertical text-white">
   <!-- 標誌區塊 -->
   <div class="app-brand demo">
-    <a href="{{ url_for('pages.index_page') }}" class="app-brand-link flex items-center">
+    <a
+      href="{% if role == 'SUPER_ADMIN' %}{{ url_for('auth.settings') }}{% else %}{{ url_for('pages.index_page') }}{% endif %}"
+      class="app-brand-link flex items-center">
       <i id="bi-activity-inSideBar" class="bi bi-activity"></i>
       <span class="app-brand-text demo sidenav-text font-weight-normal ml-2">NHRI 數據平台</span>
     </a>

@@ -500,31 +500,47 @@ def get_IndexProject(study_id):
     
     return getSubjectCount, [months, months_data]
 
-def getAssistant(ProjectId): 
+import uuid
+
+def getAssistant(ProjectId, exclude_user_id=None): 
     result = []
     
-    ProjectInfo = Project.query.filter_by(irb_number = ProjectId).first()
+    ProjectInfo = Project.query.filter_by(irb_number=ProjectId).first()
+
+    if not ProjectInfo:
+        return result
 
     Assistant_List = ProjectInfo.Assistant.split(';') if ProjectInfo.Assistant not in [None, ''] else []
 
-
-    Assistant_Info_list = User.query.filter(
+    query = User.query.filter(
         User.role.in_(["ASSISTANT", "PI"]),
         User.Del == 0
-    ).order_by(User.role.asc()).all()
+    )
+
+    if exclude_user_id:
+        exclude_user_id = str(exclude_user_id).strip()
+
+        if exclude_user_id.startswith("Practitioner/"):
+            exclude_user_id = exclude_user_id.replace("Practitioner/", "", 1)
+
+        try:
+            exclude_uuid = uuid.UUID(exclude_user_id)
+            query = query.filter(User.id != exclude_uuid)
+        except ValueError:
+            # 如果不是 UUID，就改用 fhir_practitioner_id 排除
+            query = query.filter(User.fhir_practitioner_id != str(exclude_user_id))
+
+    Assistant_Info_list = query.order_by(User.role.asc()).all()
 
     for row in Assistant_Info_list:
         row_data = {
             "id": str(row.id),
             "full_name": row.full_name,   
             "email": row.email,   
-            "role": row.role.value,   
+            "role": row.role.value if hasattr(row.role, "value") else row.role,
             "selected": str(row.id) in Assistant_List
         }
         result.append(row_data)
-    
-    
-    
     
     return result
 
@@ -578,7 +594,7 @@ def get_Project(pi_id):
     
     for study_id in ids:
         study = FHIRData_Handle(None, study_id, 2, 1)[0]
-        Assistant = getAssistant(study.ProjectId) 
+        Assistant = getAssistant(study.ProjectId, pi_id) 
 
         
         getPIName = FHIRData_Handle(None, study.PI, 3, 1)[0].name

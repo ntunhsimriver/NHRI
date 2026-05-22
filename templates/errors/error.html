@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}NHRI - 臨床研究數據平台{% endblock %}</title>
+    <title>{{ error_code }} - NHRI 臨床研究數據平台</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/tailwind.generated.css') }}">
-    {% block styles %}
+
     <style nonce="{{ g.nonce }}">
         body {
             min-height: 100vh;
@@ -14,87 +14,79 @@
                 linear-gradient(to bottom right, #f8fafc, #eef2ff);
         }
     </style>
-    {% endblock %}
 </head>
 
 <body class="min-h-screen text-slate-800">
-
-    <!-- Pre-loader -->
-    <div class="page-loader">
-        <div class="bg-primary"></div>
-    </div>
-
     <main class="flex min-h-screen items-center justify-center px-4 py-10">
         <div class="w-full max-w-2xl">
-            
-            <!-- Logo / 系統名稱 -->
+
             <div class="mb-6 text-center">
-                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl {{ icon_bg_class }} shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 {{ icon_text_class }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.65 18h16.7a1 1 0 00.86-1.5l-7.5-13a1 1 0 00-1.72 0z" />
                     </svg>
                 </div>
                 <p class="text-sm font-medium tracking-wide text-blue-700">NHRI 臨床研究數據平台</p>
             </div>
 
-            <!-- Card -->
             <section class="overflow-hidden rounded-3xl bg-white/90 shadow-xl backdrop-blur">
-                
-                <!-- Header -->
-                <div class="border-b border-slate-100 bg-gradient-to-r from-red-50 to-white px-8 py-7">
+                <div class="border-b border-slate-100 {{ header_bg_class }} px-8 py-7">
                     <div class="flex items-start gap-4">
-                        <div class="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <div class="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl {{ icon_bg_class }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 {{ icon_text_class }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.65 18h16.7a1 1 0 00.86-1.5l-7.5-13a1 1 0 00-1.72 0z" />
                             </svg>
                         </div>
 
                         <div>
-                            <h1 class="text-2xl font-bold text-slate-900">無法連線至伺服器</h1>
+                            <div class="text-sm font-semibold {{ code_text_class }}">
+                                Error {{ error_code }}
+                            </div>
+
+                            <h1 class="mt-1 text-2xl font-bold text-slate-900">
+                                {{ title }}
+                            </h1>
+
                             <p class="mt-2 text-sm leading-6 text-slate-600">
-                                很抱歉，系統目前暫時無法處理您的請求。
-                                {% if message %}
-                                    {{ message }}
-                                {% else %}
-                                    請稍後再試，或聯絡系統管理員協助確認。
-                                {% endif %}
+                                {{ message }}
                             </p>
+
+                            {% if error_message %}
+                            <div class="mt-4 rounded-xl bg-slate-100 p-3 text-xs text-slate-500 break-all">
+                                {{ error_message }}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
 
-                <!-- Body -->
                 <div class="px-8 py-7">
-                    <div class="grid gap-6">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:justify-between">
+                        <a href="{{ url_for('pages.index_page') }}"
+                           class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700">
+                            返回首頁
+                        </a>
 
-
-                        <!-- Actions -->
-                        <div class="flex flex-col gap-3 sm:flex-row sm:justify-between">
-
-                            <a href="{{ url_for('auth.logout') }}"
-                               class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700">
-                                離開
-                            </a>
-                        </div>
+                        <button type="button"
+                                class="btn-back inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50">
+                            回上一頁
+                        </button>
                     </div>
                 </div>
             </section>
 
-            <!-- Footer -->
             <p class="mt-6 text-center text-xs text-slate-400">
                 若問題持續發生，請提供錯誤畫面與時間給系統管理員協助排查。
             </p>
         </div>
     </main>
+</body>
+</html>
 
-    <script nonce="{{ g.nonce }}">
+<script nonce="{{ g.nonce }}">
     document.querySelectorAll(".btn-back").forEach(function(btn) {
         btn.addEventListener("click", function() {
             history.back();
         });
     });
 </script>
-
-    {% block scripts %}{% endblock %}
-</body>
-</html>

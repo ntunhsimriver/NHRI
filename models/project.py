@@ -18,7 +18,10 @@ class Project(db.Model):
     Del = db.Column(db.SmallInteger, default=0)
     Assistant = db.Column(db.Text)
     device_list = db.Column(db.Text)
-    device_count = db.Column(db.Text)
+    device_count = db.Column(
+        db.Text,
+        default='{"active": 0, "foundPat": 0}'
+    )
     resource_count = db.Column(db.Text, default=lambda: json.dumps([
             0,
             [

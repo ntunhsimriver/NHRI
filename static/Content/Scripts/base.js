@@ -107,11 +107,11 @@ document.addEventListener("click", function(e) {
   target.classList.toggle("hidden");
 });
 
-document.querySelectorAll('.btn-back').forEach(btn => {
-    btn.addEventListener('click', function () {
-        history.back();
-    });
-});
+// document.querySelectorAll('.btn-back').forEach(btn => {
+//     btn.addEventListener('click', function () {
+//         history.back();
+//     });
+// });
 
 const userMenu = document.getElementById("userMenu");
   const userAvatar = document.getElementById("userAvatar");

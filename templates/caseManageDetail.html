@@ -115,12 +115,13 @@
               <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium type-{{item.status}}">{{item.status}}</span>
             </div>
             <div class="flex items-center gap-4">
-              <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                <i class="bi bi-watch text-2xl"></i>
+              <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <i class="bi bi-watch text-2xl leading-none"></i>
               </div>
-              <div>
-                <p class="text-lg font-semibold text-slate-900">{{item.model}} (ID: {{item.id}})</p>
-              </div>
+
+              <p class="m-0 text-lg font-semibold leading-none text-slate-900">
+                {{ item.model }} (ID: {{ item.id }})
+              </p>
             </div>
           </div>
           {% endfor %}

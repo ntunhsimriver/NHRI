@@ -53,7 +53,7 @@ function goToStep2(type) {
 
     if (type === 'FHIR') {
         hintElement.innerText = ".json";
-        infoElement.innerText = "上傳的FHIR檔案將以POST方式上傳至FHIR server，若需以PUT上傳請用transaction打包。";
+        infoElement.innerText = "請上傳 Bundle transaction 格式的 FHIR 檔案，type 需為 transaction，且每筆資料需包含 request 設定。若需保留原始 ID 並完整匯入資料，請於 transaction 中使用 PUT 方式上傳；使用 collection 或 POST 可能導致資料無法完整寫入或 ID 被系統重新產生。";
         fileInput.accept = ".json"; 
     } 
     else if (type === 'Watch') {
@@ -485,7 +485,7 @@ function loadUploadLogs(studyId) {
             tbody.innerHTML = logs.map(log => `
                 <tr class="hover:bg-slate-50">
                     <td class="px-4 py-3 text-slate-700">${log.time}</td>
-                    <td class="px-4 py-3 font-mono text-xs text-slate-500">${log.folder}</td>
+                    <td class="px-4 py-3 font-mono text-xs text-slate-500">${log.original_filename || log.folder}</td>
                     <td class="px-4 py-3 text-slate-700">${log.total_resources}</td>
                     <td class="px-4 py-3">
                         <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${

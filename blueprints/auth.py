@@ -140,13 +140,6 @@ def register():
 
 @bp.route('/api/login', methods=['POST'])
 def api_login():
-    ok, user_id = check_session_or_header_login()
-
-    if not ok:
-        return jsonify({
-            "success": False,
-            "message": "未登入或帳號密碼錯誤"
-        }), 401
     data = request.get_json()
     email = (data.get('email') or '').strip()
     password = data.get('password') or ''
@@ -514,13 +507,6 @@ def check_login_session():
 
 @bp.route('/api/check-session', methods=['POST'])
 def api_check_session():
-    ok, user_id = check_session_or_header_login()
-
-    if not ok:
-        return jsonify({
-            "success": False,
-            "message": "未登入或帳號密碼錯誤"
-        }), 401
     token = request.cookies.get('session_token')
 
     if not token:

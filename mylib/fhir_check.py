@@ -95,7 +95,7 @@ def collect_observation_reference_check(data):
 
     return summary, result
 
-def upload_FHIR_mappingID(study_id, data):
+def upload_FHIR_mappingID(study_id, data, original_filename=None, saved_filename=None):
     ProjectMemberInfo = ProjectMember.query.filter_by(
         project_id=study_id,
         Del=0
@@ -177,6 +177,10 @@ def upload_FHIR_mappingID(study_id, data):
     observation_reference_summary_after, observation_reference_logs_after = collect_observation_reference_check(data)
 
     stats = {
+        "upload_file": {
+            "original_filename": original_filename,
+            "saved_filename": saved_filename
+        },
         "total_resources": sum(resource_counter.values()),
         "resource_count": dict(resource_counter),
 
@@ -274,7 +278,7 @@ def set_nested_value(data, path, value):
             
     return data
          
-def upload_FHIR_changeID(pat_id, data):
+def upload_FHIR_changeID(pat_id, data, original_filename=None, saved_filename=None):
     just_id = pat_id
     pat_ref = f"Patient/{pat_id}"
 
@@ -417,6 +421,10 @@ def upload_FHIR_changeID(pat_id, data):
         result = data
 
     stats = {
+            "upload_file": {
+            "original_filename": original_filename,
+            "saved_filename": saved_filename
+        },
         "target_patient_id": just_id,
         "target_patient_reference": pat_ref,
         "is_bundle": resourceType == "Bundle",

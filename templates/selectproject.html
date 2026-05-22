@@ -69,7 +69,19 @@
             class="w-full rounded-lg !border !border-slate-200 py-2 pl-9 pr-4 mb-6 text-sm outline-none bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             id="searchInput">
           </div>
-          <h2 class="mb-6 text-xl font-semibold text-slate-800">請選擇您的計畫案 (Project)</h2>
+          <div class="mb-6 grid grid-cols-1 items-center gap-4 md:grid-cols-2">
+            <h2 class="text-xl font-semibold text-slate-800">
+              請選擇您的計畫案 (Project)
+            </h2>
+
+            <div class="flex justify-end">
+              <a href="{{ url_for('pages.projectManage') }}"
+                 class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-md hover:bg-blue-700 transition">
+                進入計畫管理
+              </a>
+            </div>
+          </div>
+          
             {% if data%}
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             
