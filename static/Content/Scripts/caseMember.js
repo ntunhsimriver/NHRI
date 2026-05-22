@@ -330,3 +330,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 });
+
+
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".btn-export-list");
+
+    if (!btn) return;
+
+    const ok = confirm(
+        "請確認是否已經將修改後的清單送出。\n\n" +
+        "若尚未送出，請先點選「送出清單」完成儲存後再匯出。\n\n" +
+        "確定要繼續匯出嗎？"
+    );
+
+    if (!ok) {
+        return;
+    }
+
+    const studyId = btn.dataset.studyId || "";
+
+    const url = studyId
+        ? `/api/project_member/export?study_id=${encodeURIComponent(studyId)}`
+        : `/api/project_member/export`;
+
+    window.location.href = url;
+});

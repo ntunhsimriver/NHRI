@@ -416,7 +416,8 @@ def check_login_session():
         '/logout',
         '/api/logout',
         '/register',
-        '/static',
+        '/static/assets',
+        '/static/Content',
         '/api/trans_watch',
         '/api/check-session',
     ]

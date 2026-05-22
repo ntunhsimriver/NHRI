@@ -56,37 +56,95 @@ document.getElementById('Modal_addDevice').addEventListener('hidden.bs.modal', f
 const form = document.getElementById('registerForm');
 const msg = document.getElementById('message');
 
-form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    
-    const id = document.getElementById('DeviceId').value;
-    const status = document.getElementById('DeviceStatus').value;
-    const model = document.getElementById('DeviceModel').value;
-    const pat_id = document.getElementById('PatId').value;
+if (!form.dataset.submitBound) {
+    form.dataset.submitBound = "true";
 
-    
-    msg.classList.remove('error-message', 'success-message');
-    
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
 
-    const response = await fetch('/api/addDevice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status, model, pat_id })
+        const id = document.getElementById('DeviceId').value.trim();
+        const status = document.getElementById('DeviceStatus').value;
+        const model = document.getElementById('DeviceModel').value.trim();
+        const pat_id = document.getElementById('PatId').value.trim();
+
+        await submitDevice({
+            id,
+            status,
+            model,
+            pat_id,
+            force_update: false
+        });
     });
+}
 
-    const result = await response.json();
-    if (result.success) {
-        msg.textContent = result.message;
-        msg.classList.add('success-message');
-        setTimeout(() => {
-            location.reload();
-        }, 500);
-    } else {
-        msg.textContent = result.message;
+let isSubmittingDevice = false;
+
+async function submitDevice(payload) {
+    if (isSubmittingDevice) return;
+
+    isSubmittingDevice = true;
+
+    msg.classList.remove('error-message', 'success-message');
+    msg.textContent = '';
+
+    try {
+        const response = await fetch('/api/addDevice', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        let result = {};
+        try {
+            result = await response.json();
+        } catch (e) {
+            result = {
+                success: false,
+                message: '伺服器回傳格式錯誤'
+            };
+        }
+
+        if (result.need_confirm) {
+            const ok = confirm(
+                `${result.message}\n\n` +
+                `目前綁定：${result.current_patient_id || "無"}\n` +
+                `即將改綁：${result.new_patient_id || "未綁定"}\n\n` +
+                `是否確定要修改？`
+            );
+
+            if (!ok) {
+                msg.textContent = '已取消修改';
+                msg.classList.add('error-message');
+                return;
+            }
+
+            payload.force_update = true;
+
+            // 要送第二次前才解鎖
+            isSubmittingDevice = false;
+            return submitDevice(payload);
+        }
+
+        if (response.ok && result.success) {
+            msg.textContent = result.message || '已新增成功';
+            msg.classList.add('success-message');
+
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        } else {
+            msg.textContent = result.message || '送出失敗';
+            msg.classList.add('error-message');
+        }
+
+    } catch (err) {
+        console.error(err);
+        msg.textContent = '送出失敗，請稍後再試';
         msg.classList.add('error-message');
+    } finally {
+        isSubmittingDevice = false;
     }
-});
-
+}
 document.getElementById("updateDeviceCountBtn").addEventListener("click", async function () {
   const btn = this;
   var input_data = btn.getAttribute('data-bs-study')

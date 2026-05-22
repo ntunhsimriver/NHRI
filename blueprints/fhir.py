@@ -25,9 +25,6 @@ import uuid
 from threading import Thread
 import shutil
 
-
-
-
 resource_types = [
         "Encounter",
         "Observation",
@@ -411,10 +408,11 @@ def get_Patient(PatID, study_id):
 
     FirstDate = getSubject.start
     FirstDate = FirstDate[:10]
+    EndDate = getSubject.end[:10] if getSubject.end else None
 
     getConsent = FHIRData_Handle(None, FHIRSearch_Handle(49, [getSubject.id]), 10, 1) 
 
-    return PatInfo, FirstDate, getConsent, DeviceInfo
+    return PatInfo, FirstDate, getConsent, DeviceInfo, EndDate
 
 def safe_int(value):
     if value is None:
@@ -543,22 +541,34 @@ def getAssistant(ProjectId, exclude_user_id=None):
         result.append(row_data)
     
     return result
+def get_user_role_value(user):
+    if not user:
+        return None
 
+    return user.role.value if hasattr(user.role, "value") else str(user.role)
 def get_ProjectID(pi_id):
-    UserInfo = User.query.filter_by(fhir_practitioner_id=pi_id, Del=0).first()
+    UserInfo = User.query.filter_by(
+        fhir_practitioner_id=pi_id,
+        Del=0
+    ).first()
 
-    filters = [
-        Project.pi_id == pi_id
-    ]
+    role_value = get_user_role_value(UserInfo)
 
-    if UserInfo is not None and UserInfo.id is not None:
-        filters.append(
-            Project.Assistant.contains(str(UserInfo.id))
-        )
+    if role_value == "SUPER_ADMIN":
+        ProjectInfo = Project.query.all()
+    else:
+        filters = [
+            Project.pi_id == pi_id
+        ]
 
-    ProjectInfo = Project.query.filter(
-        or_(*filters)
-    ).all()
+        if UserInfo is not None and UserInfo.id is not None:
+            filters.append(
+                Project.Assistant.contains(str(UserInfo.id))
+            )
+
+        ProjectInfo = Project.query.filter(
+            or_(*filters)
+        ).all()
 
     result = []
     seen = set()
@@ -581,31 +591,64 @@ def get_ProjectID(pi_id):
     return result
 
 def get_Project(pi_id):
-    getResult = [] 
-    UserInfo = User.query.filter_by(fhir_practitioner_id=pi_id, Del=0).first()
-    ProjectInfo = Project.query.filter(
-        or_(
-            Project.pi_id == pi_id,
-            Project.Assistant.contains(UserInfo.id)
-        )
-    ).all()
+    getResult = []
+
+    UserInfo = User.query.filter_by(
+        fhir_practitioner_id=pi_id,
+        Del=0
+    ).first()
+
+    role_value = get_user_role_value(UserInfo)
+
+    if role_value == "SUPER_ADMIN":
+        ProjectInfo = Project.query.all()
+    else:
+        filters = [
+            Project.pi_id == pi_id
+        ]
+
+        if UserInfo is not None and UserInfo.id is not None:
+            filters.append(
+                Project.Assistant.contains(str(UserInfo.id))
+            )
+
+        ProjectInfo = Project.query.filter(
+            or_(*filters)
+        ).all()
+
     ids = [str(p.fhir_study_id) for p in ProjectInfo if p.fhir_study_id]
 
-    
     for study_id in ids:
-        study = FHIRData_Handle(None, study_id, 2, 1)[0]
-        Assistant = getAssistant(study.ProjectId, pi_id) 
+        study_list = FHIRData_Handle(None, study_id, 2, 1)
 
-        
-        getPIName = FHIRData_Handle(None, study.PI, 3, 1)[0].name
-        
-        getSubjectCount = FHIRData_Handle(None, FHIRSearch_Handle(9, [ study.ProjectId]), 1, 1)[0].SummaryCount
+        if not study_list:
+            continue
+
+        study = study_list[0]
+
+        Assistant = getAssistant(study.ProjectId, pi_id)
+
+        pi_name = ""
+        pi_list = FHIRData_Handle(None, study.PI, 3, 1)
+        if pi_list:
+            pi_name = pi_list[0].name
+
+        subject_count = 0
+        subject_count_list = FHIRData_Handle(
+            None,
+            FHIRSearch_Handle(9, [study.ProjectId]),
+            1,
+            1
+        )
+
+        if subject_count_list:
+            subject_count = subject_count_list[0].SummaryCount
 
         getResult.append({
-            "study_info": study,  
-            "pi_name": getPIName,    
-            "SubjectCount": getSubjectCount,    
-            "Assistant": Assistant,    
+            "study_info": study,
+            "pi_name": pi_name,
+            "SubjectCount": subject_count,
+            "Assistant": Assistant,
         })
 
     return getResult
@@ -1005,26 +1048,89 @@ def run_getDeviceCount_toSQL(app, study_id, device_id):
         finally:
             db.session.remove()
 def addDevice_FHIR(data, study_id):
-    pat_id = data['pat_id']
-    
-    result = FHIR_listMapping(data, 6)
-    Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)
-    app = current_app._get_current_object()
+    data = data or {}
 
-    thread = Thread(
-        target=run_getDeviceCount_toSQL,
-        args=(app, study_id, data['id'])
-    )
-    thread.daemon = True
-    thread.start()
+    device_id = str(data.get("id") or "").strip()
+    pat_id = str(data.get("pat_id") or "").strip()
+    force_update = data.get("force_update", False)
 
-    update_device_history(
-        device_id=data['id'],
-        patient_id=pat_id,
-        note=""
-    )
+    if not device_id:
+        return {
+            "success": False,
+            "message": "缺少設備 ID",
+            "status_code": 400
+        }
 
-    return True, Response
+    # 統一 patient id 格式
+    if pat_id and not pat_id.startswith("Patient/"):
+        pat_id = "Patient/" + pat_id
+
+    data["id"] = device_id
+    data["pat_id"] = pat_id
+
+    # 檢查目前設備是否已被其他個案綁定
+    active_history = FHIR.device_history.query.filter(
+        FHIR.device_history.device_id == device_id,
+        FHIR.device_history.status == "active",
+        FHIR.device_history.end_datetime.is_(None)
+    ).order_by(
+        FHIR.device_history.start_datetime.desc()
+    ).first()
+
+    current_patient_id = str(active_history.patient_id or "").strip() if active_history else ""
+
+    if (
+        active_history
+        and pat_id
+        and current_patient_id != pat_id
+        and not force_update
+    ):
+        return {
+            "success": False,
+            "need_confirm": True,
+            "message": "此設備目前已綁定其他個案，是否要改綁？",
+            "current_patient_id": current_patient_id,
+            "new_patient_id": pat_id
+        }
+
+    try:
+        result = FHIR_listMapping(data, 6)
+        Response = put_FHIR_api(result['resourceType'] + "/" + result['id'], result)
+
+        if not Response.ok:
+            return {
+                "success": False,
+                "message": Response.text if hasattr(Response, "text") else "FHIR Server 寫入失敗",
+                "status_code": getattr(Response, "status_code", 500)
+            }
+
+        app = current_app._get_current_object()
+
+        thread = Thread(
+            target=run_getDeviceCount_toSQL,
+            args=(app, study_id, device_id)
+        )
+        thread.daemon = True
+        thread.start()
+
+        update_device_history(
+            device_id=device_id,
+            patient_id=pat_id,
+            note=""
+        )
+
+        return {
+            "success": True,
+            "message": "已新增成功",
+            "response": Response
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e),
+            "status_code": 500
+        }
 
 
 def upload_FHIR(data):
@@ -1158,6 +1264,7 @@ def addPatient_FHIR(data, study_id):
         inputResSub = {
             'pat_id': "Patient/" + pat_id,
             'start': data.get('start'),
+            'end': data.get('end'),
             'id': study_id + '-' + pat_id,
             'status': data.get('status'),
             'studyId': "ResearchStudy/" + study_id

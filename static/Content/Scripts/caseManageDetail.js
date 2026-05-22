@@ -664,6 +664,9 @@ ModalupdatePatient.addEventListener('show.bs.modal', function (event) {
     var modelPeriodStart = document.getElementById('addPeriodStart');
     if (modelPeriodStart) modelPeriodStart.value = data.PeriodStart;
 
+    var modelPeriodEnd = document.getElementById('addPeriodEnd');
+    if (modelPeriodEnd) modelPeriodEnd.value = data.PeriodEnd;
+
     var modelStatus = document.getElementById('addStatus');
     if (modelStatus) modelStatus.value = data.Status;
 
@@ -691,6 +694,7 @@ form.addEventListener('submit', async function (e) {
     
     const pat_id = document.getElementById('addPatId').value;
     const start = document.getElementById('addPeriodStart').value;
+    const end = document.getElementById('addPeriodEnd').value;
     const status = document.getElementById('addStatus').value;
     const type = 'update'
 
@@ -701,7 +705,7 @@ form.addEventListener('submit', async function (e) {
     const response = await fetch('/api/addPatient', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pat_id, start, type, status })
+        body: JSON.stringify({ pat_id, start, end, type, status })
     });
 
     const result = await response.json();

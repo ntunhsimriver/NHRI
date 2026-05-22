@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request, send_file
+from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request, send_file, Response
 from blueprints import fhir 
 from blueprints import api_watch 
 from blueprints import auth 
@@ -15,7 +15,8 @@ from models.project import Project, ProjectMember
 from extensions import db
 import re
 from pathlib import Path
-
+import io
+import csv
 import pyminizip
 import tempfile
 
@@ -164,19 +165,14 @@ def caseManageDetail(case_id, ResearchSubjectStatus):
     FirstDate = getPatInfo[1] 
     getConsent = getPatInfo[2] 
     getDeviceInfo = getPatInfo[3] 
+    EndDate = getPatInfo[4] 
 
 
     
     getQAInfo = fhir.getQA(case_id)
 
 
-    return render_template("caseManageDetail.html", PatInfo=PatInfo, FirstDate=FirstDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, getQAInfo=getQAInfo, script_path=url_for('static', filename='Content/Scripts/caseManageDetail.js'))
-
-
-
-
-
-
+    return render_template("caseManageDetail.html", PatInfo=PatInfo, FirstDate=FirstDate, EndDate=EndDate, getConsent=getConsent, ResearchSubjectStatus=ResearchSubjectStatus, getDeviceInfo=getDeviceInfo, getQAInfo=getQAInfo, script_path=url_for('static', filename='Content/Scripts/caseManageDetail.js'))
 
 @bp.route("/api/getEncounter_all/<case_id>")
 def api_getEnc_all(case_id):
@@ -342,16 +338,32 @@ def api_addDevice():
             "success": False,
             "message": "未登入或帳號密碼錯誤"
         }), 401
-    if session['study_status'] == "withdrawn":
-        return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
 
-    data = request.get_json()
-    res = fhir.addDevice_FHIR(data, session['study_id'])
-    if res[0]:
-        if res[1].ok:
-            return jsonify({'success': True, 'message': '已新增成功'})
-    else:
-        return jsonify({'success': False, 'message': res[1]})
+    if session.get('study_status') == "withdrawn":
+        return jsonify({
+            'success': False,
+            'message': '已撤銷計劃無法新增資料!'
+        })
+
+    data = request.get_json(silent=True) or {}
+
+    res = fhir.addDevice_FHIR(
+        data=data,
+        study_id=session.get('study_id')
+    )
+
+    # addDevice_FHIR 回傳 need_confirm
+    if isinstance(res, dict) and res.get("need_confirm"):
+        return jsonify(res), 409
+
+    # addDevice_FHIR 回傳錯誤
+    if isinstance(res, dict) and not res.get("success"):
+        return jsonify(res), res.get("status_code", 400)
+
+    return jsonify({
+        "success": True,
+        "message": res.get("message", "已新增成功")
+    })
 
 @bp.route('/api/update-device-count', methods=['POST'])
 def api_update_device_count():
@@ -852,7 +864,64 @@ def save_all_project_member():
         db.session.rollback()
         print("錯誤:", e)
         return jsonify({"error": "更新失敗"}), 500
+@bp.route("/api/project_member/export", methods=["GET"])
+def export_project_member():
+    ok, user_id = auth.check_session_or_header_login()
 
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
+
+    study_id = request.args.get("study_id") or session.get("study_id")
+
+    if not study_id:
+        return jsonify({
+            "success": False,
+            "message": "缺少 study_id"
+        }), 400
+
+    data = ProjectMember.query.filter_by(
+        project_id=study_id
+    ).order_by(
+        ProjectMember.id.asc()
+    ).all()
+
+    output = io.StringIO()
+    output.write("\ufeff")  # Excel 開啟中文不亂碼
+
+    writer = csv.writer(output)
+
+    writer.writerow([
+        "計畫代碼",
+        "原有ID",
+        "系統ID",
+        "建立日期",
+        "刪除狀態"
+    ])
+
+    for item in data:
+        writer.writerow([
+            item.project_id,
+            item.old_patient_id,
+            item.new_patient_id,
+            item.created_at,
+            item.Del
+        ])
+
+    csv_data = output.getvalue()
+    output.close()
+
+    filename = f"project_member_{study_id}.csv"
+
+    return Response(
+        csv_data,
+        mimetype="text/csv; charset=utf-8-sig",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
 @bp.route('/api/test', methods=['POST'])
 def api_test():
     ok, user_id = auth.check_session_or_header_login()

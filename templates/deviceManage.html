@@ -19,13 +19,7 @@
       <h2 class="text-2xl font-bold text-slate-900">設備管理</h2>
       <p class="text-sm text-slate-500">檢視與管理所有專案設備、配對狀態與資料同步情形</p>
     </div>
-    <div class="flex gap-3">
-      <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm shadow-blue-500/30"
-        data-bs-toggle="modal" 
-        data-bs-target="#Modal_fhirDevice"
-        data-device-list='{{ data | tojson }}'>
-        <i class="bi bi-gear"></i> 從FHIR Server勾選設備
-      </button>
+    <div class="flex gap-2">
 
       <button class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm shadow-blue-500/30"
         data-bs-toggle="modal" 
@@ -171,7 +165,7 @@
           <option value="entered-in-error">entered-in-error</option>
         </select>
 
-        <label class="block text-sm font-medium text-slate-700" for="PatId">綁定個案(請填入FHIR id)
+        <label class="block text-sm font-medium text-slate-700" for="PatId">綁定個案(系統 Hash ID)
           <i class="bi bi-question-circle-fill ml-2 text-slate-300 text-sm hover:text-blue-500 cursor-pointer transition"
              data-bs-toggle="tooltip"
              data-bs-placement="top"
