@@ -1512,8 +1512,6 @@ def cleanup_all_old_export_folders(days=90):
     return total_deleted
 
 
-
-
 def create_page_visit_audit_event(user_practitioner_id, username, path, endpoint=None, method="GET", ip=None):
     return {
         "resourceType": "AuditEvent",

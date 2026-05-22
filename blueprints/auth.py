@@ -359,7 +359,8 @@ def check_login_session():
         '/api/logout',
         '/register',
         '/static',
-        '/api/trans_watch','/api/check-session',
+        '/api/trans_watch',
+        '/api/check-session',
     ]
 
     is_public_path = any(request.path.startswith(path) for path in public_paths)
@@ -369,7 +370,6 @@ def check_login_session():
     if (
         not request.path.startswith("/static")
         and request.path != "/favicon.ico"
-        and request.path != "/api/check-session"
     ):
         try:
             audit_event = fhir.create_page_visit_audit_event(
@@ -410,7 +410,7 @@ def check_login_session():
 
     now = datetime.now()
 
-    if now - user_session.last_activity > timedelta(minutes=1):
+    if now - user_session.last_activity > timedelta(minutes=30):
         user_session.is_active = False
         db.session.commit()
 

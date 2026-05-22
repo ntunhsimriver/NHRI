@@ -865,3 +865,13 @@ def api_save_project_devices():
         'success': True,
         'message': '設備更新成功'
     })
+
+
+@bp.app_errorhandler(500)
+def internal_server_error(error):
+    error_message = str(error) if current_app.debug else None
+
+    return render_template(
+        "errors/500.html",
+        error_message=error_message
+    ), 500

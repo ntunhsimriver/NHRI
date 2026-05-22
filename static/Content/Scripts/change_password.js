@@ -1,69 +1,133 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const toggleButtons = document.querySelectorAll(".toggle-password");
+let idleTimer = null;
+let isUploading = false;
 
-  toggleButtons.forEach(function (button) {
-    button.addEventListener("click", function () {
-      const targetId = button.getAttribute("data-target");
-      const input = document.getElementById(targetId);
+const IDLE_LIMIT = 30 * 60 * 1000;
 
+function resetIdleTimer() {
+    clearTimeout(idleTimer);
 
-      if (!input) return;
+    idleTimer = setTimeout(() => {
+        if (isUploading) {
+            resetIdleTimer();
+            return;
+        }
 
-      if (input.type === "password") {
-        input.type = "text";
-        button.innerHTML = '<i class="bi bi-eye-slash"></i>';
-        button.setAttribute("aria-label", "隱藏密碼");
-      } else {
-        input.type = "password";
-        button.innerHTML = '<i class="bi bi-eye"></i>';
-        button.setAttribute("aria-label", "顯示密碼");
-      }
-    });
-  });
+        alert("您已超過 30 分鐘未操作，系統將自動登出");
+        window.location.href = "/logout";
+    }, IDLE_LIMIT);
+}
+
+["click", "keydown", "scroll", "touchstart"].forEach(eventName => {
+    document.addEventListener(eventName, resetIdleTimer, true);
 });
 
+resetIdleTimer();
 
-const form = document.getElementById('changepwForm');
-const msg = document.getElementById('message');
+let isCheckingSession = false;
 
-form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    
-    const old_password = document.getElementById('old_password').value;
-    const new_password = document.getElementById('new_password').value;
+async function checkSessionFromServer() {
+    if (isCheckingSession) return true;
 
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/;
+    isCheckingSession = true;
 
-    if (!regex.test(new_password)) {
-      
-        msg.textContent = "密碼需包含：大小寫英文、數字、符號";
-        msg.classList.add('error-message');
-        return;
+    try {
+        const res = await fetch("/api/check-session", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        const result = await res.json();
+
+        if (!res.ok || result.expired) {
+            alert(result.message || "登入已逾時，請重新登入");
+            window.location.href = "/logout";
+            return false;
+        }
+
+        return true;
+
+    } catch (err) {
+        console.error("檢查登入狀態失敗", err);
+        return true; // 網路瞬斷時不要直接登出
+    } finally {
+        isCheckingSession = false;
     }
+}
 
-    
-    msg.classList.remove('error-message', 'success-message');
-    if (!old_password || !new_password) {
-        msg.textContent = '請填寫帳號與密碼！';
-        msg.classList.add('error-message');
-        return;
+document.addEventListener("click", async function (event) {
+    const ok = await checkSessionFromServer();
+
+    if (!ok) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
     }
-
-    const response = await fetch('/api/change_password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ old_password, new_password })
+}, true);
+document.querySelectorAll('.project-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        
+        window.location.href = this.dataset.url;
     });
+});
 
-    const result = await response.json();
-    if (result.success) {
-        msg.textContent = '密碼修改成功，請重新登入!';
-        msg.classList.add('success-message');
-        setTimeout(() => {
-            window.location.href = result.redirect;
-        }, 500);
-    } else {
-        msg.textContent = result.message;
-        msg.classList.add('error-message');
+document.addEventListener("DOMContentLoaded", function () {
+            if (window.layoutHelpers) {
+                window.layoutHelpers.init();
+            }
+
+            
+            document.querySelectorAll('.layout-sidenav-toggle').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    if (window.layoutHelpers && typeof window.layoutHelpers.toggleCollapsed === 'function') {
+                        window.layoutHelpers.toggleCollapsed();
+                    }
+                });
+            });
+        });
+
+        document.querySelectorAll('.project-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                window.location.href = this.dataset.url;
+            });
+        });
+
+const userMenu = document.getElementById("userMenu");
+  const userAvatar = document.getElementById("userAvatar");
+
+  userAvatar.addEventListener("click", function (e) {
+    e.stopPropagation();
+    userMenu.classList.toggle("active");
+  });
+
+  document.addEventListener("click", function () {
+    userMenu.classList.remove("active");
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+
+    const searchInput = document.getElementById('searchInput');
+    const caseRows = document.querySelectorAll('.case-row');
+
+    function filterRows() {
+        const searchText = searchInput.value.toLowerCase().trim();
+
+        caseRows.forEach(row => {
+
+            const proid = (row.getAttribute('data-proid') || '').toLowerCase();
+            const proname = (row.getAttribute('data-name') || '').toLowerCase();
+
+            const matchSearch =
+                proid.includes(searchText) ||
+                proname.includes(searchText);
+
+            row.style.display = matchSearch ? '' : 'none';
+        });
     }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterRows);
+    }
+
 });

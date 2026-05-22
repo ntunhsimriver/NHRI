@@ -95,7 +95,6 @@ def handler_watch(data, project_type):
     print(len(data))
     # if project_type != "麗臺手錶":
     data = watch_mapping_patient(data)
-    print(data)
     inputdata = {
         "ProjectGroup": "THBC_NHRI",
         "Project": project_type}
@@ -174,12 +173,12 @@ def Watch_leadtek(df):
         if 'heart_rate' in df.columns:
             data = {
                 "deviceid": "device-" + row["PatientID"],
-                "Patient": [{
-                    "account": row["account"],
-                    "PatientID": "patient-" + row["PatientID"]
-                }],
+                # "Patient": [{
+                #     "account": row["account"],
+                #     "PatientID": "patient-" + row["PatientID"]
+                # }],
                 "Observation_HeartRate": [{
-                    "PatientID": "patient-" + row["PatientID"],
+                    # "PatientID": "patient-" + row["PatientID"],
                     "datetime":  row["datetime"],
                     "heart_rate": row["heart_rate"]
                 }]
@@ -187,12 +186,12 @@ def Watch_leadtek(df):
         else:
             data = {
                 "deviceid": "device-" + row["PatientID"],
-                "Patient": [{
-                    "account": row["account"],
-                    "PatientID": "patient-" + row["PatientID"]
-                }],
+                # "Patient": [{
+                #     "account": row["account"],
+                #     "PatientID": "patient-" + row["PatientID"]
+                # }],
                 "Observation_Sport": [{
-                    "PatientID": "patient-" + row["PatientID"],
+                    # "PatientID": "patient-" + row["PatientID"],
                     "datetime": row["datetime"],
                     "Sport": [
                         {
@@ -216,7 +215,6 @@ def Watch_leadtek(df):
             }
         
         result_data.append(data)
-    print(result_data)
     return result_data
 
 STEPS_MAX = 100000
