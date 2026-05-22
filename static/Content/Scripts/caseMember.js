@@ -25,12 +25,10 @@ function sendList() {
     const list = [];
 
     let hasError = false;
+    const oldPatientSet = new Set();
 
     rows.forEach((row, index) => {
-        
-        if (row.classList.contains("row-deleted")) {
-            return;
-        }
+        const isDeleted = row.classList.contains("row-deleted");
 
         const tds = row.querySelectorAll("td");
         if (tds.length < 4) return;
@@ -43,17 +41,26 @@ function sendList() {
         const oldPatientId = oldPatientInput?.value.trim() || "";
         const newPatientId = newPatientInput?.value.trim() || "";
 
-        
         if (!oldPatientId.startsWith("Patient/") || oldPatientId === "Patient/") {
             hasError = true;
-
-            oldPatientInput.classList.add("border-red-500");
-
+            oldPatientInput?.classList.add("border-red-500");
             alert(`第 ${index + 1} 列：原有ID 必須是 "Patient/xxx"`);
-
             return;
         } else {
-            oldPatientInput.classList.remove("border-red-500");
+            oldPatientInput?.classList.remove("border-red-500");
+        }
+
+        // 檢查原有ID不可重複
+        // 如果 row-deleted 也要納入重複檢查，把 !isDeleted 條件拿掉
+        if (!isDeleted) {
+            if (oldPatientSet.has(oldPatientId)) {
+                hasError = true;
+                oldPatientInput?.classList.add("border-red-500");
+                alert(`第 ${index + 1} 列：原有ID「${oldPatientId}」重複，請確認後再送出`);
+                return;
+            }
+
+            oldPatientSet.add(oldPatientId);
         }
 
         if (!projectId || !oldPatientId || !newPatientId) {
@@ -64,7 +71,8 @@ function sendList() {
             project_id: projectId,
             old_patient_id: oldPatientId,
             new_patient_id: newPatientId,
-            created_at: createdAt
+            created_at: createdAt,
+            Del: isDeleted ? 1 : 0
         });
     });
 
@@ -97,7 +105,6 @@ function sendList() {
         alert("送出失敗");
     });
 }
-
 
 function removeRow(button) {
     const row = button.closest("tr");

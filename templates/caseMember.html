@@ -55,30 +55,41 @@
           </thead>
           <tbody class="divide-y divide-slate-100" id="caseTableBody">
 
-            {% for item in data %}
-            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row" data-hash-oldID="{{ item.old_patient_id }}" data-hash-newID="{{ item.new_patient_id }}">
-              <td class="px-6 py-4 font-mono font-medium text-blue-600 group-hover:underline">{{ item.project_id }}</td>
-              <td class="px-6 py-4 text-slate-600">
-                <input
-                  type="text"
-                  value="{{ item.old_patient_id }}"
-                  class="w-full rounded-md !border !border-slate-300 px-2 py-1 text-sm bg-slate-10">
-              </td>
-              <td class="px-6 py-4 text-slate-600">
-                <input
-                  type="text"
-                  value="{{ item.new_patient_id }}"
-                  readonly
-                  class="w-full rounded-md !border !border-slate-300 px-2 py-1 text-sm bg-slate-100 cursor-not-allowed">
-              </td>
-              <td class="px-6 py-4 text-slate-600">{{ item.created_at }}</td>
-              <td class="px-6 py-4">
-                <button class="text-slate-400 hover:text-red-600 btn-remove-row">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-            </tr>
-            {% endfor %}
+          {% for item in data %}
+          <tr class="hover:bg-slate-50 transition-colors group cursor-pointer case-row {% if item.Del == 1 %}row-deleted opacity-50 bg-red-50{% endif %}"
+              data-hash-oldID="{{ item.old_patient_id }}"
+              data-hash-newID="{{ item.new_patient_id }}">
+
+            <td class="px-6 py-4 font-mono font-medium text-blue-600 group-hover:underline">
+              {{ item.project_id }}
+            </td>
+
+            <td class="px-6 py-4 text-slate-600">
+              <input
+                type="text"
+                value="{{ item.old_patient_id }}"
+                class="w-full rounded-md !border !border-slate-300 px-2 py-1 text-sm bg-slate-10">
+            </td>
+
+            <td class="px-6 py-4 text-slate-600">
+              <input
+                type="text"
+                value="{{ item.new_patient_id }}"
+                readonly
+                class="w-full rounded-md !border !border-slate-300 px-2 py-1 text-sm bg-slate-100 cursor-not-allowed">
+            </td>
+
+            <td class="px-6 py-4 text-slate-600">
+              {{ item.created_at }}
+            </td>
+
+            <td class="px-6 py-4">
+              <button class="text-slate-400 hover:text-red-600 btn-remove-row">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
 
           </tbody>
         </table>

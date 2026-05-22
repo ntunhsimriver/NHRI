@@ -148,7 +148,7 @@ def caseMember(study_id):
         return redirect(url_for('auth.login_page'))
     elif 'study_id' not in session:
         return redirect(url_for('pages.selectproject'))
-    data = ProjectMember.query.filter_by(project_id=study_id, Del=0).all()
+    data = ProjectMember.query.filter_by(project_id=study_id).all()
     return render_template('caseMember.html', data=data, script_path=url_for('static', filename='Content/Scripts/caseMember.js'))
 
 @bp.route("/caseManageDetail/<case_id>/<ResearchSubjectStatus>")
@@ -179,19 +179,39 @@ def caseManageDetail(case_id, ResearchSubjectStatus):
 
 @bp.route("/api/getEncounter_all/<case_id>")
 def api_getEnc_all(case_id):
-    
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     getAllEncounter = fhir.getAllEncounter(case_id)
 
     return jsonify(getAllEncounter) 
 
 @bp.route("/api/getTreatment_all/<case_id>/<Resource>")
 def api_getTreat_all(case_id, Resource):
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     getAllData = fhir.getAllTreatment(case_id, [Resource])
 
     return jsonify(getAllData) 
 
 @bp.route("/api/getEncounter/<enc_id>")
 def api_getEnc(enc_id):
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     print(enc_id)
     getEncInfo = fhir.getEnc(enc_id)
 
@@ -209,7 +229,13 @@ def deviceDetail(pat_id, device_id):
 
 @bp.route("/api/deviceDetailObs14days/<device_id>")
 def api_deviceDetail(device_id):
+    ok, user_id = auth.check_session_or_header_login()
 
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     start = request.args.get("start")
     end = request.args.get("end")
     getObs14daysResult = fhir.getObs14days("", device_id, start, end)
@@ -217,7 +243,13 @@ def api_deviceDetail(device_id):
 
 @bp.route("/api/caseManageObs14days/<pat_id>")
 def api_patObs14days(pat_id):
+    ok, user_id = auth.check_session_or_header_login()
 
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     start = request.args.get("start")
     end = request.args.get("end")
 
@@ -229,6 +261,13 @@ def api_patObs14days(pat_id):
 
 @bp.route('/api/addPatient', methods=['POST'])
 def api_addPatient():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     print(session['study_status'] )
     if session['study_status'] == "withdrawn":
         return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
@@ -265,6 +304,13 @@ def dataExport():
 
 @bp.route('/api/export', methods=['POST'])
 def api_export():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json()
     print(data)
     res = fhir.getBULK(data['project_id'], data['zip_password'])
@@ -288,6 +334,13 @@ def deviceManage():
 
 @bp.route('/api/addDevice', methods=['POST'])
 def api_addDevice():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     if session['study_status'] == "withdrawn":
         return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
 
@@ -301,6 +354,13 @@ def api_addDevice():
 
 @bp.route('/api/update-device-count', methods=['POST'])
 def api_update_device_count():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json()
     print(data)
     study_id = data.get("study_id")
@@ -320,6 +380,13 @@ def api_update_device_count():
 
 @bp.route('/api/update-data-count', methods=['POST'])
 def api_update_data_count():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json()
     print(data)
     study_id = data.get("study_id")
@@ -339,6 +406,13 @@ def api_update_data_count():
 
 @bp.route('/api/update-resource-count', methods=['POST'])
 def api_update_resource_count():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json()
     print(data)
     study_id = data.get("study_id")
@@ -370,6 +444,13 @@ def projectManage():
 
 @bp.route('/api/addProject', methods=['POST'])
 def api_addProject():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json()
     res = fhir.addProject_FHIR(data, session['fhir_practitioner_id'])
 
@@ -377,7 +458,13 @@ def api_addProject():
 
 @bp.route('/api/addMember', methods=['POST'])
 def api_addMember():
-    
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     
     data = request.get_json()
     member_result = data['item_member']
@@ -391,6 +478,13 @@ def api_addMember():
 
 @bp.route('/api/uploadFHIR', methods=['POST'])
 def api_uploadFHIR():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     if session['study_status'] == "withdrawn":
         return jsonify({'success': False, 'message': '已撤銷計劃無法新增資料!'})
     file = request.files.get('file')
@@ -562,6 +656,13 @@ def api_uploadFHIR():
 
 @bp.route('/api/download', methods=['GET'])
 def download_export():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     folder_name = request.args.get("folder_name")
     base_path = Path(cfg.NDJSON_DIR) / folder_name
 
@@ -616,6 +717,13 @@ def download_export():
 
 @bp.route("/api/getNewID", methods=["POST"])
 def api_getNewID():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json()
     result = fhir.get_new_patient_id(data['projectId'])
     print(result)
@@ -623,6 +731,13 @@ def api_getNewID():
 
 @bp.route("/api/project_member/save_all", methods=["POST"])
 def save_all_project_member():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json(silent=True) or {}
     rows = data.get("data", [])
     print(rows)
@@ -636,10 +751,8 @@ def save_all_project_member():
         return jsonify({"error": "缺少 project_id"}), 400
 
     try:
-        
         existing_members = ProjectMember.query.filter_by(
-            project_id=project_id,
-            Del=0
+            project_id=project_id
         ).all()
 
         existing_map = {
@@ -647,13 +760,13 @@ def save_all_project_member():
             for m in existing_members
         }
 
-        
         incoming_map = {}
 
         for item in rows:
             old_patient_id = item.get("old_patient_id")
             new_patient_id = item.get("new_patient_id")
             created_at = item.get("created_at")
+            Del = int(item.get("Del", 0))
 
             if not old_patient_id or not new_patient_id:
                 continue
@@ -663,28 +776,37 @@ def save_all_project_member():
             incoming_map[key] = {
                 "old_patient_id": old_patient_id,
                 "new_patient_id": new_patient_id,
-                "created_at": created_at
+                "created_at": created_at,
+                "Del": Del
             }
 
-        
+        # 前端完全沒送來的既有資料，代表已不存在，也標成 Del=1
         for key, member in existing_map.items():
             if key not in incoming_map:
                 member.Del = 1
 
-        
         for key, item in incoming_map.items():
-            if key in existing_map:
-                
-                continue
-
             old_patient_id = item["old_patient_id"]
             new_patient_id = item["new_patient_id"]
             created_at = item["created_at"]
+            Del = item["Del"]
 
-            
+            if key in existing_map:
+                member = existing_map[key]
+                member.Del = Del
+
+                if created_at:
+                    member.created_at = created_at
+
+                continue
+
+            # 如果這筆是刪除狀態，但 DB 原本不存在，可以不用新增
+            if Del == 1:
+                continue
+
             PatInfo = fhir.read_FHIR_api(new_patient_id)
 
-            if PatInfo.get("resourceType") != "Patient":
+            if not PatInfo or PatInfo.get("resourceType") != "Patient":
                 data_addPatient = {
                     "pat_id": new_patient_id.replace("Patient/", ""),
                     "gender": "unknown",
@@ -701,7 +823,7 @@ def save_all_project_member():
                 old_patient_id=old_patient_id,
                 new_patient_id=new_patient_id,
                 created_at=created_at,
-                Del=0
+                Del=Del
             )
 
             db.session.add(member)
@@ -717,6 +839,13 @@ def save_all_project_member():
 
 @bp.route('/api/test', methods=['POST'])
 def api_test():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     study_id = 'IRB-2026-001'
     data = request.get_json()
     
@@ -726,6 +855,13 @@ def api_test():
 
 @bp.route("/api/fhir_upload_logs/<study_id>")
 def api_fhir_upload_logs(study_id):
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     base_folder = Path(cfg.FHIRUPLOAD_DIR) / study_id
 
     if not base_folder.exists():
@@ -774,6 +910,13 @@ def api_fhir_upload_logs(study_id):
 
 @bp.route("/api/fhir_upload_logs/<study_id>/<log_folder>")
 def api_fhir_upload_log_detail(study_id, log_folder):
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     folder = Path(cfg.FHIRUPLOAD_DIR) / study_id / log_folder
     stats_file = folder / "input_result_stats.json"
 
@@ -802,6 +945,13 @@ def api_fhir_upload_log_detail(study_id, log_folder):
 
 @bp.route('/api/fhir/devices', methods=['GET'])
 def api_fhir_devices():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     try:
         result = fhir.read_FHIR_api("Device?_count=1000")
 
@@ -843,6 +993,13 @@ def api_fhir_devices():
 
 @bp.route('/api/project/save_devices', methods=['POST'])
 def api_save_project_devices():
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json()
     device_list = data.get('device_list',[])
 

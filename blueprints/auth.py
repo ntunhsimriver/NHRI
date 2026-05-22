@@ -43,6 +43,13 @@ def logout():
 
 @bp.route('/register', methods=['POST'])
 def register():
+    ok, user_id = check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     new_uuid = uuid.uuid4()
     data = request.get_json() or {}
 
@@ -133,6 +140,13 @@ def register():
 
 @bp.route('/api/login', methods=['POST'])
 def api_login():
+    ok, user_id = check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json()
     email = (data.get('email') or '').strip()
     password = data.get('password') or ''
@@ -314,6 +328,13 @@ def change_password():
 
 @bp.route('/api/change_password', methods=['POST'])
 def api_change_password():
+    ok, user_id = check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json() or {}
 
     old_password = data.get('old_password')
@@ -357,6 +378,13 @@ def api_change_password():
     
 @bp.route('/api/reset_password', methods=['POST'])
 def api_reset_password():
+    ok, user_id = check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     data = request.get_json() or {}
     email = data.get('email')
     
@@ -486,6 +514,13 @@ def check_login_session():
 
 @bp.route('/api/check-session', methods=['POST'])
 def api_check_session():
+    ok, user_id = check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     token = request.cookies.get('session_token')
 
     if not token:
@@ -560,3 +595,43 @@ def api_check_session():
         'success': True,
         'expired': False
     })
+
+def check_session_or_header_login():
+    token = request.cookies.get("session_token")
+
+    if token:
+        user_session = UserSession.query.filter_by(
+            session_token=token,
+            is_active=True
+        ).first()
+
+        if user_session:
+            now = datetime.now()
+
+            if now - user_session.last_activity <= timedelta(minutes=30):
+                user_session.last_activity = now
+                db.session.commit()
+
+                return True, user_session.user_id
+
+    email = request.headers.get("X-User-Email")
+    password = request.headers.get("X-User-Password")
+
+    if not email or not password:
+        return False, None
+
+    user = User.query.filter_by(
+        email=email,
+        Del=0
+    ).first()
+
+    if not user:
+        return False, None
+
+    if user.status is False or user.status == "False" or user.status == "false":
+        return False, None
+
+    if not user.check_password(password):
+        return False, None
+
+    return True, user.id

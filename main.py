@@ -9,7 +9,9 @@ from blueprints.auth import bp as auth_bp
 from blueprints.api_watch import bp as api_watch_bp
 import secrets
 from apscheduler.schedulers.background import BackgroundScheduler # 排程用
-
+from werkzeug.security import generate_password_hash
+from models.user import User, UserRole  # 依你的實際路徑調整
+import uuid
 
 
 def create_app():
@@ -107,6 +109,35 @@ if __name__ == "__main__":
         with app.app_context():
             db.create_all()
             print("📦 已自動建立資料表（開發模式）")
+
+
+
+            admin_email = "admin@gmail.com"
+            admin_password = "aB12345678!"
+
+            admin = User.query.filter_by(email=admin_email).first()
+
+            if not admin:
+                admin_id = uuid.uuid4()
+
+                admin = User(
+                    id=admin_id,
+                    email=admin_email,
+                    password_hash=generate_password_hash(admin_password),
+                    status="true",
+                    full_name="admin",
+                    organization="NHRI",
+                    role=UserRole.SUPER_ADMIN,
+                    fhir_practitioner_id=f"Practitioner/{admin_id}",
+                    Del=0
+                )
+
+                db.session.add(admin)
+                db.session.commit()
+
+                print("👤 已建立預設管理員帳號：admin@gmail.com")
+            else:
+                print("👤 預設管理員帳號已存在，略過建立")
 
     @app.errorhandler(500)
     def internal_server_error(error):

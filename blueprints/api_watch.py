@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request
 from config import BaseConfig as cfg  # 讀 config
 from blueprints import fhir 
+from blueprints import auth 
 import mylib.fhir_check as fhir_check
 import requests
 import json
@@ -552,6 +553,13 @@ def check_sleep_json(data):
 
 @bp.route('/api/trans_watch/<datatype>', methods=['POST'])
 def api_trans_watch(datatype, study_id=None, filename=None, data=None):
+    ok, user_id = auth.check_session_or_header_login()
+
+    if not ok:
+        return jsonify({
+            "success": False,
+            "message": "未登入或帳號密碼錯誤"
+        }), 401
     try:
         if study_id is None:
             study_id = request.args.get("study_id")
